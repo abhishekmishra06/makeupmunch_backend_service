@@ -10,7 +10,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
- 
+app.use(express.json());
 
  // Routes
 app.get('', (req, res) => {
@@ -19,7 +19,7 @@ app.get('', (req, res) => {
    
 app.use('', authRoutes);
 
- 
+app.use('/auth', authRoutes);
  
 
 
