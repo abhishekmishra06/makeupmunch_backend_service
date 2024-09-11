@@ -1,56 +1,16 @@
-const bcrypt = require('bcrypt');  
-const jwt = require('jsonwebtoken');   
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { sendGeneralResponse } = require('../utils/responseHelper');
-const { validateEmail } = require('../utils/validation');
+const { validateEmail, validatePhone } = require('../utils/validation');
 const User = require('../models/userModel');
 // User Login
-
-// const login = async (req, res) => {
-//     const { phone, password } = req.body;
-
-//     if (!phone) {
-//         return sendGeneralResponse(res, false, "Phone number field is required", 400);
-//     }
-
-//     if (phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-//         return sendGeneralResponse(res, false, "Invalid phone number", 400);
-//     }
-
-//     if (!password) {
-//         return sendGeneralResponse(res, false, "Password field is required", 400);
-//     }
-
-//     try {
-//         const user = await User.findOne({ phone });
-
-//         if (!user) {
-//             return sendGeneralResponse(res, false, 'User not registered', 400);
-//         }
-
-//         // Compare provided password with stored hashed password
-//         const isMatch = await bcrypt.compare(password, user.password);
-//         if (isMatch) {
-//             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-//             user.token = token;
-//             await user.save();
-//             return sendGeneralResponse(res, true, 'Login successful', 200, user);
-//         } else {
-//             return sendGeneralResponse(res, false, 'Invalid password', 400);
-//         }
-//     } catch (error) {
-//         console.error('Login error:', error);
-//         return  sendGeneralResponse(res, false, "Internal server error", 500);
-//     }
-// };
-
-
 
 
 
 const login = async (req, res) => {
     const { email, password } = req.body;
 
-     if (!email) {
+    if (!email) {
         return sendGeneralResponse(res, false, "Email field is required", 400);
     }
 
@@ -59,15 +19,15 @@ const login = async (req, res) => {
     }
 
     try {
-         const user = await User.findOne({ email });
+        const user = await User.findOne({ email });
 
         if (!user) {
             return sendGeneralResponse(res, false, 'User not registered', 400);
         }
 
-         const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
-             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
             user.token = token;
             await user.save();
             return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, token });
@@ -80,7 +40,7 @@ const login = async (req, res) => {
     }
 };
 
- 
+
 
 
 
@@ -90,16 +50,36 @@ const register = async (req, res) => {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
 
-    const { username, email, password } = req.body;
+    const { username, email, password, dob, address, phone, gender } = req.body;
 
-    if (!username || !email || !password) {
-        return sendGeneralResponse(res, false, 'Username, email, and password are required', 400);
+    if (!username) {
+        return sendGeneralResponse(res, false, 'Username is required', 400);
+    }
+    if (!email) {
+        return sendGeneralResponse(res, false, 'Email is required', 400);
+    }
+    if (!password) {
+        return sendGeneralResponse(res, false, 'Password is required', 400);
+    }
+    if (!dob) {
+        return sendGeneralResponse(res, false, 'Date of birth is required', 400);
+    }
+    if (!address) {
+        return sendGeneralResponse(res, false, 'Address is required', 400);
+    }
+    if (!phone) {
+        return sendGeneralResponse(res, false, 'Phone number is required', 400);
+    }
+    if (!gender) {
+        return sendGeneralResponse(res, false, 'Gender is required', 400);
     }
 
     if (!validateEmail(email)) {
         return sendGeneralResponse(res, false, 'Invalid email', 400);
     }
-
+    if (!validatePhone(phone)) {
+        return sendGeneralResponse(res, false, 'Invalid phone', 400);
+    }
     try {
         const existingUser = await User.findOne({ $or: [{ email }] });
         if (existingUser) {
@@ -111,11 +91,15 @@ const register = async (req, res) => {
         const user = new User({
             username,
             email,
-            password: hashedPassword
+            password: hashedPassword,
+            dob,
+            address,
+            phone,
+            gender
         });
 
 
- 
+
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
         user.token = token;
 
@@ -129,4 +113,4 @@ const register = async (req, res) => {
 };
 
 
-module.exports = {login ,register}
+module.exports = { login, register }
