@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         enum: ['Male', 'Female', 'Other']  
     },
+    profile_img: { type: String ,  required: true,},
     token: {
         type: String
     }

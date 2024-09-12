@@ -6,7 +6,7 @@ const crypto = require('crypto');
 // const User = require('./models/User'); 
   
 const authRoutes = require('./routes/routes');
-const { sendMail } = require('./utils/mailer');
+// const { sendMail } = require('./utils/mailer');
  
 // connect to database
 dotenv.config();
@@ -22,50 +22,50 @@ app.get('', (req, res) => {
    
 app.use('', authRoutes);
 
-app.use('/auth', authRoutes);
+ 
  
 const otpStore = {};
 
 
-app.post('/send-otp', async (req, res) => {
-    const { email } = req.body;
+// app.post('/send-otp', async (req, res) => {
+//     const { email } = req.body;
 
-    if (!email) {
-        return res.status(400).json({ success: false, message: 'Email is required' });
-    }
+//     if (!email) {
+//         return res.status(400).json({ success: false, message: 'Email is required' });
+//     }
 
-    try {
-        // Generate OTP
-        const otp = crypto.randomInt(100000, 999999).toString();
-        otpStore[email] = otp; // Store OTP temporarily
+//     try {
+//         // Generate OTP
+//         const otp = crypto.randomInt(100000, 999999).toString();
+//         otpStore[email] = otp; // Store OTP temporarily
 
-        // Send OTP via email
-        await sendMail(email, 'Your OTP Code', `Your OTP code is ${otp}`);
+//         // Send OTP via email
+//         await sendMail(email, 'Your OTP Code', `Your OTP code is ${otp}`);
 
-        res.status(200).json({ success: true, message: 'OTP sent to email' });
-    } catch (error) {
-        console.error('Error sending OTP:', error);
-        res.status(500).json({ success: false, message: 'Internal server error' });
-    }
-});
+//         res.status(200).json({ success: true, message: 'OTP sent to email' });
+//     } catch (error) {
+//         console.error('Error sending OTP:', error);
+//         res.status(500).json({ success: false, message: 'Internal server error' });
+//     }
+// });
 
-// Verify OTP
-app.post('/verify-otp', (req, res) => {
-    const { email, otp } = req.body;
+// // Verify OTP
+// app.post('/verify-otp', (req, res) => {
+//     const { email, otp } = req.body;
 
-    if (!email || !otp) {
-        return res.status(400).json({ success: false, message: 'Email and OTP are required' });
-    }
+//     if (!email || !otp) {
+//         return res.status(400).json({ success: false, message: 'Email and OTP are required' });
+//     }
 
-    const storedOtp = otpStore[email];
+//     const storedOtp = otpStore[email];
 
-    if (storedOtp && storedOtp === otp) {
-        delete otpStore[email]; // OTP valid, remove it from store
-        res.status(200).json({ success: true, message: 'OTP verified successfully' });
-    } else {
-        res.status(400).json({ success: false, message: 'Invalid OTP' });
-    }
-});
+//     if (storedOtp && storedOtp === otp) {
+//         delete otpStore[email]; // OTP valid, remove it from store
+//         res.status(200).json({ success: true, message: 'OTP verified successfully' });
+//     } else {
+//         res.status(400).json({ success: false, message: 'Invalid OTP' });
+//     }
+// });
 
 
 const PORT = process.env.PORT || 3001;

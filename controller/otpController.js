@@ -1,5 +1,10 @@
  
- 
+  const { sendMail } = require('../utils/mailer');
+//   const dotenv = require('dotenv');
+//   const connectDB = require('./utils/db');
+  const crypto = require('crypto');
+const otpStore = {};
+
 const sendOtp = async (req, res) => {
     const { email } = req.body;
 
@@ -14,6 +19,7 @@ const sendOtp = async (req, res) => {
 
         // Send OTP via email
         await sendMail(email, 'Your OTP Code', `Your OTP code is ${otp}`);
+     
 
         res.status(200).json({ success: true, message: 'OTP sent to email' });
     } catch (error) {

@@ -1,11 +1,15 @@
+const multer = require('multer');
+const { uploadImage } = require('../utils/uploadImages');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { sendGeneralResponse } = require('../utils/responseHelper');
 const { validateEmail, validatePhone } = require('../utils/validation');
 const User = require('../models/userModel');
+const upload = multer({ storage: multer.memoryStorage() });
+
+
+
 // User Login
-
-
 
 const login = async (req, res) => {
     const { email, password } = req.body;
@@ -42,15 +46,18 @@ const login = async (req, res) => {
 
 
 
+ 
+
 
 
 const register = async (req, res) => {
-    // Ensure req.body is defined
-    if (!req.body) {
+     if (!req.body) {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
 
-    const { username, email, password, dob, address, phone, gender } = req.body;
+    const { username, email, password, dob, address, phone, gender ,   } = req.body;
+
+    
 
     if (!username) {
         return sendGeneralResponse(res, false, 'Username is required', 400);
@@ -73,44 +80,59 @@ const register = async (req, res) => {
     if (!gender) {
         return sendGeneralResponse(res, false, 'Gender is required', 400);
     }
+    if (!req.file) {
+        return sendGeneralResponse(res, false, 'Profile image is required', 400);
+    }
 
+
+     
     if (!validateEmail(email)) {
         return sendGeneralResponse(res, false, 'Invalid email', 400);
     }
     if (!validatePhone(phone)) {
         return sendGeneralResponse(res, false, 'Invalid phone', 400);
     }
+
     try {
-        const existingUser = await User.findOne({ $or: [{ email }] });
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
             return sendGeneralResponse(res, false, 'Email already registered', 400);
         }
+ 
+        let profile_img_url = null;
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        if (req.file) {
+            profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
+        }
 
-        const user = new User({
+         const hashedPassword = await bcrypt.hash(password, 10);
+
+         const user = new User({
             username,
             email,
             password: hashedPassword,
             dob,
             address,
             phone,
-            gender
+            gender,
+            profile_img: profile_img_url 
         });
 
-
-
+       
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
         user.token = token;
-
+ 
         await user.save();
 
+        
         sendGeneralResponse(res, true, 'Registered successfully', 200, { ...user._doc, token });
     } catch (error) {
         console.error('Registration error:', error);
         sendGeneralResponse(res, false, 'Internal server error', 500);
     }
 };
+
 
 
 module.exports = { login, register }
