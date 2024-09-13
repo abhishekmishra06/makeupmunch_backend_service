@@ -9,4 +9,4 @@ const validatePhone = (phone) => {
 
 module.exports = {
      validateEmail, validatePhone
-};
+}; 

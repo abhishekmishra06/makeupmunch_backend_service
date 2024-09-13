@@ -10,10 +10,10 @@ cloudinary.config({
 /**
  * Uploads an image to Cloudinary.
  * @param {Buffer} imageBuffer - The image file buffer.
- * @param {string} publicId - Optional public ID for the image.
+ * @param {string} publicId - Optional public ID for the image. 
  * @returns {Promise<string>} - The URL of the uploaded image.
  */
-
+ 
 const uploadImage = async (imageBuffer, publicId) => {
     return new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(

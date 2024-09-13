@@ -2,6 +2,11 @@
   const { sendMail } = require('../utils/mailer');
 //   const dotenv = require('dotenv');
 //   const connectDB = require('./utils/db');
+
+const bcrypt = require('bcrypt');
+const User = require('../models/userModel');
+
+
   const crypto = require('crypto');
 const otpStore = {};
 
@@ -47,42 +52,46 @@ const verifyOtp = (req, res) => {
 };
 
 
+const verifyOtpAndChangePassword = async (req, res) => {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+        return res.status(400).json({ success: false, message: 'Email, OTP, and new password are required' });
+    }
+
+    const storedOtp = otpStore[email];
+
+    if (!storedOtp || storedOtp !== otp) {
+        return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+    }
+
+    try { 
+        // Find user
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Hash new password and update
+        user.password = await bcrypt.hash(newPassword, 10);
+
+        // Save only the updated password without affecting other fields
+        await User.updateOne({ email }, { $set: { password: user.password } });
+
+        // Remove OTP from store
+        delete otpStore[email];
+
+        res.status(200).json({ success: true, message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Error changing password:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
 
 
 
 module.exports={
-    sendOtp, verifyOtp
+    sendOtp, verifyOtp , verifyOtpAndChangePassword
 };
 
-// const login = async (req, res) => {
-//     const { email, password } = req.body;
-
-//     if (!email) {
-//         return sendGeneralResponse(res, false, "Email field is required", 400);
-//     }
-
-//     if (!password) {
-//         return sendGeneralResponse(res, false, "Password field is required", 400);
-//     }
-
-//     try {
-//         const user = await User.findOne({ email });
-
-//         if (!user) {
-//             return sendGeneralResponse(res, false, 'User not registered', 400);
-//         }
-
-//         const isMatch = await bcrypt.compare(password, user.password);
-//         if (isMatch) {
-//             const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-//             user.token = token;
-//             await user.save();
-//             return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, token });
-//         } else {
-//             return sendGeneralResponse(res, false, 'Invalid password', 400);
-//         }
-//     } catch (error) {
-//         console.error('Login error:', error);
-//         return sendGeneralResponse(res, false, "Internal server error", 500);
-//     }
-// };

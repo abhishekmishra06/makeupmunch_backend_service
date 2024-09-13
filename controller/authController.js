@@ -31,9 +31,10 @@ const login = async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, );
             user.token = token;
             await user.save();
+           
             return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, token });
         } else {
             return sendGeneralResponse(res, false, 'Invalid password', 400);
