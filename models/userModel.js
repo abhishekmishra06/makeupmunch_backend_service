@@ -24,6 +24,18 @@ const userSchema = new mongoose.Schema({
         required: true,
         enum: ['Male', 'Female', 'Other']  
     },
+    role: {
+        type: String,   
+        required: true,
+        enum: ['costumer', 'artist', 'beauty_parlor','admin'
+        ]  
+
+    },
+    isverify: {
+        type: Boolean,     
+        required: true,
+        default: false
+    },
     profile_img: { type: String ,  required: true,},
     token: {
         type: String

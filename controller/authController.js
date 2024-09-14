@@ -56,7 +56,7 @@ const register = async (req, res) => {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
 
-    const { username, email, password, dob, address, phone, gender ,   } = req.body;
+    const { username, email, password, dob, address, phone, gender , role} = req.body;
 
     
 
@@ -81,11 +81,17 @@ const register = async (req, res) => {
     if (!gender) {
         return sendGeneralResponse(res, false, 'Gender is required', 400);
     }
+    if (!role) {
+        return sendGeneralResponse(res, false, 'role is required', 400);
+    }
+    
     if (!req.file) {
         return sendGeneralResponse(res, false, 'Profile image is required', 400);
     }
 
-
+    if (role !== 'costumer') {
+        return sendGeneralResponse(res, false, 'Registration is only allowed for costumers', 403);
+    }
      
     if (!validateEmail(email)) {
         return sendGeneralResponse(res, false, 'Invalid email', 400);
@@ -117,7 +123,8 @@ const register = async (req, res) => {
             address,
             phone,
             gender,
-            profile_img: profile_img_url 
+            profile_img: profile_img_url ,
+            role
         });
 
        
