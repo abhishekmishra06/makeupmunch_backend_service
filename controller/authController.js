@@ -89,9 +89,9 @@ const register = async (req, res) => {
         return sendGeneralResponse(res, false, 'Profile image is required', 400);
     }
 
-    if (role !== 'costumer') {
-        return sendGeneralResponse(res, false, 'Registration is only allowed for costumers', 403);
-    }
+    // if (role !== 'costumer') {
+    //     return sendGeneralResponse(res, false, 'Registration is only allowed for costumers', 403);
+    // }
      
     if (!validateEmail(email)) {
         return sendGeneralResponse(res, false, 'Invalid email', 400);
