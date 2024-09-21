@@ -11,12 +11,12 @@ const bookingSchema = new mongoose.Schema({
         currency: { type: String, required: true },
         payment_method: { type: String, enum: ['credit_card', 'paypal', 'bank_transfer'], required: true }, 
         payment_status: { type: String, enum: ['paid', 'pending', 'failed'], required: true }, 
-        transaction_id: { type: String },  
-        payment_date: { type: Date },  
+        transaction_id: { type: String , required: true},  
+        payment_date: { type: Date, required: true },  
+        payment_id: {type: String, required: true},
+        booking_id : {type: String, required: true},
     },
-    details: {
-        additional_info: { type: String }
-    }
+    details: {additional_info: { type: String }}
 }, { timestamps: true });
 
 module.exports = mongoose.model('Booking', bookingSchema);

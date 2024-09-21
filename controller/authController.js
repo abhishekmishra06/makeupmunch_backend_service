@@ -31,11 +31,18 @@ const login = async (req, res) => {
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch) {
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, );
-            user.token = token;
+
+            const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+            // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' } );
+            // user.token = token;
+
+            user.refreshToken = refreshToken;
+
             await user.save();
            
-            return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, token });
+            return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc , accessToken , refreshToken });
         } else {
             return sendGeneralResponse(res, false, 'Invalid password', 400);
         }
@@ -43,7 +50,7 @@ const login = async (req, res) => {
         console.error('Login error:', error);
         return sendGeneralResponse(res, false, "Internal server error", 500);
     }
-};
+}; 
 
 
 
@@ -127,14 +134,18 @@ const register = async (req, res) => {
             role
         });
 
-       
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
-        user.token = token;
- 
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+        
+        // const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+        // user.token = token;
+
+        user.refreshToken = refreshToken;
+
         await user.save();
 
         
-        sendGeneralResponse(res, true, 'Registered successfully', 200, { ...user._doc, token });
+        sendGeneralResponse(res, true, 'Registered successfully', 200, { ...user._doc,accessToken , refreshToken });
     } catch (error) {
         console.error('Registration error:', error);
         sendGeneralResponse(res, false, 'Internal server error', 500);
@@ -143,4 +154,80 @@ const register = async (req, res) => {
 
 
 
-module.exports = { login, register }
+
+
+
+
+
+
+
+
+
+
+const getAccessToken = async (req, res) => {
+    const { refreshToken } = req.body;
+
+   
+    if (!refreshToken) {
+      return sendGeneralResponse(res, false, 'Refresh token is missing', 400);
+    }
+  
+    try {
+       
+      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
+  
+      const user = await User.findById(decoded.id);
+   
+      if (!user || user.refreshToken !== refreshToken) {
+        return sendGeneralResponse(res, false, 'Invalid refresh token', 403);
+      }
+  
+      
+      const newAccessToken = generateAccessToken(user._id);
+      const newRefreshToken = generateRefreshToken(user._id);
+  
+      // Update user's refresh token in the database
+      user.refreshToken = newRefreshToken;
+      await user.save();
+  
+      // Return new access token
+      sendGeneralResponse(res, true, 'Token refreshed successfully', 200, { accessToken: newAccessToken , refreshToken: newRefreshToken });
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      sendGeneralResponse(res, false, 'Invalid or expired refresh token', 403);
+    }
+  };
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const generateAccessToken = (userId) => {
+    return jwt.sign({ id: userId }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+  };
+  
+  const generateRefreshToken = (userId) => {
+    return jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: '7d' });  
+  };
+
+
+
+
+
+module.exports = { login, register , getAccessToken} 

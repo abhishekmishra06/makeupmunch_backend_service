@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
         default: false
     },
     profile_img: { type: String ,  required: true,},
-    token: {
+    refreshToken: {
         type: String
     }
 }, { timestamps: true });

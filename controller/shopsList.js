@@ -12,7 +12,7 @@ const shopsList = async (req, res) => {
         if (!shops || shops.length === 0) {
             return sendGeneralResponse(res, false, 'No artists found', 404);
         }
-        return sendGeneralResponse(res, true, 'Artists retrieved successfully', 200, shops);
+        return sendGeneralResponse(res, true, 'shops list retrieved successfully', 200, shops);
 
     } catch (error) {
         console.error('Error fetching artists:', error);

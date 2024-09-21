@@ -44,6 +44,21 @@ const { sendGeneralResponse } = require('../utils/responseHelper');
         return sendGeneralResponse(res, false, 'Payment status is required', 400);
     }
 
+
+    if (!payment.transaction_id) {
+        return sendGeneralResponse(res, false, 'transaction id is required', 400);
+    }
+    if (!payment.payment_date) {
+        return sendGeneralResponse(res, false, 'Payment date is required', 400);
+    }
+    if (!payment.payment_id) {
+        return sendGeneralResponse(res, false, 'Payment id is required', 400);
+    }
+    if (!payment.booking_id) {
+        return sendGeneralResponse(res, false, 'booking id is required', 400);
+    }
+
+
      try {
         const user = await User.findById(user_id);
         if (!user) {
