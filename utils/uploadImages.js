@@ -28,5 +28,4 @@ const uploadImage = async (imageBuffer, publicId) => {
     });
 };
 
-
 module.exports = { uploadImage };

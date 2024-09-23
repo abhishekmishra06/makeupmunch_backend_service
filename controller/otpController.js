@@ -8,6 +8,9 @@ const User = require('../models/userModel');
 
 
   const crypto = require('crypto');
+const { sendSMS } = require('../utils/sms');
+const { sendGeneralResponse } = require('../utils/responseHelper');
+
 const otpStore = {};
 
 const sendOtp = async (req, res) => {
@@ -23,7 +26,7 @@ const sendOtp = async (req, res) => {
         otpStore[email] = otp; // Store OTP temporarily
 
         // Send OTP via email
-        await sendMail(email, 'Your OTP Code', `Your OTP code is ${otp}`);
+        await sendMail(email, 'Your OTP Code', `Your OTP code is ${otp}`,``);
      
 
         res.status(200).json({ success: true, message: 'OTP sent to email' });
@@ -32,6 +35,63 @@ const sendOtp = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
+
+
+
+
+
+
+
+
+
+const sendPhoneOtp = async (req, res) => {
+    const { phone } = req.body;
+
+    if (!phone) {
+        return res.status(400).json({ success: false, message: 'phone no is required' });
+    }
+
+
+
+
+    try {
+         const otp = crypto.randomInt(100000, 999999).toString();
+        otpStore[phone] = otp; 
+
+         // await sendMail(email, 'Your OTP Code', `Your OTP code is ${otp}`,``);
+     
+
+
+
+        const otpMessage = `Hi welcome to our service! Your OTP is: ${otp}`;  
+const otpResult = await sendSMS(phone, otpMessage);
+
+
+ 
+if (!otpResult.success) {
+    console.error('OTP sending failed:', otpResult.error);
+    return sendGeneralResponse(res, false, 'Failed to send OTP', 500);
+}
+
+
+
+sendGeneralResponse(res, true, 'OTP sent to phone no', 200);
+        // res.status(200).json({ success: true, message: 'OTP sent to email' });
+    } catch (error) {
+        console.error('Error sending OTP:', error);
+sendGeneralResponse(res, false, 'Internal server error', 500);
+
+        // res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+
+
+ 
+
+
+
+
 
 // Verify OTP
 const verifyOtp = (req, res) => {
@@ -92,6 +152,6 @@ const verifyOtpAndChangePassword = async (req, res) => {
 
 
 module.exports={
-    sendOtp, verifyOtp , verifyOtpAndChangePassword
+    sendOtp, sendPhoneOtp ,  verifyOtp , verifyOtpAndChangePassword
 };
 

@@ -18,10 +18,10 @@ app.use(express.json());
  // Routes
 app.get('', (req, res) => {
     res.send('Welcome to Makeup Munch');
-});
+}); 
    
 app.use('', authRoutes);
-
+ 
  
  
 const otpStore = {};
@@ -71,4 +71,4 @@ const otpStore = {};
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT}`);
-});
+}); 

@@ -10,13 +10,14 @@ const transporter = nodemailer.createTransport({
 });
 
  
-const sendMail = async (to, subject, text) => {
+const sendMail = async (to, subject, text,  html) => {
     try {
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to,
             subject,
-            text
+            text,
+            html,
         });
     } catch (error) {
         console.error('Error sending email:', error);
@@ -24,5 +25,24 @@ const sendMail = async (to, subject, text) => {
     }
 };
 
-module.exports = { sendMail };
+
+
+// const sendSubscribeMail = async (to, subject, text) => {
+//     try {
+//         await transporter.sendMail({
+//             from: process.env.EMAIL_USER,
+//             to,
+//             subject,
+//             // text
+        //     html: `<h1>Thank You for Subscribing!</h1>
+        //     <p>We are excited to share the latest beauty tips and exclusive offers with you.</p>
+        //     <p>Stay tuned!</p>`,
+        // });
+//     } catch (error) {
+//         console.error('Error sending email:', error);
+//         throw error; 
+//     }
+// };
+
+module.exports = { sendMail ,  };
  
