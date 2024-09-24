@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const { sendGeneralResponse } = require('../utils/responseHelper');
 const { validateEmail, validatePhone } = require('../utils/validation');
 const User = require('../models/userModel');
+const { sendMail } = require('../utils/mailer');
 const upload = multer({ storage: multer.memoryStorage() });
 
 
@@ -144,6 +145,51 @@ const register = async (req, res) => {
 
         await user.save();
 
+        // Send email for confermation you are registering
+
+        const subject = 'Welcome to MakeUp Munch!';
+        const text = `Hi ${username},\n\nThank you for registering with us. We're excited to have you onboard!`;
+
+        const html = `
+        <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+            <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
+                    <h1>Welcome to Our Service!</h1>
+                </div>
+                <div style="padding: 20px;">
+                    <h2 style="color: #333;">Hello, ${username}!</h2>
+                    <p>We are thrilled to have you on board. Thank you for registering with us!</p>
+                    <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
+                    <p>We hope you have a great experience with us!</p>
+                    <a href="https://yourwebsite.com" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
+                    <p style="margin-top: 20px;">Follow us on social media:</p>
+                    <div style="text-align: center; margin-top: 10px;"> 
+                        <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+                            <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
+                        </a>
+                        <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+                            <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
+                        </a>
+                        <a href="mailto:support@yourservice.com">
+                            <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
+                        </a>
+
+                             <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
+                    <p>&copy; 2024 Our Service. All Rights Reserved.</p>
+                </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    `;
+
+
+         await sendMail(email, subject, text, html);
+        
+        
+    
+        
         
         sendGeneralResponse(res, true, 'Registered successfully', 200, { ...user._doc,accessToken , refreshToken });
     } catch (error) {

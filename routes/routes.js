@@ -20,6 +20,7 @@ const { readBlogPosts } = require('../controller/blog/getBlogPost');
 const { updateBlogPost } = require('../controller/blog/updateBlogPost');
 const { deleteBlogPost } = require('../controller/blog/deteteBlogPost');
 const { subscribe } = require('../controller/subscription/subscription');
+const { contactUs } = require('../controller/contactUs');
  const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
@@ -54,6 +55,7 @@ router.get('/blog/get', readBlogPosts);
 router.put('/blog/:id', updateBlogPost);
 router.delete('/blog/:id', deleteBlogPost);
 router.post('/subscribe', subscribe);
+router.post('/contactus', contactUs);
 
  
   
