@@ -92,11 +92,11 @@ const sendPhoneOtp = async (req, res) => {
 
 
 
-        const otpMessage = `Hi welcome to our service! Your OTP is: ${otp}`;  
+        const otpMessage = `${otp}`;  
 const otpResult = await sendSMS(phone, otpMessage);
 
 
- 
+  
 if (!otpResult.success) {
     console.error('OTP sending failed:', otpResult.error);
     return sendGeneralResponse(res, false, 'Failed to send OTP', 500);

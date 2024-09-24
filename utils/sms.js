@@ -6,11 +6,10 @@ const sendSMS = async (phone, otpMessage) => {
     
     try {
         const response = await axios.post('https://www.fast2sms.com/dev/bulkV2', {
-            route: 'q', // Make sure this matches the route for transactional/OTP messages
-            // sender_id: 'FSTSMS',
-            message: otpMessage,  
-            language: 'english',
-            numbers: phone 
+            route: 'otp', // Make sure this matches the route for transactional/OTP messages
+            sender_id: 'JG-MKUPMN',
+            variables_values: otpMessage,
+             numbers: phone 
         }, {
             headers: {
                 'authorization': fast2smsAPIKey,

@@ -21,6 +21,13 @@ const { updateBlogPost } = require('../controller/blog/updateBlogPost');
 const { deleteBlogPost } = require('../controller/blog/deteteBlogPost');
 const { subscribe } = require('../controller/subscription/subscription');
 const { contactUs } = require('../controller/contactUs');
+const { addFavorite } = require('../controller/addFavorite/addFavorite');
+const { removeFavorite } = require('../controller/addFavorite/removeFavorite');
+const { rateUser } = require('../controller/rating');
+const { getRatings } = require('../controller/rating/getRating');
+const { addFeedback } = require('../controller/feedback/addFeedback');
+const { getFeedback } = require('../controller/feedback/getFeedback');
+const { applyForJob, getJobApplications } = require('../controller/careers/jobApplicationController');
  const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
@@ -43,6 +50,20 @@ router.get('/artistsList', artistList);
 router.get('/allUsersList', allUsersList);
 router.get('/userDetail/:id', userDetail);
 router.get('/user/role/:role', getUsersByRole);
+
+router.post('/addFavorite', addFavorite);
+
+router.post('/removeFavorite', removeFavorite);
+router.post('/makeRating', rateUser);
+router.get('/getRatings/:rated_id', getRatings);
+
+router.post('/feedback', addFeedback);
+router.get('/feedback/:feedback_for_id', getFeedback);
+
+router.post('/applyForJob', applyForJob);
+router.get('/getJobApplications', getJobApplications);
+ 
+
 router.get('/bookingHistory/:user_id', bookingHistory);
 router.post('/order', bookingpayment);
 router.post('/createServiceType', createService);
