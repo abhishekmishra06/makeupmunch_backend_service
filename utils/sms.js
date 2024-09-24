@@ -2,7 +2,7 @@ const axios = require('axios');
 
  
 const sendSMS = async (phone, otpMessage) => {
-    const fast2smsAPIKey = 'OyhJatNpsPLTXrzjSwD3nGCKfA70uH2b5Fc6qiQgVmxMUEYodl1haKoW8GsCQL6e3krNjIOEgnRmiSYt'; 
+    const fast2smsAPIKey = 'QngJUu1rcsILSpkoBhtbvx57XKZOV3lM4mR62P8iEjWCA0HF9wMvp8ne4L7bmYr32HCc5jTkJyBfKDEU'; 
     
     try {
         const response = await axios.post('https://www.fast2sms.com/dev/bulkV2', {

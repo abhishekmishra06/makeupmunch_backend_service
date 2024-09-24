@@ -42,7 +42,7 @@ const sendOtp = async (req, res) => {
 
 
 
-
+ 
 
 const sendPhoneOtp = async (req, res) => {
     const { phone } = req.body;
