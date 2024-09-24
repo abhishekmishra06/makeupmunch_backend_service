@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./utils/db');
+const cors = require('cors');
 const crypto = require('crypto');
 // const { sendMail } = require('./mailer');
 // const User = require('./models/User'); 
@@ -14,7 +15,7 @@ connectDB();
 
 const app = express();
 app.use(express.json());
-
+app.use(cors());
  // Routes
 app.get('', (req, res) => {
     res.send('Welcome to Makeup Munch');
