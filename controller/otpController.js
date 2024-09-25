@@ -26,7 +26,7 @@ const sendOtp = async (req, res) => {
         otpStore[email] = otp; // Store OTP temporarily
 
         // Send OTP via email
-        await sendMail(email, 'Your OTP Code', `Your OTP code is ${otp}`,``);
+        // await sendMail(email, 'Your OTP Code', `Your OTP code is ${otp}`,``);
 
 
 
