@@ -28,6 +28,7 @@ const { getRatings } = require('../controller/rating/getRating');
 const { addFeedback } = require('../controller/feedback/addFeedback');
 const { getFeedback } = require('../controller/feedback/getFeedback');
 const { applyForJob, getJobApplications } = require('../controller/careers/jobApplicationController');
+const { likeBlogPost } = require('../controller/blog/blogLikeController');
  const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
@@ -75,6 +76,9 @@ router.post('/blog/create', createBlogPost);
 router.get('/blog/get', readBlogPosts);
 router.put('/blog/:id', updateBlogPost);
 router.delete('/blog/:id', deleteBlogPost);
+router.post('/like', likeBlogPost); 
+
+
 router.post('/subscribe', subscribe);
 router.post('/contactus', contactUs);
 
