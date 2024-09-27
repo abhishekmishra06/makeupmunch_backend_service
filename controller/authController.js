@@ -165,7 +165,7 @@ const register = async (req, res) => {
                     <p>&copy; 2024 Our Service. All Rights Reserved.</p>
                 </div>
                     </div>
-                </div>
+                </div>12
                 
             </div>
         </div>

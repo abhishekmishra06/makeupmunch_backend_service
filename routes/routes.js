@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { register, login, getAccessToken,} = require('../controller/authController');
-const { sendOtp, verifyOtp , verifyOtpAndChangePassword, sendPhoneOtp } = require('../controller/otpController');
+const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
 const { editProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
 const { booking } = require('../controller/bookingController');
@@ -39,10 +39,13 @@ router.post('/getAccessToken',getAccessToken);
 
 
  
-router.post('/send_otp',sendOtp);
-router.post('/send_sms',sendPhoneOtp);
+router.post('/sendEmailOtp',sendEmailOtp);
+router.post('/sendPhoneOtp',sendPhoneOtp);
 
-router.post('/verify_otp',verifyOtp);
+router.post('/verifyPhonOtp',verifyPhoneOtp);
+router.post('/verifyEmailOtp',verifyEmailOtp);
+
+
 router.put('/editProfile/:id', upload.single('profile_img'), verifyToken,  editProfile);
 router.put('/change_password', verifyOtpAndChangePassword);
 router.post('/booking', booking);
