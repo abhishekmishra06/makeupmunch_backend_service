@@ -48,7 +48,7 @@ const sendEmailOtp = async (req, res) => {
                         <h2 style="color: #333;">Hello!</h2>
                         <p>Your One-Time Password (OTP) is:</p>
                         <h1 style="font-size: 2em; color: #4CAF50;">${otp}</h1>
-                        <p>This OTP is valid for the next 1 minutes. Please enter it on the verification page to proceed.</p>
+                        <p>This OTP is valid for the next 15 minutes. Please enter it on the verification page to proceed.</p>
                         <p>If you did not request this OTP, please ignore this email.</p>
                     </div>
                     <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
