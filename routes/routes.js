@@ -72,6 +72,7 @@ router.get('/bookingHistory/:user_id', bookingHistory);
 router.post('/order', bookingpayment);
 router.post('/createServiceType', createService);
 router.get('/getServiceType', getServices); 
+
 router.post('/updateServiceType/:id', updateService);
 
 
