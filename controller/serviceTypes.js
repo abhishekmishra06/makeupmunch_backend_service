@@ -55,15 +55,28 @@ const createService = async (req, res) => {
 
 const getServices = async (req, res) => {
     try {
-         const services = await Service.find({});
-
-         sendGeneralResponse(res, true, 'Services retrieved successfully', 200, services);
+        const services = await Service.find({});
+        sendGeneralResponse(res, true, 'Services retrieved successfully', 200, services);
     } catch (error) {
         console.error('Get services error:', error);
         sendGeneralResponse(res, false, 'Internal server error', 500);
     }
 };
 
+const getSubServices = async (req, res) => {
+    try {
+        const { serviceId } = req.params;
+        const service = await Service.findById(serviceId).populate('subServices');
+        if (service) {
+            sendGeneralResponse(res, true, 'Sub-services retrieved successfully', 200, service.subServices);
+        } else {
+            sendGeneralResponse(res, false, 'Service not found', 404);
+        }
+    } catch (error) {
+        console.error('Get sub-services error:', error);
+        sendGeneralResponse(res, false, 'Internal server error', 500);
+    }
+};
  
 
 

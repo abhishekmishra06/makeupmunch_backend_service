@@ -18,10 +18,16 @@
 
 const mongoose = require('mongoose');
 
-const serviceSchema = new mongoose.Schema({
-    services: { type: String, required: true },  
-    subServices: [{ type: String, required: true }] 
-});
+
+const subServiceSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    speciality: { type: String, required: true }
+  });
+  
+  const serviceSchema = new mongoose.Schema({
+    service: { type: String, required: true },
+    subServices: [subServiceSchema]
+  });
 
 const Service = mongoose.model('Service', serviceSchema);
 

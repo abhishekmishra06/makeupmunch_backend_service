@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { register, login, getAccessToken,} = require('../controller/authController');
-const { sendOtp, verifyOtp , verifyOtpAndChangePassword, sendPhoneOtp } = require('../controller/otpController');
+const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
 const { editProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
 const { booking } = require('../controller/bookingController');
@@ -32,17 +32,18 @@ const { likeBlogPost } = require('../controller/blog/blogLikeController');
  const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
-//   routes
 router.post('/register', upload.single('profile_img'), register);
+
 router.post('/login',login);
 router.post('/getAccessToken',getAccessToken);
-
-
  
-router.post('/send_otp',sendOtp);
-router.post('/send_sms',sendPhoneOtp);
+router.post('/sendEmailOtp',sendEmailOtp);
+router.post('/sendPhoneOtp',sendPhoneOtp);
 
-router.post('/verify_otp',verifyOtp);
+router.post('/verifyPhonOtp',verifyPhoneOtp); 
+router.post('/verifyEmailOtp',verifyEmailOtp);
+
+
 router.put('/editProfile/:id', upload.single('profile_img'), verifyToken,  editProfile);
 router.put('/change_password', verifyOtpAndChangePassword);
 router.post('/booking', booking);
@@ -69,6 +70,7 @@ router.get('/bookingHistory/:user_id', bookingHistory);
 router.post('/order', bookingpayment);
 router.post('/createServiceType', createService);
 router.get('/getServiceType', getServices); 
+
 router.post('/updateServiceType/:id', updateService);
 
 
