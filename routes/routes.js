@@ -32,17 +32,15 @@ const { likeBlogPost } = require('../controller/blog/blogLikeController');
  const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
-//   routes
 router.post('/register', upload.single('profile_img'), register);
+
 router.post('/login',login);
 router.post('/getAccessToken',getAccessToken);
-
-
  
 router.post('/sendEmailOtp',sendEmailOtp);
 router.post('/sendPhoneOtp',sendPhoneOtp);
 
-router.post('/verifyPhonOtp',verifyPhoneOtp);
+router.post('/verifyPhonOtp',verifyPhoneOtp); 
 router.post('/verifyEmailOtp',verifyEmailOtp);
 
 
