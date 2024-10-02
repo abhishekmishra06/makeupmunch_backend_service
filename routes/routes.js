@@ -29,7 +29,8 @@ const { addFeedback } = require('../controller/feedback/addFeedback');
 const { getFeedback } = require('../controller/feedback/getFeedback');
 const { applyForJob, getJobApplications } = require('../controller/careers/jobApplicationController');
 const { likeBlogPost } = require('../controller/blog/blogLikeController');
- const router = express.Router();
+const { createJob, deleteJob, updateJob } = require('../controller/careers/createJob');
+  const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/register', upload.single('profile_img'), register);
@@ -62,8 +63,13 @@ router.get('/getRatings/:rated_id', getRatings);
 router.post('/feedback', addFeedback);
 router.get('/feedback/:feedback_for_id', getFeedback);
 
-router.post('/applyForJob', applyForJob);
+router.post('/applyForJob', upload.single('resume') , applyForJob);
 router.get('/getJobApplications', getJobApplications);
+router.post('/createJob', createJob);
+router.put('/updateJob/:jobId', updateJob);
+router.delete('/deleteJob/:jobId', deleteJob);
+
+
  
 
 router.get('/bookingHistory/:user_id', bookingHistory);

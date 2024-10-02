@@ -399,8 +399,7 @@ const registerArtist = async (req, res) => {
           return sendGeneralResponse(res, false, 'Email already registered', 400);
       }
 
-      let profile_img_url = null;
-      if (req.file) {
+       if (req.file) {
           profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
       }
       const hashedPassword = await bcrypt.hash(password, 10);
