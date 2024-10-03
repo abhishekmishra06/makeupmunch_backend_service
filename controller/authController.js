@@ -56,7 +56,7 @@ const login = async (req, res) => {
 
 const registerUser = async (req, res) => {
 
-  console.log('register login weweweweweweewewewew');
+  
     if (!req.body) {
 
       return sendGeneralResponse(res, false, 'Request body is missing', 400);
@@ -329,9 +329,11 @@ const registerUser = async (req, res) => {
 
 
 
-
 const registerArtist = async (req, res) => {
   console.log('register login request');
+
+  // Log the request body to inspect the data being sent
+  console.log('Request Body:', req.body);
 
   if (!req.body) {
     return sendGeneralResponse(res, false, 'Request body is missing', 400);
@@ -355,6 +357,9 @@ const registerArtist = async (req, res) => {
   const requiredFields = [
     'username', 'email', 'password', 'dob', 'address', 'phone', 'role', 'gender', 'paymentMethod', 'services', 'specialties', 'advanceBookingAmount'
   ];
+  if (!req.file) {
+    return sendGeneralResponse(res, false, 'Profile image is required', 400);
+  }
 
   const validationError = validateRequiredFields(res, req.body, requiredFields);
   if (validationError) return validationError;
@@ -385,10 +390,11 @@ const registerArtist = async (req, res) => {
       return sendGeneralResponse(res, false, 'Email already registered', 400);
     }
 
-      let profile_img_url = null;
-      if (req.file) {
-          profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
-      }
+    let profile_img_url = null;
+
+    if (req.file) {
+        profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
+    }
       const hashedPassword = await bcrypt.hash(password, 10);
        const userData = {
           username,
@@ -398,7 +404,7 @@ const registerArtist = async (req, res) => {
           address,
           phone,
           gender,
-          profile_img: "profile_img_url",
+          profile_img: profile_img_url ,
           role,
           paymentMethod,
           services,
@@ -477,11 +483,6 @@ const registerArtist = async (req, res) => {
     sendGeneralResponse(res, false, 'Internal server error', 500);
   }
 };
-
-
-
-
-
 
 const getAccessToken = async (req, res) => {
     const { refreshToken } = req.body;

@@ -33,7 +33,7 @@ const { createJob, deleteJob, updateJob } = require('../controller/careers/creat
   const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/register', upload.single('profile_img'), register);
+router.post('/register', upload.single('profile_img'),  register);
 
 router.post('/login',login);
 router.post('/getAccessToken',getAccessToken);
