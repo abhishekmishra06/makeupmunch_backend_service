@@ -5,6 +5,21 @@ const mongoose = require('mongoose');
 
 
 
+// const AddressSchema = new mongoose.Schema({
+//     pinCode: { type: String, required: true },
+//     state: { type: String, required: true },
+//     city: { type: String, required: true },
+//     street: { type: String, required: true },
+//     area: { type: String, required: true },
+//     nearby: { type: String, required: true }
+// });
+
+ 
+// module.exports = User
+
+
+
+
 const CustomerRegisterSchema = new mongoose.Schema({
     username: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -30,19 +45,17 @@ const Customer = mongoose.model('Customer', CustomerRegisterSchema);
 
 
 const SubServiceSchema = new mongoose.Schema({
-    name: { type: String, required: true, trim: true },   // Ensure sub-service name is required
-    price: { type: Number, required: true, min: 0.01 }    // Ensure price is required and positive
+    name: { type: String, required: true, trim: true },    
+    price: { type: Number, required: true, min: 0.01 }    
 });
 
 
-// Service schema
-const ServiceSchema = new mongoose.Schema({
-    service: { type: String, required: true }, // Main service name
-    subServices: [SubServiceSchema]            // Array of sub-services
+ const ServiceSchema = new mongoose.Schema({
+    service: { type: String, required: true },  
+    subServices: [SubServiceSchema]             
 });
 
-// Address schema
-const AddressSchema = new mongoose.Schema({
+ const AddressSchema = new mongoose.Schema({
     pinCode: { type: String },
     state: { type: String, required: true },
     city: { type: String, required: true },
@@ -71,4 +84,25 @@ const ArtistRegisterSchema = new mongoose.Schema({
 const Artist = mongoose.model('Artist', ArtistRegisterSchema);
 module.exports = Artist;
 
-module.exports = {Artist, Customer};
+
+
+
+
+const UserSchema = new mongoose.Schema({
+    username: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    dob: { type: Date, required: true },
+    address: { type: AddressSchema, required: true },
+    phone: { type: String, required: true },
+    gender: { type: String, required: true },
+    role: { type: String, enum: ['customer', 'artist'], default: 'customer' }, // 'customer' or 'artist'
+    profile_img: { type: String }, // Optional image URL or file
+    refreshToken: { type: String },
+}, { timestamps: true, collection: 'users' });
+
+const User = mongoose.model('User', UserSchema);
+
+
+module.exports = {Artist, Customer , User};
+ 

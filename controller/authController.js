@@ -23,7 +23,7 @@ const login = async (req, res) => {
     }
   
     try {
-      const user = await User.findOne({ email });
+      const user = await User.User.findOne({ email });
   
       if (!user) {
         return sendGeneralResponse(res, false, 'User not registered', 400);
@@ -36,8 +36,9 @@ const login = async (req, res) => {
   
         user.refreshToken = refreshToken;
   
-        await user.save();
-  
+        // await user.save();
+        await User.User.updateOne({ _id: user._id }, { $set: { refreshToken } });
+
         return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, accessToken, refreshToken });
       } else {
         return sendGeneralResponse(res, false, 'Invalid password', 400);
@@ -418,7 +419,7 @@ const registerArtist = async (req, res) => {
     const refreshToken = generateRefreshToken(user._id);
     user.refreshToken = refreshToken;
 
-    await user.save();
+    await user.save(); 
 
     const subject = 'Welcome to MakeUp Munch!';
     const text = ``;
@@ -584,6 +585,68 @@ module.exports = { login, register , getAccessToken }
 
 
 
+
+
+// const verifyEmailOtp = async (req, res) => {
+//   const { email, otp } = req.body;
+
+//   // Check if email is provided
+//   if (!email) {
+//     return sendGeneralResponse(res, false, "Email is required", 400);
+//   }
+
+//   // Check if OTP is provided
+//   if (!otp) {
+//     return sendGeneralResponse(res, false, "OTP is required", 400);
+//   }
+
+//   // Validate email format
+//   if (!validateEmail(email)) {
+//     return sendGeneralResponse(res, false, "Invalid email", 400);
+//   }
+
+//   try {
+//     // Find OTP entry in the database
+//     const otpEntry = await Otp.findOne({ email });
+
+//     // Check if OTP entry exists
+//     if (!otpEntry) {
+//       return sendGeneralResponse(res, false, "Please request a new OTP", 400);
+//     }
+
+//     const { otpHash, expiresAt } = otpEntry;
+
+//     // Log current time and expiration time for debugging
+//     console.log("Current Time:", Date.now());
+//     console.log("OTP Expiration Time:", expiresAt);
+
+//     // Check if OTP has expired
+//     if (Date.now() > expiresAt) {
+//       // Clean up expired OTP
+//       await Otp.deleteMany({ email });
+//       return sendGeneralResponse(
+//         res,
+//         false,
+//         "The OTP has expired. Please request a new one.",
+//         400
+//       );
+//     }
+
+//     // Compare provided OTP with stored OTP hash
+//     const isValid = await bcrypt.compare(otp, otpHash);
+//     if (isValid) {
+//       // Delete OTP entry after successful verification
+//       await Otp.deleteMany({ email });
+
+//       return sendGeneralResponse(res, true, "OTP verified successfully", 200);
+//     } else {
+//       return sendGeneralResponse(res, false, "Invalid OTP", 400);
+//     }
+//   } catch (error) {
+//     console.error("Error verifying OTP:", error);
+//     return sendGeneralResponse(res, false, "Internal server error", 500);
+//   }
+// };
 
 
 
