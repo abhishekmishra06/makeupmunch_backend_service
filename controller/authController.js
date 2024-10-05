@@ -330,160 +330,261 @@ const registerUser = async (req, res) => {
 
 
 
+// const registerArtist = async (req, res) => {
+//   console.log('register login request');
+
+//   // Log the request body to inspect the data being sent
+//   console.log('Request Body:', req.body);
+
+//   if (!req.body) {
+//     return sendGeneralResponse(res, false, 'Request body is missing', 400);
+//   }
+
+//   const {
+//     username,
+//     email,
+//     password,
+//     dob,
+//     address,
+//     phone,
+//     gender,
+//     role,
+//     paymentMethod,
+//     services,
+//     specialties,
+//     advanceBookingAmount
+//   } = req.body;
+
+//   const requiredFields = [
+//     'username', 'email', 'password', 'dob', 'address', 'phone', 'role', 'gender', 'paymentMethod', 'services', 'specialties', 'advanceBookingAmount'
+//   ];
+//   if (!req.file) {
+//     return sendGeneralResponse(res, false, 'Profile image is required', 400);
+//   }
+
+//   const validationError = validateRequiredFields(res, req.body, requiredFields);
+//   if (validationError) return validationError;
+
+//   const addressFields = ['pinCode', 'state', 'city', 'street', 'area', 'nearby'];
+//   const addressError = validateRequiredAddressFields(res, address, addressFields);
+//   if (addressError) return addressError;
+
+//   const servicesError = validateServicesFormat(res, services);
+//   if (servicesError) return servicesError;
+
+//   if (!specialties || !Array.isArray(specialties) || specialties.length === 0) {
+//     return sendGeneralResponse(res, false, 'Specialties are required for artists', 400);
+//   }
+
+//   if (typeof advanceBookingAmount !== 'number' || advanceBookingAmount <= 0) {
+//     return sendGeneralResponse(res, false, 'Advance booking amount must be a positive number', 400);
+//   }
+
+//   if (!validateEmail(email)) {
+//     return sendGeneralResponse(res, false, 'Invalid email', 400);
+//   }
+
+//   try {
+//     const existingUser = await User.Artist.findOne({ email });
+
+//     if (existingUser) {
+//       return sendGeneralResponse(res, false, 'Email already registered', 400);
+//     }
+
+//     let profile_img_url = null;
+
+//     if (req.file) {
+//         profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
+//     }
+//       const hashedPassword = await bcrypt.hash(password, 10);
+//        const userData = {
+//           username,
+//           email,
+//           password: hashedPassword,
+//           dob,
+//           address,
+//           phone,
+//           gender,
+//           profile_img: profile_img_url ,
+//           role,
+//           paymentMethod,
+//           services,
+//           specialties,
+//           advanceBookingAmount,
+//        }; 
+ 
+
+//     const user = new User.Artist(userData);
+//     const accessToken = generateAccessToken(user._id);
+//     const refreshToken = generateRefreshToken(user._id);
+//     user.refreshToken = refreshToken;
+
+//     await user.save(); 
+
+//     const subject = 'Welcome to MakeUp Munch!';
+//     const text = ``;
+//     const html = `
+//       <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+//         <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+//           <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
+//             <h1>Welcome to Our Service!</h1>
+//           </div>
+//           <div style="padding: 20px;">
+//             <h2 style="color: #333;">Hello, ${username}!</h2>
+//             <p>We are thrilled to have you on board as an artist. Thank you for registering with us!</p>
+//             <p>You can now start offering your services. If you have any questions, feel free to reach out to our support team.</p>
+//             <p>We hope you have a great experience with us!</p>
+//             <a href="https://yourwebsite.com" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
+//             <p style="margin-top: 20px;">Follow us on social media:</p>
+//             <div style="text-align: center; margin-top: 10px;">
+//               <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+//                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
+//               </a>
+//               <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+//                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
+//               </a>
+//               <a href="mailto:support@yourservice.com">
+//                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
+//               </a>
+//             </div>
+//             <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
+//               <p>&copy; 2024 Our Service. All Rights Reserved.</p>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     `;
+
+//     await sendMail(email, subject, text, html);
+
+//     sendGeneralResponse(res, true, 'Registered successfully', 200, {
+//       _id: user._id,
+//       username: user.username,
+//       email: user.email,
+//       password: user.password,
+//       dob: user.dob,
+//       address: user.address,
+//       phone: user.phone,
+//       gender: user.gender,
+//       role: user.role,
+//       paymentMethod: user.paymentMethod,
+//       services: user.services,
+//       specialties: user.specialties,
+//       advanceBookingAmount: user.advanceBookingAmount,
+//       profile_img: user.profile_img,
+//       refreshToken: user.refreshToken,
+//       createdAt: user.createdAt,
+//       updatedAt: user.updatedAt,
+//       __v: user.__v,
+//       accessToken,
+//       refreshToken
+//     });
+//   } catch (error) {
+//     console.error('Registration error:', error);
+//     sendGeneralResponse(res, false, 'Internal server error', 500);
+//   }
+// };
+
+
+
+
+
+
+
 const registerArtist = async (req, res) => {
   console.log('register login request');
-
-  // Log the request body to inspect the data being sent
   console.log('Request Body:', req.body);
 
   if (!req.body) {
-    return sendGeneralResponse(res, false, 'Request body is missing', 400);
+      return sendGeneralResponse(res, false, 'Request body is missing', 400);
   }
 
   const {
-    username,
-    email,
-    password,
-    dob,
-    address,
-    phone,
-    gender,
-    role,
-    paymentMethod,
-    services,
-    specialties,
-    advanceBookingAmount
+      businessName,
+      username,
+      email,
+      password,
+      phone,
+      city,
+      specialties,
+      role
   } = req.body;
 
   const requiredFields = [
-    'username', 'email', 'password', 'dob', 'address', 'phone', 'role', 'gender', 'paymentMethod', 'services', 'specialties', 'advanceBookingAmount'
+      'businessName', 'username', 'email', 'password', 'phone', 'role','city', 'specialties'
   ];
+  
   if (!req.file) {
-    return sendGeneralResponse(res, false, 'Profile image is required', 400);
+      return sendGeneralResponse(res, false, 'Profile image is required', 400);
   }
 
   const validationError = validateRequiredFields(res, req.body, requiredFields);
   if (validationError) return validationError;
 
-  const addressFields = ['pinCode', 'state', 'city', 'street', 'area', 'nearby'];
-  const addressError = validateRequiredAddressFields(res, address, addressFields);
-  if (addressError) return addressError;
-
-  const servicesError = validateServicesFormat(res, services);
-  if (servicesError) return servicesError;
-
   if (!specialties || !Array.isArray(specialties) || specialties.length === 0) {
-    return sendGeneralResponse(res, false, 'Specialties are required for artists', 400);
-  }
-
-  if (typeof advanceBookingAmount !== 'number' || advanceBookingAmount <= 0) {
-    return sendGeneralResponse(res, false, 'Advance booking amount must be a positive number', 400);
+      return sendGeneralResponse(res, false, 'Specialties are required for artists', 400);
   }
 
   if (!validateEmail(email)) {
-    return sendGeneralResponse(res, false, 'Invalid email', 400);
+      return sendGeneralResponse(res, false, 'Invalid email', 400);
   }
 
   try {
-    const existingUser = await User.Artist.findOne({ email });
+      const existingUser = await User.Artist.findOne({ email });
 
-    if (existingUser) {
-      return sendGeneralResponse(res, false, 'Email already registered', 400);
-    }
+      if (existingUser) {
+          return sendGeneralResponse(res, false, 'Email already registered', 400);
+      }
 
-    let profile_img_url = null;
+      let profile_img_url = null;
 
-    if (req.file) {
-        profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
-    }
+      if (req.file) {
+          profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
+      }
+      
       const hashedPassword = await bcrypt.hash(password, 10);
-       const userData = {
+      const userData = {
+          businessName,
           username,
           email,
           password: hashedPassword,
-          dob,
-          address,
           phone,
-          gender,
-          profile_img: profile_img_url ,
-          role,
-          paymentMethod,
-          services,
+          city,
+          profile_img: profile_img_url,
           specialties,
-          advanceBookingAmount,
-       }; 
- 
+      };
 
-    const user = new User.Artist(userData);
-    const accessToken = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
-    user.refreshToken = refreshToken;
+      const user = new User.Artist(userData);
+      await user.save();
 
-    await user.save(); 
+      const accessToken = generateAccessToken(user._id);
+      const refreshToken = generateRefreshToken(user._id);
+      user.refreshToken = refreshToken;
+      await user.save();
 
-    const subject = 'Welcome to MakeUp Munch!';
-    const text = ``;
-    const html = `
-      <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-        <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-          <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1>Welcome to Our Service!</h1>
-          </div>
-          <div style="padding: 20px;">
-            <h2 style="color: #333;">Hello, ${username}!</h2>
-            <p>We are thrilled to have you on board as an artist. Thank you for registering with us!</p>
-            <p>You can now start offering your services. If you have any questions, feel free to reach out to our support team.</p>
-            <p>We hope you have a great experience with us!</p>
-            <a href="https://yourwebsite.com" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
-            <p style="margin-top: 20px;">Follow us on social media:</p>
-            <div style="text-align: center; margin-top: 10px;">
-              <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
-                <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
-              </a>
-              <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
-                <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
-              </a>
-              <a href="mailto:support@yourservice.com">
-                <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
-              </a>
-            </div>
-            <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
-              <p>&copy; 2024 Our Service. All Rights Reserved.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    await sendMail(email, subject, text, html);
-
-    sendGeneralResponse(res, true, 'Registered successfully', 200, {
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      password: user.password,
-      dob: user.dob,
-      address: user.address,
-      phone: user.phone,
-      gender: user.gender,
-      role: user.role,
-      paymentMethod: user.paymentMethod,
-      services: user.services,
-      specialties: user.specialties,
-      advanceBookingAmount: user.advanceBookingAmount,
-      profile_img: user.profile_img,
-      refreshToken: user.refreshToken,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      __v: user.__v,
-      accessToken,
-      refreshToken
-    });
+      sendGeneralResponse(res, true, 'Registered successfully', 200, {
+          _id: user._id,
+          businessName: user.businessName,
+          username: user.username,
+          email: user.email,
+          phone: user.phone,
+          city: user.city,
+          specialties: user.specialties,
+          profile_img: user.profile_img,
+          refreshToken: user.refreshToken,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+          accessToken,
+          refreshToken
+      });
   } catch (error) {
-    console.error('Registration error:', error);
-    sendGeneralResponse(res, false, 'Internal server error', 500);
+      console.error('Registration error:', error);
+      sendGeneralResponse(res, false, 'Internal server error', 500);
   }
 };
+
+
+
 
 const getAccessToken = async (req, res) => {
     const { refreshToken } = req.body;
@@ -526,18 +627,7 @@ const getAccessToken = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+  
 
 const generateAccessToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
@@ -550,8 +640,7 @@ const generateAccessToken = (userId) => {
 
 
   const register = async (req, res) => {
-    console.log('register');
-    if (!req.body) {
+     if (!req.body) {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
   
@@ -559,8 +648,12 @@ const generateAccessToken = (userId) => {
   
     // Handle role-specific registration
     if (role === 'artist') {
+      console.log('lllll');
         return registerArtist(req, res);
     } else {
+
+      console.log('lll111111111111111111ll');
+
         return registerUser(req, res);
     }
   };
