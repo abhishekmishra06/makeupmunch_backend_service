@@ -492,8 +492,7 @@ const registerUser = async (req, res) => {
 
 
 const registerArtist = async (req, res) => {
-  console.log('register login request');
-  console.log('Request Body:', req.body);
+ 
 
   if (!req.body) {
       return sendGeneralResponse(res, false, 'Request body is missing', 400);
@@ -511,7 +510,7 @@ const registerArtist = async (req, res) => {
   } = req.body;
 
   const requiredFields = [
-      'businessName', 'username', 'email', 'password', 'phone', 'role','city', 'specialties'
+      'businessName', 'username', 'email', 'password', 'phone', 'role', 'city', 'specialties'
   ];
   
   if (!req.file) {
@@ -552,6 +551,7 @@ const registerArtist = async (req, res) => {
           city,
           profile_img: profile_img_url,
           specialties,
+          role,
       };
 
       const user = new User.Artist(userData);
@@ -574,6 +574,7 @@ const registerArtist = async (req, res) => {
           refreshToken: user.refreshToken,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
+          role: user.role,
           accessToken,
           refreshToken
       });
@@ -648,8 +649,7 @@ const generateAccessToken = (userId) => {
   
     // Handle role-specific registration
     if (role === 'artist') {
-      console.log('lllll');
-        return registerArtist(req, res);
+         return registerArtist(req, res);
     } else {
 
       console.log('lll111111111111111111ll');

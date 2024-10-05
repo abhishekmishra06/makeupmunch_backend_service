@@ -94,6 +94,9 @@ const ArtistRegisterSchema = new mongoose.Schema({
     city: { type: String, required: true }, 
     specialties: [{ type: String, required: true }],
     profile_img: { type: String,  required: true},
+    profile_img: { type: String,  required: true},
+    role: { type: String,  required: true},
+
 }, { timestamps: true, collection: 'users' });
 
 const Artist = mongoose.model('Artist', ArtistRegisterSchema);
