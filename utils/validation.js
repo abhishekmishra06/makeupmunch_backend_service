@@ -63,7 +63,7 @@ const validateServicesFormat = (res, services) => {
 
 
 module.exports = {
-     validateEmail, validatePhone ,validateRequiredFields ,  validateRequiredAddressFields , validateServicesFormat
+     validateEmail, validatePhone ,validateRequiredFields ,  validateRequiredAddressFields ,  validateServicesFormat
 }; 
 
 
@@ -75,56 +75,3 @@ module.exports = {
 
 
 
-
-
-
-
-// const registerArtist = async (req, res) => {
-//     const { username, email, password, dob, address, phone, gender, paymentMethod, services, specialties, advanceBookingAmount } = req.body;
-  
-//     // Validate required fields for artist
-//     const requiredFields = ['username', 'email', 'password', 'dob', 'address', 'phone', 'gender', 'paymentMethod', 'services', 'specialties', 'advanceBookingAmount'];
-//     const validationError = validateRequiredFields(req.body, requiredFields);
-//     if (validationError) return validationError;
-  
-//     // Validate address
-//     const addressFields = ['pinCode', 'state', 'city', 'street', 'area', 'nearby'];
-//     const addressError = validateRequiredAddressFields(address, addressFields);
-//     if (addressError) return addressError;
-  
-//     // Validate services format
-//     const servicesError = validateServicesFormat(services);
-//     if (servicesError) return servicesError;
-  
-//     // Proceed with registration
-//     return handleUserRegistration({ username, email, password, dob, address, phone, gender, role: 'artist', paymentMethod, services, specialties, advanceBookingAmount }, res);
-//   };
-  
-//   const handleUserRegistration = async (userData, res) => {
-//     const { email, password } = userData;
-  
-//     if (!validateEmail(email)) {
-//         return sendGeneralResponse(res, false, 'Invalid email', 400);
-//     }
-  
-//     try {
-//         const existingUser = await User.findOne({ email });
-//         if (existingUser) {
-//             return sendGeneralResponse(res, false, 'Email already registered', 400);
-//         }
-  
-//         const hashedPassword = await bcrypt.hash(password, 10);
-//         const newUser = new User({ ...userData, password: hashedPassword, profile_img: "profile_img_url" });
-//         await newUser.save();
-  
-//         const accessToken = generateAccessToken(newUser._id);
-//         const refreshToken = generateRefreshToken(newUser._id);
-//         newUser.refreshToken = refreshToken;
-  
-//         await sendWelcomeEmail(newUser.username, email);
-//         sendGeneralResponse(res, true, 'Registered successfully', 200, { ...newUser._doc, accessToken, refreshToken });
-//     } catch (error) {
-//         console.error('Registration error:', error);
-//         sendGeneralResponse(res, false, 'Internal server error', 500);
-//     }
-//   };

@@ -94,8 +94,7 @@ const ArtistRegisterSchema = new mongoose.Schema({
     city: { type: String, required: true }, 
     specialties: [{ type: String, required: true }],
     profile_img: { type: String,  required: true},
-    profile_img: { type: String,  required: true},
-    role: { type: String,  required: true},
+     role: { type: String,  required: true},
 
 }, { timestamps: true, collection: 'users' });
 
@@ -114,7 +113,8 @@ const UserSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     gender: { type: String, required: true },
     role: { type: String, enum: ['customer', 'artist'], default: 'customer' }, // 'customer' or 'artist'
-    profile_img: { type: String }, // Optional image URL or file
+    profile_img: { type: String },  
+    services: [ServiceSchema], 
     refreshToken: { type: String },
 }, { timestamps: true, collection: 'users' });
 

@@ -7,7 +7,7 @@ const verifyToken = require('../middleware/authMiddleware');
 const { booking } = require('../controller/bookingController');
  
 const { fetchData, getCountries, getStates, getCities } = require('../controller/stateCityController');
-const { artistList } = require('../controller/ArtistsListController');
+const { artistList, addArtistServices, deleteArtistServices } = require('../controller/ArtistsListController');
 const { allUsersList } = require('../controller/allUsersList');
 const { shopsList, getUsersByRole } = require('../controller/shopsList');
 const { userDetail } = require('../controller/UserDetail');
@@ -30,7 +30,7 @@ const { getFeedback } = require('../controller/feedback/getFeedback');
 const { applyForJob, getJobApplications } = require('../controller/careers/jobApplicationController');
 const { likeBlogPost } = require('../controller/blog/blogLikeController');
 const { createJob, deleteJob, updateJob } = require('../controller/careers/createJob');
-  const router = express.Router();
+   const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/register', upload.single('profile_img'),  register);
@@ -55,8 +55,12 @@ router.get('/userDetail/:id', userDetail);
 router.get('/user/role/:role', getUsersByRole);
 
 router.post('/addFavorite', addFavorite);
-
 router.post('/removeFavorite', removeFavorite);
+router.post('/artist/addservices', addArtistServices);
+router.post('/artist/deleteArtistServices', deleteArtistServices);
+
+
+
 router.post('/makeRating', rateUser);
 router.get('/getRatings/:rated_id', getRatings);
 
