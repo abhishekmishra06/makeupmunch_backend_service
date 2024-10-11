@@ -26,12 +26,8 @@ const CustomerRegisterSchema = new mongoose.Schema({
     password: { type: String, required: true },
     dob: { type: Date, required: true },
     address: {
-        pinCode: { type: String, required: true },
-        state: { type: String, required: true },
-        city: { type: String, required: true },
-        street: { type: String, required: true },
-        area: { type: String, required: true },
-        nearby: { type: String, required: true },
+        type: String,   
+        required: true
     },
     phone: { type: String, required: true },
     gender: { type: String, required: true },

@@ -47,7 +47,7 @@ const artistList = async (req, res) => {
 
 
 const addArtistServices = async (req, res) => {
-    const { services, role, id } = req.body;  
+    const {role, id } = req.body;  
 
      if (role !== 'artist') {
         return sendGeneralResponse(res, false, 'You must be an artist to add services', 403);
@@ -70,33 +70,7 @@ const addArtistServices = async (req, res) => {
             return sendGeneralResponse(res, false, 'Access denied. Only artists can add services', 403);
         }
 
-        // If no services exist yet, create an empty array for services
-        if (!user.services) {
-            user.services = [];
-        }
-
-        // Loop through the services and update or add them to the user's profile
-        services.forEach(service => {
-            // Check if the service already exists
-            const existingService = user.services.find(existing => existing.service === service.service);
-
-            if (!existingService) {
-                // Add the new service if it doesn't exist
-                user.services.push(service);
-            } else {
-                // Add subservices if the service already exists
-                service.subServices.forEach(subService => {
-                    const existingSubService = existingService.subServices.find(
-                        (sub) => sub._id.toString() === subService._id.toString()
-                    );
-
-                    if (!existingSubService) {
-                        existingService.subServices.push(subService);
-                    }
-                });
-            }
-        });
-
+       
  
          await User.findByIdAndUpdate(id, {
             $set: { services: user.services }   
