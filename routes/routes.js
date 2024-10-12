@@ -7,7 +7,7 @@ const verifyToken = require('../middleware/authMiddleware');
 const { booking } = require('../controller/bookingController');
  
 const { fetchData, getCountries, getStates, getCities } = require('../controller/stateCityController');
-const { artistList } = require('../controller/ArtistsListController');
+const { artistList, addArtistServices, deleteArtistServices } = require('../controller/ArtistsListController');
 const { allUsersList } = require('../controller/allUsersList');
 const { shopsList, getUsersByRole } = require('../controller/shopsList');
 const { userDetail } = require('../controller/UserDetail');
@@ -29,10 +29,11 @@ const { addFeedback } = require('../controller/feedback/addFeedback');
 const { getFeedback } = require('../controller/feedback/getFeedback');
 const { applyForJob, getJobApplications } = require('../controller/careers/jobApplicationController');
 const { likeBlogPost } = require('../controller/blog/blogLikeController');
- const router = express.Router();
+const { createJob, deleteJob, updateJob } = require('../controller/careers/createJob');
+   const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
-router.post('/register', upload.single('profile_img'), register);
+router.post('/register', upload.single('profile_img'),  register);
 
 router.post('/login',login);
 router.post('/getAccessToken',getAccessToken);
@@ -54,16 +55,25 @@ router.get('/userDetail/:id', userDetail);
 router.get('/user/role/:role', getUsersByRole);
 
 router.post('/addFavorite', addFavorite);
-
 router.post('/removeFavorite', removeFavorite);
+router.post('/artist/addservices', addArtistServices);
+router.post('/artist/deleteArtistServices', deleteArtistServices);
+
+
+
 router.post('/makeRating', rateUser);
 router.get('/getRatings/:rated_id', getRatings);
 
 router.post('/feedback', addFeedback);
 router.get('/feedback/:feedback_for_id', getFeedback);
 
-router.post('/applyForJob', applyForJob);
+router.post('/applyForJob', upload.single('resume') , applyForJob);
 router.get('/getJobApplications', getJobApplications);
+router.post('/createJob', createJob);
+router.put('/updateJob/:jobId', updateJob);
+router.delete('/deleteJob/:jobId', deleteJob);
+
+
  
 
 router.get('/bookingHistory/:user_id', bookingHistory);
