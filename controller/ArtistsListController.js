@@ -2,37 +2,31 @@
 
 
 const { sendGeneralResponse } = require("../utils/responseHelper");
-const {   User }  = require("../models/userModel");const Favorite = require('../models/favoriteModel');  
+const {   User, Service }  = require("../models/userModel");
+const Favorite = require('../models/favoriteModel');  
 const { validateServicesFormat } = require("../utils/validation");
-
+ 
 
 
 const artistList = async (req, res) => {
      const { customer_id } = req.body;
-
-
- 
     try {
         console.log("Fetching artist list...");
         
          const artists = await User.find({ role: 'artist' }).select('username email role _id address phone profile_img');
 
-        // Handle case when no artists are found
-        if (!artists || artists.length === 0) {
+         if (!artists || artists.length === 0) {
             return sendGeneralResponse(res, false, 'No artists found', 404);
         }
 
-        // Fetch the list of favorite artists for the customer
-        const favoriteArtists = await Favorite.find({ customer_id, favorite_type: 'artist' }).select('favorite_id');
+         const favoriteArtists = await Favorite.find({ customer_id, favorite_type: 'artist' }).select('favorite_id');
 
-        // Convert the favoriteArtists to an array of artist IDs for easy comparison
-        const favoriteArtistIds = favoriteArtists.map(fav => fav.favorite_id.toString());
+         const favoriteArtistIds = favoriteArtists.map(fav => fav.favorite_id.toString());
 
-        // Add `is_favorite` field to each artist based on the favorite list
-        const artistsWithFavoriteStatus = artists.map(artist => {
+         const artistsWithFavoriteStatus = artists.map(artist => {
             return {
-                ...artist._doc, // Spread the artist object (._doc is used to access the Mongoose document data)
-                is_favorite: favoriteArtistIds.includes(artist._id.toString()) // Check if the artist is in the favorite list
+                ...artist._doc,  
+                is_favorite: favoriteArtistIds.includes(artist._id.toString()) 
             };
         });
 
@@ -47,50 +41,98 @@ const artistList = async (req, res) => {
 
 
 const addArtistServices = async (req, res) => {
-    const {role, id } = req.body;  
+  const { role, id, services } = req.body;
 
-     if (role !== 'artist') {
-        return sendGeneralResponse(res, false, 'You must be an artist to add services', 403);
+  if (role !== 'artist') {
+    return sendGeneralResponse(res, false, 'You must be an artist to add services', 403);
+  }
+
+  // Check the incoming request data
+  console.log("Received services:", services);
+
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return sendGeneralResponse(res, false, 'Artist not found', 404);
     }
 
-     const validation = validateServicesFormat(res, services, role);
-    if (validation) {
-        return validation;
+    if (user.role !== 'artist') {
+      return sendGeneralResponse(res, false, 'Access denied. Only artists can add services', 403);
     }
 
-    try {
-        
-         const user = await User.findById(id);
+    let existingServices = await Service.findOne({ userId: user._id });
 
-        if (!user) {
-            return sendGeneralResponse(res, false, 'Artist not found', 404);
+    if (existingServices) {
+      // Ensure existingServices.services is an array
+      if (!Array.isArray(existingServices.services)) {
+        existingServices.services = []; // Initialize it as an empty array if it's undefined
+      } 
+
+      services.forEach(service => {
+        const { serviceName, subServices } = service;
+
+        let existingService = existingServices.services.find(s => s.serviceName === serviceName);
+
+        if (existingService) {
+          // If the service exists, check the sub-services
+          subServices.forEach(subService => {
+            const existingSubService = existingService.subServices.find(sub => sub.name === subService.name);
+
+            if (!existingSubService) {
+              // Add the new sub-service if it doesn't already exist
+              existingService.subServices.push({
+                name: subService.name,
+                price: subService.price
+              });
+            } else {
+              // Optionally, update the price of an existing sub-service if needed
+              existingSubService.price = subService.price;
+            }
+          });
+        } else {
+          // If the service doesn't exist, create a new service object
+          existingServices.services.push({
+            serviceName: serviceName,
+            subServices: subServices.map(subService => ({
+              name: subService.name,
+              price: subService.price
+            }))
+          });
         }
+      });
 
-         if (user.role !== 'artist') {
-            return sendGeneralResponse(res, false, 'Access denied. Only artists can add services', 403);
-        }
+      await existingServices.save();
+      return sendGeneralResponse(res, true, 'Services updated successfully', 200);
+    } else {
+      // If the user doesn't have services, create a new service document
+      const newServiceDocument = new Service({
+        userId: user._id,
+        services: services.map(service => ({
+          serviceName: service.serviceName,
+          subServices: service.subServices.map(subService => ({
+            name: subService.name,
+            price: subService.price
+          }))
+        }))
+      });
 
-       
- 
-         await User.findByIdAndUpdate(id, {
-            $set: { services: user.services }   
-        });
- 
+      // Log before saving to verify the data
+      console.log("Saving new service document:", newServiceDocument);
 
-         return sendGeneralResponse(res, true, 'Services added successfully', 200, user);
-    } catch (error) {
-        console.error('Error adding services:', error);
-        return sendGeneralResponse(res, false, 'Internal server error', 500);
+      await newServiceDocument.save();
+      return sendGeneralResponse(res, true, 'Services added successfully', 200);
     }
+  } catch (error) {
+    console.error('Error adding services:', error);
+    return sendGeneralResponse(res, false, 'Internal server error', 500);
+  }
 };
 
- 
 
 
 
 
-
-const deleteArtistServices = async (req, res) => {
+  const deleteArtistServices = async (req, res) => {
     const { serviceId, subServiceId, role, userId } = req.body;
   
     // Check if the role is 'Artist'
@@ -108,50 +150,42 @@ const deleteArtistServices = async (req, res) => {
   
       // If subServiceId is provided, delete the subservice
       if (subServiceId) {
-        const result = await User.findByIdAndUpdate(
-          userId,
-          {
-            $pull: { 'services.$[service].subServices': { _id: subServiceId } },
-          },
-          {
-            arrayFilters: [{ 'service._id': serviceId }],  // Find the specific service
-            new: true, // Return the updated user object (optional)
-          }
+        const service = await Service.findOneAndUpdate(
+            { userId: userId, 'services._id': serviceId },  // Match by serviceId and userId
+            {
+                $pull: { 'services.$.subServices': { _id: subServiceId } }  // Pull specific subservice from subServices array
+            },
+            { new: true }  // Return the updated service document
         );
   
-        // If no service/subservice was deleted
-        if (!result) {
-          return sendGeneralResponse(res, false, 'Subservice not found or already deleted', 404);
+        if (!service) {
+            return sendGeneralResponse(res, false, 'Subservice not found or already deleted', 404);
         }
   
         return sendGeneralResponse(res, true, 'Subservice deleted successfully', 200);
   
       } else {
-        // If no subServiceId, delete the entire service
-        const result = await User.Artist.findByIdAndUpdate(
-          userId,
-          {
-            $pull: { services: { _id: serviceId } }, // Pull the entire service
-          },
-          {
-            new: true,  // Return the updated user object (optional)
-          }
+        // If no subServiceId is provided, delete the entire service
+        const service = await Service.findOneAndUpdate(
+            { userId: userId, 'services._id': serviceId },  // Match by serviceId and userId
+            {
+                $pull: { services: { _id: serviceId } }  // Pull the entire service from the services array
+            },
+            { new: true }  // Return the updated service document
         );
   
-        // If no service was deleted
-        if (!result) {
-          return sendGeneralResponse(res, false, 'Service not found or already deleted', 404);
+        if (!service) {
+            return sendGeneralResponse(res, false, 'Service not found or already deleted', 404);
         }
   
         return sendGeneralResponse(res, true, 'Service deleted successfully', 200);
       }
-  
     } catch (error) {
       console.error('Error deleting services:', error);
       return sendGeneralResponse(res, false, 'Internal server error', 500);
     }
   };
   
-
+   
 
 module.exports = { artistList , addArtistServices , deleteArtistServices };
