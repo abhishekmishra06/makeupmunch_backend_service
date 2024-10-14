@@ -123,7 +123,31 @@ const addArtistServices = async (req, res) => {
 };
 
 
+const getArtistServices = async (req, res) => {
+  const { id } = req.params; // Assuming you'll pass the artist's ID as a URL parameter
 
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return sendGeneralResponse(res, false, 'Artist not found', 404);
+    }
+
+    if (user.role !== 'artist') {
+      return sendGeneralResponse(res, false, 'Access denied. This user is not an artist', 403);
+    }
+
+    const services = await Service.findOne({ userId: user._id });
+
+    if (!services) {
+      return sendGeneralResponse(res, true, 'No services found for this artist', 200, { services: [] });
+    }
+
+    return sendGeneralResponse(res, true, 'Services retrieved successfully', 200, { services: services.services });
+  } catch (error) {
+    console.error('Error retrieving services:', error);
+    return sendGeneralResponse(res, false, 'Internal server error', 500);
+  }
+};
 
 
 
@@ -184,4 +208,4 @@ const addArtistServices = async (req, res) => {
   
    
 
-module.exports = { artistList , addArtistServices , deleteArtistServices };
+module.exports = { artistList , addArtistServices , deleteArtistServices , getArtistServices };
