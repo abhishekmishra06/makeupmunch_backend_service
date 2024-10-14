@@ -40,6 +40,8 @@ const artistList = async (req, res) => {
 
 
 
+
+
 const addArtistServices = async (req, res) => {
   const { role, id, services } = req.body;
 
@@ -47,7 +49,6 @@ const addArtistServices = async (req, res) => {
     return sendGeneralResponse(res, false, 'You must be an artist to add services', 403);
   }
 
-  // Check the incoming request data
   console.log("Received services:", services);
 
   try {
@@ -63,9 +64,8 @@ const addArtistServices = async (req, res) => {
     let existingServices = await Service.findOne({ userId: user._id });
 
     if (existingServices) {
-      // Ensure existingServices.services is an array
       if (!Array.isArray(existingServices.services)) {
-        existingServices.services = []; // Initialize it as an empty array if it's undefined
+        existingServices.services = [];
       } 
 
       services.forEach(service => {
@@ -74,23 +74,19 @@ const addArtistServices = async (req, res) => {
         let existingService = existingServices.services.find(s => s.serviceName === serviceName);
 
         if (existingService) {
-          // If the service exists, check the sub-services
           subServices.forEach(subService => {
             const existingSubService = existingService.subServices.find(sub => sub.name === subService.name);
 
             if (!existingSubService) {
-              // Add the new sub-service if it doesn't already exist
               existingService.subServices.push({
                 name: subService.name,
                 price: subService.price
               });
             } else {
-              // Optionally, update the price of an existing sub-service if needed
               existingSubService.price = subService.price;
             }
           });
         } else {
-          // If the service doesn't exist, create a new service object
           existingServices.services.push({
             serviceName: serviceName,
             subServices: subServices.map(subService => ({
@@ -104,7 +100,6 @@ const addArtistServices = async (req, res) => {
       await existingServices.save();
       return sendGeneralResponse(res, true, 'Services updated successfully', 200);
     } else {
-      // If the user doesn't have services, create a new service document
       const newServiceDocument = new Service({
         userId: user._id,
         services: services.map(service => ({
@@ -116,7 +111,6 @@ const addArtistServices = async (req, res) => {
         }))
       });
 
-      // Log before saving to verify the data
       console.log("Saving new service document:", newServiceDocument);
 
       await newServiceDocument.save();
@@ -127,6 +121,8 @@ const addArtistServices = async (req, res) => {
     return sendGeneralResponse(res, false, 'Internal server error', 500);
   }
 };
+
+
 
 
 

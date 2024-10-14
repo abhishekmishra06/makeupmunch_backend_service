@@ -88,7 +88,8 @@ const User = mongoose.model('User', UserSchema);
 
 
 
-const ServiceSchemas = new mongoose.Schema({
+
+const ServiceSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -114,10 +115,10 @@ const ServiceSchemas = new mongoose.Schema({
     }]
 }, { timestamps: true, collection: 'ArtistServices' });
 
- ServiceSchemas.index({ userId: 1, serviceName: 1 }, { unique: true });
+ServiceSchema.index({ userId: 1, 'services.serviceName': 1 }, { unique: true });
 
-  
-const Service = mongoose.model('Services', ServiceSchemas);
+const Service = mongoose.model('Services', ServiceSchema);
+
 module.exports = Service;
  
 
