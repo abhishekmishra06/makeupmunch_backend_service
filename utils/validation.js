@@ -67,7 +67,7 @@ const validateServicesFormat=(res, services, role) =>{
     if (!Array.isArray(services) || services.length === 0) {
       return sendGeneralResponse(res, false, "No services provided", 400);
     }
-  
+    
     // Loop through each service to validate serviceName and subServices
     for (const service of services) {
       if (!service.serviceName) {

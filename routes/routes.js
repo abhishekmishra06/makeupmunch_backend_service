@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const { register, login, getAccessToken,} = require('../controller/authController');
 const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
-const { editProfile } = require('../controller/editProfileController');
+const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
 const { booking } = require('../controller/bookingController');
  
@@ -46,6 +46,8 @@ router.post('/verifyEmailOtp',verifyEmailOtp);
 
 
 router.put('/editProfile/:id', upload.single('profile_img'), verifyToken,  editProfile);
+router.put('/editArtistProfile/:id', upload.single('profile_img'),    editArtistProfile);
+
 router.put('/change_password', verifyOtpAndChangePassword);
 router.post('/booking', booking);
 router.get('/shopsList', shopsList);
