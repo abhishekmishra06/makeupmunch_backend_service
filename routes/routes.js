@@ -46,7 +46,7 @@ router.post('/verifyEmailOtp',verifyEmailOtp);
 
 
 router.put('/editProfile/:id', upload.single('profile_img'), verifyToken,  editProfile);
-router.put('/editArtistProfile/:id', upload.single('profile_img'),    editArtistProfile);
+router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken,   editArtistProfile);
 
 router.put('/change_password', verifyOtpAndChangePassword);
 router.post('/booking', booking);
