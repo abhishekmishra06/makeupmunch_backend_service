@@ -7,7 +7,7 @@ const verifyToken = require('../middleware/authMiddleware');
 const { booking } = require('../controller/bookingController');
  
 const { fetchData, getCountries, getStates, getCities } = require('../controller/stateCityController');
-const { artistList, getArtistServices, addArtistServices, deleteArtistServices } = require('../controller/ArtistsListController');
+const { artistList, getArtistServices, addArtistServices, deleteArtistService } = require('../controller/ArtistsListController');
 const { allUsersList } = require('../controller/allUsersList');
 const { shopsList, getUsersByRole } = require('../controller/shopsList');
 const { userDetail } = require('../controller/UserDetail');
@@ -60,7 +60,7 @@ router.post('/addFavorite', addFavorite);
 router.post('/removeFavorite', removeFavorite);
 router.get('/artist/services/:id', getArtistServices);
 router.post('/artist/addservices', addArtistServices);
-router.post('/artist/deleteArtistServices', deleteArtistServices);
+router.delete('/artist/deleteService', deleteArtistService);
 
 
 

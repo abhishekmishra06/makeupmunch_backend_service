@@ -98,7 +98,7 @@ const addArtistServices = async (req, res) => {
       });
 
       await existingServices.save();
-      return sendGeneralResponse(res, true, 'Services updated successfully', 200);
+      return sendGeneralResponse(res, true, 'Services updated successfully', 200, { services: existingServices.services });
     } else {
       const newServiceDocument = new Service({
         userId: user._id,
@@ -114,7 +114,7 @@ const addArtistServices = async (req, res) => {
       console.log("Saving new service document:", newServiceDocument);
 
       await newServiceDocument.save();
-      return sendGeneralResponse(res, true, 'Services added successfully', 200);
+      return sendGeneralResponse(res, true, 'Services added successfully', 200, { services: newServiceDocument.services });
     }
   } catch (error) {
     console.error('Error adding services:', error);
@@ -152,60 +152,56 @@ const getArtistServices = async (req, res) => {
 
 
 
-  const deleteArtistServices = async (req, res) => {
-    const { serviceId, subServiceId, role, userId } = req.body;
-  
-    // Check if the role is 'Artist'
-    if (role !== 'artist') {
-      return sendGeneralResponse(res, false, 'You must be an artist to delete services', 403);
+const deleteArtistService = async (req, res) => {
+  const { role, id, serviceName, subServiceName } = req.body;
+
+  if (role !== 'artist') {
+    return sendGeneralResponse(res, false, 'You must be an artist to delete services', 403);
+  }
+
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return sendGeneralResponse(res, false, 'Artist not found', 404);
     }
-  
-    try {
-      // Fetch the user profile (we're fetching to check if user exists)
-      const user = await User.findById(userId);
-  
-      if (!user) {
-        return sendGeneralResponse(res, false, 'Artist not found', 404);
-      }
-  
-      // If subServiceId is provided, delete the subservice
-      if (subServiceId) {
-        const service = await Service.findOneAndUpdate(
-            { userId: userId, 'services._id': serviceId },  // Match by serviceId and userId
-            {
-                $pull: { 'services.$.subServices': { _id: subServiceId } }  // Pull specific subservice from subServices array
-            },
-            { new: true }  // Return the updated service document
-        );
-  
-        if (!service) {
-            return sendGeneralResponse(res, false, 'Subservice not found or already deleted', 404);
-        }
-  
-        return sendGeneralResponse(res, true, 'Subservice deleted successfully', 200);
-  
-      } else {
-        // If no subServiceId is provided, delete the entire service
-        const service = await Service.findOneAndUpdate(
-            { userId: userId, 'services._id': serviceId },  // Match by serviceId and userId
-            {
-                $pull: { services: { _id: serviceId } }  // Pull the entire service from the services array
-            },
-            { new: true }  // Return the updated service document
-        );
-  
-        if (!service) {
-            return sendGeneralResponse(res, false, 'Service not found or already deleted', 404);
-        }
-  
-        return sendGeneralResponse(res, true, 'Service deleted successfully', 200);
-      }
-    } catch (error) {
-      console.error('Error deleting services:', error);
-      return sendGeneralResponse(res, false, 'Internal server error', 500);
+
+    if (user.role !== 'artist') {
+      return sendGeneralResponse(res, false, 'Access denied. Only artists can delete services', 403);
     }
-  };
-  
+
+    let existingServices = await Service.findOne({ userId: user._id });
+
+    if (!existingServices) {
+      return sendGeneralResponse(res, false, 'No services found for this artist', 404);
+    }
+
+    const serviceIndex = existingServices.services.findIndex(s => s.serviceName === serviceName);
+
+    if (serviceIndex === -1) {
+      return sendGeneralResponse(res, false, 'Service not found', 404);
+    }
+
+    const subServiceIndex = existingServices.services[serviceIndex].subServices.findIndex(sub => sub.name === subServiceName);
+
+    if (subServiceIndex === -1) {
+      return sendGeneralResponse(res, false, 'Subservice not found', 404);
+    }
+
+    existingServices.services[serviceIndex].subServices.splice(subServiceIndex, 1);
+
+    // If no more subservices, remove the entire service
+    if (existingServices.services[serviceIndex].subServices.length === 0) {
+      existingServices.services.splice(serviceIndex, 1);
+    }
+
+    await existingServices.save();
+
+    return sendGeneralResponse(res, true, 'Subservice deleted successfully', 200, { services: existingServices.services });
+  } catch (error) {
+    console.error('Error deleting subservice:', error);
+    return sendGeneralResponse(res, false, 'Internal server error', 500);
+  }
+};
    
 
-module.exports = { artistList , addArtistServices , deleteArtistServices , getArtistServices };
+module.exports = { artistList , addArtistServices , deleteArtistService , getArtistServices };
