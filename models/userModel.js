@@ -94,7 +94,7 @@ const ServiceSchemas = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    services: [{   
+    services: [{    
         serviceName: {
             type: String, 
             required: true
