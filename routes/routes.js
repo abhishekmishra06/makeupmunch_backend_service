@@ -19,7 +19,7 @@ const { createBlogPost } = require('../controller/blog/createBlogPost');
 const { readBlogPosts } = require('../controller/blog/getBlogPost');
 const { updateBlogPost } = require('../controller/blog/updateBlogPost');
 const { deleteBlogPost } = require('../controller/blog/deteteBlogPost');
-const { subscribe } = require('../controller/subscription/subscription');
+const { subscribe, unsubscribe } = require('../controller/subscription/subscription');
 const { contactUs } = require('../controller/contactUs');
 const { addFavorite } = require('../controller/addFavorite/addFavorite');
 const { removeFavorite } = require('../controller/addFavorite/removeFavorite');
@@ -95,6 +95,8 @@ router.post('/like', likeBlogPost);
 
 
 router.post('/subscribe', subscribe);
+router.post('/unsubscribe', unsubscribe);
+
 router.post('/contactus', contactUs);
 
  
