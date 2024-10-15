@@ -13,7 +13,7 @@ const artistList = async (req, res) => {
     try {
         console.log("Fetching artist list...");
         
-         const artists = await User.find({ role: 'artist' }).select('username email role _id address phone profile_img');
+        const artists = await User.find({ role: 'artist' }).select('-password -refreshToken -token'); // Exclude password field
 
          if (!artists || artists.length === 0) {
             return sendGeneralResponse(res, false, 'No artists found', 404);
@@ -22,13 +22,18 @@ const artistList = async (req, res) => {
          const favoriteArtists = await Favorite.find({ customer_id, favorite_type: 'artist' }).select('favorite_id');
 
          const favoriteArtistIds = favoriteArtists.map(fav => fav.favorite_id.toString());
-
-         const artistsWithFavoriteStatus = artists.map(artist => {
-            return {
-                ...artist._doc,  
-                is_favorite: favoriteArtistIds.includes(artist._id.toString()) 
-            };
-        });
+         
+        const artistsWithFavoriteStatus = await Promise.all(artists.map(async (artist) => {
+          const services = await Service.findOne({ userId: artist._id });
+          
+          console.log(artists._id);
+          console.log("artists._id");
+          return {
+              ...artist._doc,
+              is_favorite: favoriteArtistIds.includes(artist._id.toString()),
+              services: services ? services.services : []
+          };
+      }));
 
         return sendGeneralResponse(res, true, 'Artists retrieved successfully', 200, artistsWithFavoriteStatus);
 
