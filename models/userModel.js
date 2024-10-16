@@ -1,6 +1,3 @@
-
-
-
 const mongoose = require('mongoose');
 
 
@@ -58,9 +55,32 @@ const ArtistRegisterSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     city: { type: String, required: true }, 
     specialties: [{ type: String, required: true }],
-    profile_img: { type: String,  required: true},
-     role: { type: String,  required: true},
-
+    profile_img: { type: String, required: true },
+    role: { type: String, required: true },
+    availability: { 
+        type: String, 
+        enum: ['day', 'night', 'both'], 
+        required: true 
+    },
+    gender: { 
+        type: String, 
+        enum: ['male', 'female', 'other'], 
+        required: true 
+    },
+    paymentMethods: { 
+        type: [String], 
+        enum: ['online', 'cash'], 
+        required: true 
+    },
+    advanceAmount: { 
+        type: Number, 
+        required: true, 
+        enum: [10, 20, 30, 40, 50],
+        validate: {
+            validator: Number.isInteger,
+            message: '{VALUE} is not an integer value'
+        }
+    }
 }, { timestamps: true, collection: 'users' });
 
 const Artist = mongoose.model('Artist', ArtistRegisterSchema);

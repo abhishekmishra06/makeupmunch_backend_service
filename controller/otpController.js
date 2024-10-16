@@ -37,26 +37,50 @@ const sendEmailOtp = async (req, res) => {
     );
 
     // Email subject and HTML content
-    const subject = "Your OTP Code";
+    const subject = "Your Makeup Munch Verification Code";
     const html = `
-            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-                <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-                    <div style="background-color: #4CAF50; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
-                        <h1>Your OTP Code</h1>
-                    </div>
-                    <div style="padding: 20px;">
-                        <h2 style="color: #333;">Hello!</h2>
-                        <p>Your One-Time Password (OTP) is:</p>
-                        <h1 style="font-size: 2em; color: #4CAF50;">${otp}</h1>
-                        <p>This OTP is valid for the next 15 minutes. Please enter it on the verification page to proceed.</p>
-                        <p>If you did not request this OTP, please ignore this email.</p>
-                    </div>
-                    <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
-                        <p>&copy; 2024 Our Service. All Rights Reserved.</p>
-                    </div>
-                </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makeup Munch Verification Code</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #FFF0F5; margin: 0; padding: 20px;">
+    <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 20px rgba(255, 20, 147, 0.1);">
+        <div style="background-color: #FF1493; padding: 20px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">Your Makeup Munch Verification Code</h1>
+        </div>
+        <div style="padding: 30px; background-color: #FFFFFF;">
+            <h2 style="color: #FF1493; margin-top: 0;">Hello, Beauty Enthusiast!</h2>
+            <p style="color: #333; font-size: 16px; line-height: 1.5;">Your One-Time Password (OTP) for Makeup Munch is:</p>
+            <div style="background-color: #FFF0F5; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
+                <h1 style="font-size: 36px; color: #FF1493; margin: 0;">${otp}</h1>
             </div>
-        `;
+            <p style="color: #333; font-size: 16px; line-height: 1.5;">This code is valid for the next 15 minutes. Please enter it on the verification page to continue your beauty journey with us.</p>
+            <p style="color: #333; font-size: 16px; line-height: 1.5;">If you didn't request this code, please ignore this email. Your account's security is important to us.</p>
+        </div>
+        <div style="background-color: #FFB6C1; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;">
+            <p style="color: #333; font-size: 14px; margin: 0;">Follow us for daily beauty inspiration:</p>
+            <div style="margin-top: 10px;">
+                <a href="#" style="text-decoration: none; margin: 0 10px;">
+                    <img src="https://img.icons8.com/ios-filled/30/FF1493/facebook-new.png" alt="Facebook" />
+                </a>
+                <a href="#" style="text-decoration: none; margin: 0 10px;">
+                    <img src="https://img.icons8.com/ios-filled/30/FF1493/instagram-new.png" alt="Instagram" />
+                </a>
+                <a href="#" style="text-decoration: none; margin: 0 10px;">
+                    <img src="https://img.icons8.com/ios-filled/30/FF1493/twitter.png" alt="Twitter" />
+                </a>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 20px; color: #777; font-size: 12px;">
+            <p>&copy; 2024 Makeup Munch. All Rights Reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+`;
 
     // Send the email
     await sendMail(email, subject, "", html);
