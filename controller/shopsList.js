@@ -1,4 +1,3 @@
-
 const { sendGeneralResponse } = require("../utils/responseHelper");
 const User = require('../models/userModel');
 
@@ -56,4 +55,19 @@ const getUsersByRole = async (req, res) => {
     }
 };
 
-module.exports = { getUsersByRole , shopsList };
+const getArtists = async (req, res) => {
+    try {
+        const artists = await User.find({ role: 'artist' }).select('username email role _id address phone profile_img');
+
+        if (!artists || artists.length === 0) {
+            return sendGeneralResponse(res, false, 'No artists found', 404);
+        }
+
+        return sendGeneralResponse(res, true, 'Artists retrieved successfully', 200, artists);
+    } catch (error) {
+        console.error('Error fetching artists:', error);
+        return sendGeneralResponse(res, false, 'Internal server error', 500);
+    }
+};
+
+module.exports = { getUsersByRole, shopsList, getArtists };

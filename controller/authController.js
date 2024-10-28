@@ -189,95 +189,125 @@ const registerUser = async (req, res) => {
 
 
 const registerArtist = async (req, res) => {
- 
-
   if (!req.body) {
-      return sendGeneralResponse(res, false, 'Request body is missing', 400);
+    return sendGeneralResponse(res, false, 'Request body is missing', 400);
   }
 
   const {
-      businessName,
-      username,
-      email,
-      password,
-      phone,
-      city,
-      specialties,
-      role
+    businessName,
+    username,
+    email,
+    password,
+    phone,
+    city,
+    specialties,
+    role,
+    availability,
+    gender,
+    paymentMethods,
+    advanceAmount
   } = req.body;
 
   const requiredFields = [
-      'businessName', 'username', 'email', 'password', 'phone', 'role', 'city', 'specialties'
+    'businessName', 'username', 'email', 'password', 'phone', 'role', 'city', 'specialties',
+    'availability', 'gender', 'paymentMethods', 'advanceAmount'
   ];
   
   if (!req.file) {
-      return sendGeneralResponse(res, false, 'Profile image is required', 400);
+    return sendGeneralResponse(res, false, 'Profile image is required', 400);
   }
 
   const validationError = validateRequiredFields(res, req.body, requiredFields);
   if (validationError) return validationError;
 
   if (!specialties || !Array.isArray(specialties) || specialties.length === 0) {
-      return sendGeneralResponse(res, false, 'Specialties are required for artists', 400);
+    return sendGeneralResponse(res, false, 'Specialties are required for artists', 400);
   }
 
   if (!validateEmail(email)) {
-      return sendGeneralResponse(res, false, 'Invalid email', 400);
+    return sendGeneralResponse(res, false, 'Invalid email', 400);
+  }
+
+  // Validate new fields
+  if (!['day', 'night', 'both'].includes(availability)) {
+    return sendGeneralResponse(res, false, 'Invalid availability option', 400);
+  }
+
+  if (!['male', 'female', 'other'].includes(gender)) {
+    return sendGeneralResponse(res, false, 'Invalid gender option', 400);
+  }
+
+  if (!Array.isArray(paymentMethods) || !paymentMethods.every(method => ['online', 'cash'].includes(method))) {
+    return sendGeneralResponse(res, false, 'Invalid payment methods', 400);
+  }
+
+  // Updated validation for advanceAmount
+  const validAdvanceAmounts = [10, 20, 30, 40, 50];
+  if (!validAdvanceAmounts.includes(Number(advanceAmount))) {
+    return sendGeneralResponse(res, false, 'Invalid advance amount. Must be 10, 20, 30, 40, or 50.', 400);
   }
 
   try {
-      const existingUser = await User.Artist.findOne({ email });
+    const existingUser = await User.Artist.findOne({ email });
 
-      if (existingUser) {
-          return sendGeneralResponse(res, false, 'Email already registered', 400);
-      }
+    if (existingUser) {
+      return sendGeneralResponse(res, false, 'Email already registered', 400);
+    }
 
-      let profile_img_url = null;
+    let profile_img_url = null;
 
-      if (req.file) {
-          profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
-      }
-      
-      const hashedPassword = await bcrypt.hash(password, 10);
-      const userData = {
-          businessName,
-          username,
-          email,
-          password: hashedPassword,
-          phone,
-          city,
-          profile_img: profile_img_url,
-          specialties,
-          role,
-      };
+    if (req.file) {
+      profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const userData = {
+      businessName,
+      username,
+      email,
+      password: hashedPassword,
+      phone,
+      city,
+      profile_img: profile_img_url,
+      specialties,
+      role,
+      availability,
+      gender,
+      paymentMethods,
+      advanceAmount: Number(advanceAmount)
+    };
 
-      const user = new User.Artist(userData);
-      await user.save();
+    const user = new User.Artist(userData);
+    await user.save();
 
-      const accessToken = generateAccessToken(user._id);
-      const refreshToken = generateRefreshToken(user._id);
-      user.refreshToken = refreshToken;
-      await user.save();
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    user.refreshToken = refreshToken;
+    await user.save();
 
-      sendGeneralResponse(res, true, 'Registered successfully', 200, {
-          _id: user._id,
-          businessName: user.businessName,
-          username: user.username,
-          email: user.email,
-          phone: user.phone,
-          city: user.city,
-          specialties: user.specialties,
-          profile_img: user.profile_img,
-          refreshToken: user.refreshToken,
-          createdAt: user.createdAt,
-          updatedAt: user.updatedAt,
-          role: user.role,
-          accessToken,
-          refreshToken
-      });
+    sendGeneralResponse(res, true, 'Registered successfully', 200, {
+      _id: user._id,
+      businessName: user.businessName,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      city: user.city,
+      specialties: user.specialties,
+      profile_img: user.profile_img,
+      refreshToken: user.refreshToken,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      role: user.role,
+      availability: user.availability,
+      gender: user.gender,
+      paymentMethods: user.paymentMethods,
+      advanceAmount: user.advanceAmount,
+      accessToken,
+      refreshToken
+    });
   } catch (error) {
-      console.error('Registration error:', error);
-      sendGeneralResponse(res, false, 'Internal server error', 500);
+    console.error('Registration error:', error);
+    sendGeneralResponse(res, false, 'Internal server error', 500);
   }
 };
 
@@ -328,11 +358,11 @@ const getAccessToken = async (req, res) => {
   
 
 const generateAccessToken = (userId) => {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+    return jwt.sign({ id: userId }, process.env.JWT_SECRET_KEY, { expiresIn: '5000000h' });
   };
   
   const generateRefreshToken = (userId) => {
-    return jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: '7d' });  
+    return jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: '700000000d' });  
   };
 
 
@@ -578,3 +608,5 @@ module.exports = { login, register , getAccessToken }
 // const sendWelcomeEmail = async (username, email) => {
 //   // Email sending logic...
 // };
+
+

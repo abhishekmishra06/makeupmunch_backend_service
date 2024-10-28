@@ -18,34 +18,52 @@ const contactUs = async (req, res) => {
     }
 
     // Prepare email content
-    const subject = 'New Contact Us Message';
+    const subject = 'New Contact Us Message from Makeup Munch';
     const html = `
-    <div style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f9f9f9;">
-        <table width="100%" cellspacing="0" cellpadding="0" style="background-color: #ffffff; padding: 20px;">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>New Contact Message - Makeup Munch</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #FFF0F5;">
+        <table width="100%" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
             <tr>
-                <td style="border-bottom: 2px solid #e4e4e4; text-align: center; padding-bottom: 20px;">
-                    <h2 style="color: #333333; font-size: 24px; margin: 0;">Contact Us Message</h2>
+                <td style="background-color: #FF1493; text-align: center; padding: 30px;">
+                    <h1 style="color: #ffffff; font-size: 28px; margin: 0;">New Contact Message</h1>
                 </td>
             </tr>
             <tr>
-                <td>
-                    <div style="padding: 20px; font-size: 16px; line-height: 1.6; color: #333333;">
-                        <p><strong style="color: #333333;">Name:</strong> ${name}</p>
-                        <p><strong style="color: #333333;">Email:</strong> ${email}</p>
-                        <p><strong style="color: #333333;">Message:</strong></p>
-                        <p style="background-color: #f4f4f4; padding: 15px; border-radius: 5px; color: #333333;">
-                            ${message}
-                        </p>
-                    </div>
+                <td style="padding: 30px;">
+                    <p style="font-size: 16px; color: #333333; margin-bottom: 20px;">A new message has been received from the Makeup Munch contact form:</p>
+                    <table width="100%" cellspacing="0" cellpadding="0" style="background-color: #FFF0F5; border-radius: 5px; overflow: hidden;">
+                        <tr>
+                            <td style="padding: 15px;">
+                                <p style="margin: 0 0 10px;"><strong style="color: #FF1493;">Name:</strong> ${name}</p>
+                                <p style="margin: 0 0 10px;"><strong style="color: #FF1493;">Email:</strong> ${email}</p>
+                                <p style="margin: 0 0 10px;"><strong style="color: #FF1493;">Message:</strong></p>
+                                <p style="background-color: #ffffff; padding: 15px; border-radius: 5px; color: #333333; margin: 0;">
+                                    ${message}
+                                </p>
+                            </td>
+                        </tr>
+                    </table>
                 </td>
             </tr>
             <tr>
-                <td style="border-top: 2px solid #e4e4e4; padding-top: 20px; text-align: center;">
-                    <p style="color: #888888; font-size: 14px;">Thank you for reaching out! We will get back to you soon.</p>
+                <td style="background-color: #FFB6C1; padding: 20px; text-align: center;">
+                    <p style="color: #333333; font-size: 14px; margin: 0;">Thank you for your attention. Please respond to this inquiry promptly.</p>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 20px; text-align: center;">
+                    <p style="color: #888888; font-size: 12px; margin: 0;">&copy; 2024 Makeup Munch. All Rights Reserved.</p>
                 </td>
             </tr>
         </table>
-    </div>
+    </body>
+    </html>
 `;
 
 
