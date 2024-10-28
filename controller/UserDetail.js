@@ -56,15 +56,13 @@ const userDetail = async (req, res) => {
         }
 
         // Fetch services associated with the user
-        const services = await Service.findById({ userId: id });
-
-        // Fetch favorite status for the user (if any)
-        
+        // Changed from findById to findOne since we're querying by userId
+        const services = await Service.findOne({ userId: id });
 
         // Construct the response
         const userWithDetails = {
             ...user._doc,
-             services: services ? services.services : []
+            services: services ? services.services : []
         };
 
         return sendGeneralResponse(res, true, 'User details retrieved successfully', 200, userWithDetails);
