@@ -19,8 +19,8 @@ app.get('', (req, res) => {
     res.send('Welcome to Makeup Munch');
 }); 
 
-app.get('/shivank', (req, res) => {
-    res.send('Welcome shivank');
+app.get('/', (req, res) => {
+    res.send('Welcome to makeup munch');
 }); 
    
    

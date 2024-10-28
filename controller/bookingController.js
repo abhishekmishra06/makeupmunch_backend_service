@@ -12,11 +12,18 @@ const moment = require('moment');
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
 
-    const { user_id, service_id, provider_id, booking_date, status, payment, details } = req.body;
+    const { user_id, user_info,   service_id, provider_id, booking_date, status, payment, details } = req.body;
 
      if (!user_id) {
         return sendGeneralResponse(res, false, 'User ID is required', 400);
     }
+
+
+    if (!user_info) {
+        return sendGeneralResponse(res, false, 'User Info is required', 400);
+    }
+
+    
     if (!service_id) {
         return sendGeneralResponse(res, false, 'Service ID is required', 400);
     }
@@ -75,7 +82,7 @@ const moment = require('moment');
 
 
      try {
-        const user = await User.findById(user_id);
+        const user = await User.Customer.findById(user_id);
         if (!user) {
             return sendGeneralResponse(res, false, 'User not found', 404);
         }
@@ -91,7 +98,7 @@ const moment = require('moment');
         //     return sendGeneralResponse(res, false, 'Provider not found', 404);
         // }
 
-        const provider = await User.findById(provider_id);
+        const provider = await User.Artist.findById(provider_id);
         if (!provider) {
             return sendGeneralResponse(res, false, 'Provider not found', 404);
         }
@@ -99,6 +106,7 @@ const moment = require('moment');
         // Create a new booking
         const booking = new Booking({
             user_id,
+            user_info,
             service_id,
             provider_id,
             booking_date,
@@ -113,7 +121,7 @@ const moment = require('moment');
         const booking_date_formatted = parsedBookingDate.format('DD MMMM YYYY');
         const payment_date_formatted = moment(payment.payment_date).format('DD MMMM YYYY');
 
-
+ 
         const subject = 'Your Booking is Confirmed!';
  
        const html = `

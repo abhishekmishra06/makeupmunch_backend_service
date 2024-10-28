@@ -2,6 +2,17 @@ const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    user_info: {
+        user_Fname: { type: String, required: true },  
+        user_Lname: { type: String, required: true },
+        phoneNumber: { type: Number, required: true }, 
+        nearby: { type: String,  required: true }, 
+        street: { type: String, required: true},  
+        area: { type: String, required: true },  
+        pincode: {type: Number, required: true},
+        city : {type: String, required: true},
+    },
+
     service_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Service', required: true },
     provider_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     booking_date: { type: Date, required: true },

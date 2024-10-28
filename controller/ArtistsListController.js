@@ -26,8 +26,7 @@ const artistList = async (req, res) => {
         const artistsWithFavoriteStatus = await Promise.all(artists.map(async (artist) => {
           const services = await Service.findOne({ userId: artist._id });
           
-          console.log(artists._id);
-          console.log("artists._id");
+      
           return {
               ...artist._doc,
               is_favorite: favoriteArtistIds.includes(artist._id.toString()),

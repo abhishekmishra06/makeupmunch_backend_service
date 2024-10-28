@@ -30,6 +30,7 @@ const { getFeedback } = require('../controller/feedback/getFeedback');
 const { applyForJob, getJobApplications } = require('../controller/careers/jobApplicationController');
 const { likeBlogPost } = require('../controller/blog/blogLikeController');
 const { createJob, deleteJob, updateJob } = require('../controller/careers/createJob');
+const { uploadArtistImages, getArtistImages } = require('../controller/subscription/gallery/gallery');
    const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
@@ -58,6 +59,11 @@ router.get('/user/role/:role', getUsersByRole);
 
 router.post('/addFavorite', addFavorite);
 router.post('/removeFavorite', removeFavorite);
+
+// router.post('/uploadArtistImages',   upload.array('images'), uploadArtistImages);
+router.post('/uploadArtistImages', upload.array('images[]'), uploadArtistImages);
+
+ router.get('/artist-images/:artistId', getArtistImages);
 router.get('/artist/services/:id', getArtistServices);
 router.post('/artist/addservices', addArtistServices);
 router.delete('/artist/deleteService', deleteArtistService);
