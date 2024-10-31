@@ -35,8 +35,7 @@
 
 
 const { sendGeneralResponse } = require("../utils/responseHelper");
-const User = require('../models/userModel');
-const Service = require('../models/serviceModel'); // Assuming you have a Service model to fetch services
+const { User, Service } = require('../models/userModel');  // Updated import
  
 const userDetail = async (req, res) => {
     try {
@@ -47,22 +46,21 @@ const userDetail = async (req, res) => {
             return sendGeneralResponse(res, false, 'User ID is required', 400);
         }
 
-        // Find the user by ID
-        const user = await User.Artist.findById(id);
+        // Artist model के बजाय Service model का उपयोग
+        const user = await User.findById(id);
 
-        // Handle case where the user is not found
         if (!user) {
             return sendGeneralResponse(res, false, 'User not found', 404);
         }
 
-        // Fetch services associated with the user
-        // Changed from findById to findOne since we're querying by userId
-        const services = await Service.findOne({ userId: id });
+        // ServiceSchema से सर्विसेज को प्राप्त करें
+        const services = await Service.findOne({ userId: id })
+            .populate('userId')  // यदि user details भी चाहिए
+            .select('services'); // केवल services array प्राप्त करें
 
-        // Construct the response
         const userWithDetails = {
             ...user._doc,
-            services: services ? services.services : []
+            services: services ? services.services : []  // services object से services array निकालें
         };
 
         return sendGeneralResponse(res, true, 'User details retrieved successfully', 200, userWithDetails);
@@ -72,5 +70,15 @@ const userDetail = async (req, res) => {
         return sendGeneralResponse(res, false, 'Internal server error', 500);
     }
 };
+const getServiceById = async (serviceId) => {
+    try {
+        const service = await Service.findById(serviceId);
+        return service;
+    } catch (error) {
+        console.error('Error fetching service:', error);
+        throw error;
+    }
+};
+
 
 module.exports = { userDetail };

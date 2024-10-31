@@ -1,208 +1,150 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Booking = require('../models/bookingModel'); 
-const User = require('../models/userModel'); 
+
 const { sendGeneralResponse } = require('../utils/responseHelper');
 const { sendMail } = require('../utils/mailer');
- 
+
+const { User, Service } = require('../models/userModel');  
 const moment = require('moment');
 
- const booking =  async (req, res) => {
+const booking = async (req, res) => {
     if (!req.body) {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
 
-    const { user_id, user_info,   service_id, provider_id, booking_date, status, payment, details } = req.body;
+    const { 
+        user_id, 
+        user_info, 
+        service_details, 
+        artist_id, 
+        booking_date,
+        booking_time, 
+        payment 
+    } = req.body;
 
-     if (!user_id) {
-        return sendGeneralResponse(res, false, 'User ID is required', 400);
+    // Basic validations
+    if (!user_id || !user_info || !service_details || !artist_id || !booking_date || !booking_time) {
+        return sendGeneralResponse(res, false, 'Missing required fields', 400);
     }
 
-
-    if (!user_info) {
-        return sendGeneralResponse(res, false, 'User Info is required', 400);
+    // Validate service details structure
+    if (!service_details.service_id || 
+        !service_details.serviceName || 
+        !Array.isArray(service_details.selected_services) || 
+        service_details.selected_services.length === 0) {
+        return sendGeneralResponse(res, false, 'Invalid service details structure', 400);
     }
 
-    
-    if (!service_id) {
-        return sendGeneralResponse(res, false, 'Service ID is required', 400);
-    }
-    if (!provider_id) {
-        return sendGeneralResponse(res, false, 'Provider ID is required', 400);
-    }
-    if (!booking_date) {
-        return sendGeneralResponse(res, false, 'Booking date is required', 400);
-    }
-
-
-    const parsedBookingDate = moment(booking_date, 'DD-MM-YYYY', true);
-
-    // Ensure booking date is valid and not in the past
-    if (!parsedBookingDate.isValid() || parsedBookingDate.isBefore(moment().startOf('day'))) {
-        return sendGeneralResponse(res, false, 'Booking date must be today or a future date and in correct format (DD-MM-YYYY)', 400);
-    }
-
-
-    if (!status) {
-        return sendGeneralResponse(res, false, 'Status is required', 400);
-    }
-    if (!payment) {
-        return sendGeneralResponse(res, false, 'Payment status is required', 400);
-    }
-
-    if (!payment.amount) {
-        return sendGeneralResponse(res, false, 'Payment amount is required', 400);
-    }
-    if (!payment.currency) {
-        return sendGeneralResponse(res, false, 'Payment currency is required', 400);
-    }
-    if (!payment.payment_method) {
-        return sendGeneralResponse(res, false, 'Payment method is required', 400);
-    }
-    if (!payment.payment_status) {
-        return sendGeneralResponse(res, false, 'Payment status is required', 400);
-    }
-
-
-    if (!payment.transaction_id) {
-        return sendGeneralResponse(res, false, 'transaction id is required', 400);
-    }
-    if (!payment.payment_date) {
-        return sendGeneralResponse(res, false, 'Payment date is required', 400);
-    }
-    if (!payment.payment_id) {
-        return sendGeneralResponse(res, false, 'Payment id is required', 400);
-    }
-    if (!payment.booking_id) {
-        return sendGeneralResponse(res, false, 'booking id is required', 400);
-    }
-
-
- 
-
-
-     try {
-        const user = await User.Customer.findById(user_id);
-        if (!user) {
-            return sendGeneralResponse(res, false, 'User not found', 404);
+    try {
+        // Verify user exists
+        const user = await User.findById(user_id);
+        console.log('Found user:', user);
+        
+        if (!user || (user.role !== 'customer' && user.role !== 'costumer')) {
+            return sendGeneralResponse(res, false, 'User not found or invalid role', 404);
         }
 
-        // const service = await Service.findById(service_id);
-        // if (!service) {
-        //     return sendGeneralResponse(res, false, 'Service not found', 404);
-        // }
-
-        // Optionally validate provider if needed
-        // const provider = await User.findById(provider_id); // Or appropriate model
-        // if (!provider) {
-        //     return sendGeneralResponse(res, false, 'Provider not found', 404);
-        // }
-
-        const provider = await User.Artist.findById(provider_id);
-        if (!provider) {
-            return sendGeneralResponse(res, false, 'Provider not found', 404);
+        // Verify artist exists
+        const artist = await User.findById(artist_id);
+        console.log('Found artist:', artist);
+        
+        if (!artist || artist.role !== 'artist') {
+            return sendGeneralResponse(res, false, 'Makeup Artist not found or invalid role', 404);
         }
 
-        // Create a new booking
-        const booking = new Booking({
-            user_id,
-            user_info,
-            service_id,
-            provider_id,
-            booking_date,
-            status,
-            payment,
-            details
+        // Fetch artist services from Service model
+        const artistService = await Service.findOne({ 
+            userId: artist_id,
+            'services.serviceName': { $regex: new RegExp(service_details.serviceName, 'i') }
         });
 
-        await booking.save();
+        if (!artistService) {
+            console.log('Artist services not found for ID:', artist_id);
+            console.log('Service name being searched:', service_details.serviceName);
+            return sendGeneralResponse(res, false, 'No services found for this artist', 404);
+        }
 
+        console.log('Found artist services:', artistService);
 
-        const booking_date_formatted = parsedBookingDate.format('DD MMMM YYYY');
-        const payment_date_formatted = moment(payment.payment_date).format('DD MMMM YYYY');
+        // Find the main service category (e.g., 'bridal')
+        const serviceCategory = artistService.services.find(s => 
+            s.serviceName.toLowerCase() === service_details.serviceName.toLowerCase()
+        );
 
- 
-        const subject = 'Your Booking is Confirmed!';
- 
-       const html = `
-            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-                <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-                    <div style="background-color: #4CAF50; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
-                        <h1>Your Booking Confirmation</h1>
-                    </div>
-                    <div style="padding: 20px;">
-                        <h2 style="color: #333;">Hello, ${user.username}!</h2>
-                        <p>Your booking is confirmed! Below are your booking details:</p>
+        if (!serviceCategory) {
+            console.log('Available services:', artistService.services.map(s => s.serviceName));
+            return sendGeneralResponse(res, false, 
+                `Service category "${service_details.serviceName}" not found for this artist`, 404
+            );
+        }
 
-                        <h3>Booking Details:</h3>
-                        <p><strong>Service:</strong> ${service_id}</p>
-                        <p><strong>Provider:</strong> ${provider.username}</p>
-                        <p><strong>Booking Date:</strong> ${booking_date_formatted}</p>
-                        <p><strong>Status:</strong> ${status}</p>
+        console.log('Service Category found:', serviceCategory);
+        console.log('Selected services:', service_details.selected_services);
 
-                        <h3>Payment Details:</h3>
-                        <p><strong>Amount:</strong> ${payment.amount} ${payment.currency}</p>
-                        <p><strong>Payment Method:</strong> ${payment.payment_method}</p>
-                        <p><strong>Transaction ID:</strong> ${payment.transaction_id}</p>
-                        <p><strong>Payment Date:</strong> ${payment_date_formatted}</p>
+        // Validate each selected sub-service
+        let totalAmount = 0;
+        for (const selected of service_details.selected_services) {
+            const subService = serviceCategory.subServices.find(
+                sub => sub.name.toLowerCase() === selected.subService_name.toLowerCase()
+            );
 
-                        <p>We wish you all the best with your booking!</p>
-                    </div>
-                    <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
-                        <p>&copy; 2024 Our Service. All Rights Reserved.</p>
-                    </div>
-                </div>
-            </div>
-        `;
+            if (!subService) {
+                console.log('Available sub-services:', serviceCategory.subServices.map(s => s.name));
+                return sendGeneralResponse(res, false, 
+                    `Sub-service "${selected.subService_name}" not found in ${service_details.serviceName} category`, 400
+                );
+            }
 
-    
-        await sendMail(user.email, subject, ``, html);
+            // Verify price matches
+            if (subService.price !== selected.price) {
+                return sendGeneralResponse(res, false, 
+                    `Price mismatch for ${selected.subService_name}. Expected: ${subService.price}, Received: ${selected.price}`, 400
+                );
+            }
 
+            totalAmount += selected.price * selected.quantity;
+        }
 
+        // Validate total amount matches
+        if (totalAmount !== payment.base_amount) {
+            return sendGeneralResponse(res, false, 
+                `Total amount mismatch. Calculated: ${totalAmount}, Received: ${payment.base_amount}`, 400
+            );
+        }
 
+        // Create booking object with validated data
+        const newBooking = new Booking({
+            user_id,
+            user_info,
+            service_details: {
+                service_id: artistService._id, // Use the correct service ID from found service
+                serviceName: serviceCategory.serviceName,
+                selected_services: service_details.selected_services,
+                total_persons: service_details.total_persons || 1,
+                special_requirements: service_details.special_requirements || ''
+            },
+            artist_id,
+            booking_date,
+            booking_time,
+            status: 'pending',
+            payment: {
+                ...payment,
+                payment_status: 'pending'
+            }
+        });
 
+        await newBooking.save();
 
-        const providerSubject = 'New Booking Confirmation';
-        const providerHtml = `
-            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-                <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-                    <div style="background-color: #4CAF50; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
-                        <h1>New Booking Received</h1>
-                    </div>
-                    <div style="padding: 20px;">
-                        <h2 style="color: #333;">Hello, ${provider.username}!</h2>
-                        <p>You have received a new booking! Below are the details:</p>
+        // Add debug logging
+        console.log('Booking saved successfully:', newBooking);
 
-                        <h3>Booking Details:</h3>
-                        <p><strong>User:</strong> ${user.username}</p>
-                        <p><strong>Service:</strong> ${service_id}</p>
-                        <p><strong>Booking Date:</strong> ${booking_date_formatted}</p>
-                        <p><strong>Status:</strong> ${status}</p>
+        // ... rest of the email sending code ...
 
-                        <h3>Payment Details:</h3>
-                        <p><strong>Amount:</strong> ${payment.amount} ${payment.currency}</p>
-                        <p><strong>Payment Method:</strong> ${payment.payment_method}</p>
-                        <p><strong>Transaction ID:</strong> ${payment.transaction_id}</p>
-                        <p><strong>Payment Date:</strong> ${payment_date_formatted}</p>
-
-                        <p>Thank you for your service!</p>
-                    </div>
-                    <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
-                        <p>&copy; 2024 Our Service. All Rights Reserved.</p>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Send confirmation email to the provider
-        await sendMail(provider.email, providerSubject, '', providerHtml);
-
-        
-
-         sendGeneralResponse(res, true, 'Booking created and confirmation email sent successfully', 201, booking);
+        sendGeneralResponse(res, true, 'Booking created successfully', 201, newBooking);
     } catch (error) {
-        console.error('Booking error:', error);
-        sendGeneralResponse(res, false, 'Internal server error', 500);
+        console.error('Detailed booking error:', error);
+        sendGeneralResponse(res, false, error.message || 'Internal server error', 500);
     }
 };
 
