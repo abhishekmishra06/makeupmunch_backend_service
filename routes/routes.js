@@ -130,6 +130,3 @@ router.post('/verifyPayment', verifyPayment);
 
 module.exports = router; 
 
-
-
-router. get("abhishekmishrqa" , abhishek );
