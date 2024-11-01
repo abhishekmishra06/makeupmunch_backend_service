@@ -108,6 +108,24 @@ const User = mongoose.model('User', UserSchema);
 
 
 
+const salonSchema = new mongoose.Schema({
+    businessName: { type: String, required: true },
+    username: { type: String, required: true, },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    phone: { type: String, required: true },
+    role: { type: String, required: true },
+    city: { type: String, required: true },
+    profile_img: { type: String },
+    numberOfArtists: { type: Number, required: true },
+    refreshToken: { type: String },
+  }, { timestamps: true });
+  
+  const Salon = mongoose.model('Salon', salonSchema);
+
+
+
+
 
 const ServiceSchema = new mongoose.Schema({
     userId: {
@@ -143,5 +161,5 @@ module.exports = Service;
  
 
 
-module.exports = {Artist, Customer , User ,Service };
-   
+module.exports = {Artist, Customer , User ,Service  , Salon};
+    

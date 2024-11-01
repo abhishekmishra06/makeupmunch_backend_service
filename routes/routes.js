@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { register, login, getAccessToken,} = require('../controller/authController');
+const { register, login, getAccessToken, registerSalon, Salonlogin,} = require('../controller/authController');
 const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
@@ -35,6 +35,13 @@ const { uploadArtistImages, getArtistImages } = require('../controller/subscript
  const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/register', upload.single('profile_img'),  register);
+
+router.post('/registerSalon', upload.single('profile_img'),  registerSalon);
+router.post('/Salonlogin',Salonlogin);
+
+
+
+
 
 router.post('/login',login);
 router.post('/getAccessToken',getAccessToken);

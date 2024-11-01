@@ -51,6 +51,52 @@ const login = async (req, res) => {
 
 
 
+
+
+
+
+   
+const Salonlogin = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email) {
+    return sendGeneralResponse(res, false, "Email field is required", 400);
+  }
+
+  if (!password) {
+    return sendGeneralResponse(res, false, "Password field is required", 400);
+  }
+
+  try {
+    const user = await User.Salon.findOne({ email });
+
+    if (!user) {
+      return sendGeneralResponse(res, false, 'User not registered', 400);
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      const accessToken = generateAccessToken(user._id);
+      const refreshToken = generateRefreshToken(user._id);
+
+      user.refreshToken = refreshToken;
+
+      // await user.save();
+      await User.Salon.updateOne({ _id: user._id }, { $set: { refreshToken } });
+
+      return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, accessToken, refreshToken });
+    } else {
+      return sendGeneralResponse(res, false, 'Invalid password', 400);
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    return sendGeneralResponse(res, false, "Internal server error", 500);
+  }
+};
+
+
+
+
  
 
 
@@ -314,6 +360,124 @@ const registerArtist = async (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+const registerSalon = async (req, res) => {
+  if (!req.body) {
+    return sendGeneralResponse(res, false, 'Request body is missing', 400);
+  }
+
+  const {
+    businessName,
+    role,
+    username,
+    email,
+    password,
+    phone,
+    city,
+    numberOfArtists,
+  } = req.body;
+
+
+  const numArtists = parseInt(numberOfArtists, 10); // Use parseInt or Number
+
+
+  const requiredFields = [
+    'businessName', 'username', 'email', 'password', 'phone', 'city', 'role' ,  'numberOfArtists',
+  ];
+
+  if (!req.file) {
+    return sendGeneralResponse(res, false, 'Profile image is required', 400);
+  }
+
+  const validationError = validateRequiredFields(res, req.body, requiredFields);
+  if (validationError) return validationError;
+
+  // Validate email
+  if (!validateEmail(email)) {
+    return sendGeneralResponse(res, false, 'Invalid email', 400);
+  }
+
+  // Validate numberOfArtists
+  if (!Number.isInteger(numArtists) || numArtists <= 0) {
+    return sendGeneralResponse(res, false, 'Number of artists must be a positive integer greater than 0', 400);
+  }
+
+  
+  try {
+    const existingUser = await User.Salon.findOne({ email });
+
+    if (existingUser) {
+      return sendGeneralResponse(res, false, 'Email already registered', 400);
+    }
+
+    let profile_img_url = null;
+
+    if (req.file) {
+      profile_img_url = await uploadImage(req.file.buffer, 'salon_img_' + Date.now());
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const salonData = {
+      businessName,
+      username,
+      email,
+      role,
+      password: hashedPassword,
+      phone,
+      city,
+      profile_img: profile_img_url,
+      numberOfArtists: Number(numberOfArtists),
+    };
+
+    const salon = new User.Salon(salonData);
+    await salon.save();
+
+    const accessToken = generateAccessToken(salon._id);
+    const refreshToken = generateRefreshToken(salon._id);
+    salon.refreshToken = refreshToken;
+    await salon.save();
+
+    sendGeneralResponse(res, true, 'Registered successfully', 200, {
+      _id: salon._id,
+      businessName: salon.businessName,
+      username: salon.username,
+      email: salon.email,
+      phone: salon.phone,
+      role:salon.role,
+      city: salon.city,
+      profile_img: salon.profile_img,
+      refreshToken: salon.refreshToken,
+      createdAt: salon.createdAt,
+      updatedAt: salon.updatedAt,
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    sendGeneralResponse(res, false, 'Internal server error', 500);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const getAccessToken = async (req, res) => {
     const { refreshToken } = req.body;
 
@@ -378,9 +542,6 @@ const generateAccessToken = (userId) => {
     if (role === 'artist') {
          return registerArtist(req, res);
     } else {
-
-      console.log('lll111111111111111111ll');
-
         return registerUser(req, res);
     }
   };
@@ -388,7 +549,7 @@ const generateAccessToken = (userId) => {
 
 
 
-module.exports = { login, register , getAccessToken } 
+module.exports = { login, register , getAccessToken  , registerSalon , Salonlogin} 
 
 
 
