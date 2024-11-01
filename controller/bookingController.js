@@ -24,16 +24,18 @@ const booking = async (req, res) => {
     } = req.body;
 
     // Basic validations
-    if (!user_id || !user_info || !service_details || !artist_id || !booking_date || !booking_time) {
+    if (!user_id || !user_info || !Array.isArray(service_details) || !artist_id || !booking_date || !booking_time) {
         return sendGeneralResponse(res, false, 'Missing required fields', 400);
     }
 
     // Validate service details structure
-    if (!service_details.service_id || 
-        !service_details.serviceName || 
-        !Array.isArray(service_details.selected_services) || 
-        service_details.selected_services.length === 0) {
-        return sendGeneralResponse(res, false, 'Invalid service details structure', 400);
+    for (const service of service_details) {
+        if (!service.service_id || 
+            !service.serviceName || 
+            !Array.isArray(service.selected_services) || 
+            service.selected_services.length === 0) {
+            return sendGeneralResponse(res, false, 'Invalid service details structure', 400);
+        }
     }
 
     try {
@@ -53,57 +55,63 @@ const booking = async (req, res) => {
             return sendGeneralResponse(res, false, 'Makeup Artist not found or invalid role', 404);
         }
 
-        // Fetch artist services from Service model
-        const artistService = await Service.findOne({ 
-            userId: artist_id,
-            'services.serviceName': { $regex: new RegExp(service_details.serviceName, 'i') }
-        });
-
-        if (!artistService) {
-            console.log('Artist services not found for ID:', artist_id);
-            console.log('Service name being searched:', service_details.serviceName);
-            return sendGeneralResponse(res, false, 'No services found for this artist', 404);
-        }
-
-        console.log('Found artist services:', artistService);
-
-        // Find the main service category (e.g., 'bridal')
-        const serviceCategory = artistService.services.find(s => 
-            s.serviceName.toLowerCase() === service_details.serviceName.toLowerCase()
-        );
-
-        if (!serviceCategory) {
-            console.log('Available services:', artistService.services.map(s => s.serviceName));
-            return sendGeneralResponse(res, false, 
-                `Service category "${service_details.serviceName}" not found for this artist`, 404
-            );
-        }
-
-        console.log('Service Category found:', serviceCategory);
-        console.log('Selected services:', service_details.selected_services);
-
-        // Validate each selected sub-service
         let totalAmount = 0;
-        for (const selected of service_details.selected_services) {
-            const subService = serviceCategory.subServices.find(
-                sub => sub.name.toLowerCase() === selected.subService_name.toLowerCase()
+        const validatedServices = [];
+
+        // Process each service
+        for (const serviceDetail of service_details) {
+            // Fetch artist services from Service model
+            const artistService = await Service.findOne({ 
+                userId: artist_id,
+                'services.serviceName': { $regex: new RegExp(serviceDetail.serviceName, 'i') }
+            });
+
+            if (!artistService) {
+                console.log('Artist services not found for ID:', artist_id);
+                console.log('Service name being searched:', serviceDetail.serviceName);
+                return sendGeneralResponse(res, false, `No services found for this artist for ${serviceDetail.serviceName}`, 404);
+            }
+
+            // Find the main service category
+            const serviceCategory = artistService.services.find(s => 
+                s.serviceName.toLowerCase() === serviceDetail.serviceName.toLowerCase()
             );
 
-            if (!subService) {
-                console.log('Available sub-services:', serviceCategory.subServices.map(s => s.name));
+            if (!serviceCategory) {
                 return sendGeneralResponse(res, false, 
-                    `Sub-service "${selected.subService_name}" not found in ${service_details.serviceName} category`, 400
+                    `Service category "${serviceDetail.serviceName}" not found for this artist`, 404
                 );
             }
 
-            // Verify price matches
-            if (subService.price !== selected.price) {
-                return sendGeneralResponse(res, false, 
-                    `Price mismatch for ${selected.subService_name}. Expected: ${subService.price}, Received: ${selected.price}`, 400
+            // Validate each selected sub-service
+            for (const selected of serviceDetail.selected_services) {
+                const subService = serviceCategory.subServices.find(
+                    sub => sub.name.toLowerCase() === selected.subService_name.toLowerCase()
                 );
+
+                if (!subService) {
+                    return sendGeneralResponse(res, false, 
+                        `Sub-service "${selected.subService_name}" not found in ${serviceDetail.serviceName} category`, 400
+                    );
+                }
+
+                // Verify price matches
+                if (subService.price !== selected.price) {
+                    return sendGeneralResponse(res, false, 
+                        `Price mismatch for ${selected.subService_name}. Expected: ${subService.price}, Received: ${selected.price}`, 400
+                    );
+                }
+
+                totalAmount += selected.price * selected.quantity;
             }
 
-            totalAmount += selected.price * selected.quantity;
+            validatedServices.push({
+                service_id: artistService._id,
+                serviceName: serviceCategory.serviceName,
+                selected_services: serviceDetail.selected_services,
+                total_persons: serviceDetail.total_persons || 1,
+                special_requirements: serviceDetail.special_requirements || ''
+            });
         }
 
         // Validate total amount matches
@@ -117,13 +125,7 @@ const booking = async (req, res) => {
         const newBooking = new Booking({
             user_id,
             user_info,
-            service_details: {
-                service_id: artistService._id, // Use the correct service ID from found service
-                serviceName: serviceCategory.serviceName,
-                selected_services: service_details.selected_services,
-                total_persons: service_details.total_persons || 1,
-                special_requirements: service_details.special_requirements || ''
-            },
+            service_details: validatedServices,
             artist_id,
             booking_date,
             booking_time,

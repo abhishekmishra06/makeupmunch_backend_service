@@ -15,7 +15,7 @@ const bookingSchema = new mongoose.Schema({
         }
     },
 
-    service_details: {
+    service_details: [{
         service_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Services', required: true },
         serviceName: { type: String, required: true },
         selected_services: [{
@@ -25,7 +25,7 @@ const bookingSchema = new mongoose.Schema({
         }],
         total_persons: { type: Number, default: 1 },
         special_requirements: { type: String }
-    },
+    }],
 
     artist_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     booking_date: { type: Date, required: true },
