@@ -31,13 +31,16 @@ const { applyForJob, getJobApplications } = require('../controller/careers/jobAp
 const { likeBlogPost } = require('../controller/blog/blogLikeController');
 const { createJob, deleteJob, updateJob } = require('../controller/careers/createJob');
 const { uploadArtistImages, getArtistImages } = require('../controller/subscription/gallery/gallery');
+const { addOrUpdateAboutSection } = require('../controller/addAboutSectionController');
    const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/register', upload.single('profile_img'),  register);
 
 router.post('/registerSalon', upload.single('profile_img'),  registerSalon);
-router.post('/Salonlogin',Salonlogin);
+router.post('/Salonlogin',Salonlogin); 
+router.post('/addOrUpdateAboutSection',addOrUpdateAboutSection);
+
 
 
 
@@ -46,9 +49,10 @@ router.post('/Salonlogin',Salonlogin);
 router.post('/login',login);
 router.post('/getAccessToken',getAccessToken);
  
+
 router.post('/sendEmailOtp',sendEmailOtp);
 router.post('/sendPhoneOtp',sendPhoneOtp);
-
+  
 router.post('/verifyPhonOtp',verifyPhoneOtp); 
 router.post('/verifyEmailOtp',verifyEmailOtp);
 
@@ -128,5 +132,4 @@ module.exports = router;
 
 
 
-
- 
+router. get("abhishekmishrqa" , abhishek );
