@@ -35,8 +35,9 @@
 
 
 const { sendGeneralResponse } = require("../utils/responseHelper");
-const { User, Service } = require('../models/userModel');  // Updated import
- 
+const {   User, Service }  = require("../models/userModel");
+
+
 const userDetail = async (req, res) => {
     try {
         const { id } = req.params; 
@@ -46,24 +47,18 @@ const userDetail = async (req, res) => {
             return sendGeneralResponse(res, false, 'User ID is required', 400);
         }
 
-        // Artist model के बजाय Service model का उपयोग
-        const user = await User.findById(id);
+        // Find the user by ID
+        const user = await User.Artist.findById(id);
 
+      
+        // Handle case where the user is not found
         if (!user) {
             return sendGeneralResponse(res, false, 'User not found', 404);
         }
+          const services = await Service.findOne({ userId: artist._id });
 
-        // ServiceSchema से सर्विसेज को प्राप्त करें
-        const services = await Service.findOne({ userId: id })
-            .populate('userId')  // यदि user details भी चाहिए
-            .select('services'); // केवल services array प्राप्त करें
-
-        const userWithDetails = {
-            ...user._doc,
-            services: services ? services.services : []  // services object से services array निकालें
-        };
-
-        return sendGeneralResponse(res, true, 'User details retrieved successfully', 200, userWithDetails);
+       
+        return sendGeneralResponse(res, true, 'User details retrieved successfully', 200, {user , services: services ? services.services : []});
 
     } catch (error) {
         console.error('Error fetching user details:', error);
