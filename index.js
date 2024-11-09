@@ -14,7 +14,10 @@ connectDB();
 const app = express();
 app.use(express.json());
 app.use(cors({
-    origin: ['http://localhost:5000', 'https://makeup-munch-service-y87h.vercel.app'],
+    origin: [
+        'http://localhost:3000',
+        'https://makeupmunch-ui-testing.vercel.app'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 }));
