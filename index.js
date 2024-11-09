@@ -20,11 +20,11 @@ app.use(cors({
 }));
  // Routes
 app.get('', (req, res) => {
-    res.send('Welcome to Makeup');
+    res.send('Welcome to Makeup munch app');
 }); 
 
 app.get('/', (req, res) => {
-    res.send('Welcome to makeup');
+    res.send('Welcome to makeup munch app');
 }); 
    
    
