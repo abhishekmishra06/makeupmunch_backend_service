@@ -102,85 +102,68 @@ const Salonlogin = async (req, res) => {
 
 
 const registerUser = async (req, res) => {
-
-  
     if (!req.body) {
-
-      return sendGeneralResponse(res, false, 'Request body is missing', 400);
+        return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
   
-    const { username, email, password, dob, address, phone, gender, role } = req.body;
+    const { username, email, password, phone, gender, role } = req.body;
   
     if (!username) {
-      return sendGeneralResponse(res, false, 'Username is required', 400);
+        return sendGeneralResponse(res, false, 'Username is required', 400);
     }
     if (!email) {
-      return sendGeneralResponse(res, false, 'Email is required', 400);
+        return sendGeneralResponse(res, false, 'Email is required', 400);
     }
     if (!password) {
-      return sendGeneralResponse(res, false, 'Password is required', 400);
-    }
-    if (!dob) {
-      return sendGeneralResponse(res, false, 'Date of birth is required', 400);
-    }
-    if (!address) {
-      return sendGeneralResponse(res, false, 'Address is required', 400);
+        return sendGeneralResponse(res, false, 'Password is required', 400);
     }
     if (!phone) {
-      return sendGeneralResponse(res, false, 'Phone number is required', 400);
+        return sendGeneralResponse(res, false, 'Phone number is required', 400);
     }
     if (!gender) {
-      return sendGeneralResponse(res, false, 'Gender is required', 400);
+        return sendGeneralResponse(res, false, 'Gender is required', 400);
     }
     if (!role) {
-      return sendGeneralResponse(res, false, 'Role is required', 400);
+        return sendGeneralResponse(res, false, 'Role is required', 400);
     }
     if (!req.file) {
-      return sendGeneralResponse(res, false, 'Profile image is required', 400);
+        return sendGeneralResponse(res, false, 'Profile image is required', 400);
     }
   
     if (!validateEmail(email)) {
-      return sendGeneralResponse(res, false, 'Invalid email', 400);
+        return sendGeneralResponse(res, false, 'Invalid email', 400);
     }
      
-  
     try {
-         const existingUser = await User.Customer.findOne({ email });
+        const existingUser = await User.Customer.findOne({ email });
         if (existingUser) {
             return sendGeneralResponse(res, false, 'Email already registered', 400);
         }
  
         let profile_img_url = null;
-
         if (req.file) {
             profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
         }
 
-         const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-         const user = new User.Customer({
+        const user = new User.Customer({
             username,
             email,
             password: hashedPassword,
-            dob,
-            address,
             phone,
             gender,
-            profile_img: profile_img_url ,
+            profile_img: profile_img_url,
             role
         });
 
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefreshToken(user._id);
-        
-       
-
         user.refreshToken = refreshToken;
 
         await user.save();
 
-        // Send email for confermation you are registering
-
+        // Rest of the email sending code remains the same
         const subject = 'Welcome to MakeUp Munch!';
         const text = `Hi ${username},\n\nThank you for registering with us. We're excited to have you onboard!`;
 
@@ -218,14 +201,14 @@ const registerUser = async (req, res) => {
         </div>
     `;
 
-         await sendMail(email, subject, text, html);
+        await sendMail(email, subject, text, html);
         
-        sendGeneralResponse(res, true, 'Registered successfully', 200, { ...user._doc,accessToken , refreshToken });
+        sendGeneralResponse(res, true, 'Registered successfully', 200, { ...user._doc, accessToken, refreshToken });
     } catch (error) {
-      console.error('Registration error:', error);
-      sendGeneralResponse(res, false, 'Internal server error', 500);
+        console.error('Registration error:', error);
+        sendGeneralResponse(res, false, 'Internal server error', 500);
     }
-  };
+};
 
 
 
