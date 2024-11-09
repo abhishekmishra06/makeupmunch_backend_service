@@ -13,7 +13,11 @@ connectDB();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:3000', 'https://makeup-munch-service-y87h.vercel.app'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+}));
  // Routes
 app.get('', (req, res) => {
     res.send('Welcome to Makeup Munch');
