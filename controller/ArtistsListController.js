@@ -1,6 +1,3 @@
-
-
-
 const { sendGeneralResponse } = require("../utils/responseHelper");
 const {   User, Service }  = require("../models/userModel");
 const Favorite = require('../models/favoriteModel');  
@@ -206,6 +203,30 @@ const deleteArtistService = async (req, res) => {
     return sendGeneralResponse(res, false, 'Internal server error', 500);
   }
 };
-   
 
-module.exports = { artistList , addArtistServices , deleteArtistService , getArtistServices };
+const customerList = async (req, res) => {
+    try {
+        console.log("Fetching customer list...");
+        
+        const customers = await User.find({ role: 'customer' })
+            .select('-password -refreshToken -token'); // Exclude sensitive fields
+
+        if (!customers || customers.length === 0) {
+            return sendGeneralResponse(res, false, 'No customers found', 404);
+        }
+
+        return sendGeneralResponse(res, true, 'Customers retrieved successfully', 200, customers);
+
+    } catch (error) {
+        console.error('Error fetching customers:', error);
+        return sendGeneralResponse(res, false, 'Internal server error', 500);
+    }
+};
+
+module.exports = { 
+    artistList, 
+    addArtistServices, 
+    deleteArtistService, 
+    getArtistServices,
+    customerList
+};

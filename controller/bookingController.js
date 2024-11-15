@@ -202,8 +202,46 @@ const getArtistBookings = async (req, res) => {
     }
 };
 
+const getAllBookings = async (req, res) => {
+    try {
+        // Get query parameters for filtering
+        const { status, date_from, date_to } = req.query;
+        
+        // Build query object
+        let query = {};
+        
+        // Add status filter if provided
+        if (status) {
+            query.status = status;
+        }
+        
+        // Add date range filter if provided
+        if (date_from || date_to) {
+            query.booking_date = {};
+            if (date_from) {
+                query.booking_date.$gte = new Date(date_from);
+            }
+            if (date_to) {
+                query.booking_date.$lte = new Date(date_to);
+            }
+        }
+
+        // Find bookings with populated user and artist details
+        const bookings = await Booking.find(query)
+            .sort({ createdAt: -1 })
+            .populate('user_id', 'name email phone profile_image')
+            .populate('artist_id', 'name email phone profile_image');
+
+        return sendGeneralResponse(res, true, 'Bookings fetched successfully', 200, bookings);
+    } catch (error) {
+        console.error('Error fetching all bookings:', error);
+        return sendGeneralResponse(res, false, error.message || 'Internal server error', 500);
+    }
+};
+
 module.exports = {
     booking,
     getUserBookings,
-    getArtistBookings
+    getArtistBookings,
+    getAllBookings
 };

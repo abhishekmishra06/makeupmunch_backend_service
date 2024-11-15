@@ -4,10 +4,10 @@ const { register, login, getAccessToken, registerSalon, Salonlogin,} = require('
 const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
-const { booking, getUserBookings, getArtistBookings } = require('../controller/bookingController');
+const { booking,getAllBookings, getUserBookings, getArtistBookings } = require('../controller/bookingController');
  
 const { fetchData, getCountries, getStates, getCities } = require('../controller/stateCityController');
-const { artistList, getArtistServices, addArtistServices, deleteArtistService } = require('../controller/ArtistsListController');
+const { artistList,customerList, getArtistServices, addArtistServices, deleteArtistService } = require('../controller/ArtistsListController');
 const { allUsersList } = require('../controller/allUsersList');
 const { shopsList, getUsersByRole } = require('../controller/shopsList');
 const { userDetail } = require('../controller/UserDetail');
@@ -62,10 +62,12 @@ router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken, 
 
 router.put('/change_password', verifyOtpAndChangePassword);
 router.post('/booking', booking);
+router.get('/getbooking' ,getAllBookings);
 router.get('/booking/user/:user_id', getUserBookings);
 router.get('/booking/artist/:artist_id', getArtistBookings);
 router.get('/shopsList', shopsList);
 router.get('/artistsList', artistList);
+router.get('/customerList', customerList);
 router.get('/allUsersList', allUsersList);
 router.get('/userDetail/:id', userDetail);
 router.get('/user/role/:role', getUsersByRole);
