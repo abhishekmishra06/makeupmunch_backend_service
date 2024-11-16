@@ -4,7 +4,7 @@ const { register, login, getAccessToken, registerSalon, Salonlogin,} = require('
 const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
-const { booking,getAllBookings, getUserBookings, getArtistBookings } = require('../controller/bookingController');
+const { getUserPackageBookings ,packageBooking,booking,getAllBookings, getUserBookings, getArtistBookings } = require('../controller/bookingController');
  
 const { fetchData, getCountries, getStates, getCities } = require('../controller/stateCityController');
 const { artistList,customerList, getArtistServices, addArtistServices, deleteArtistService } = require('../controller/ArtistsListController');
@@ -32,6 +32,7 @@ const { likeBlogPost } = require('../controller/blog/blogLikeController');
 const { createJob, deleteJob, updateJob } = require('../controller/careers/createJob');
 const { uploadArtistImages, getArtistImages } = require('../controller/subscription/gallery/gallery');
 const { addOrUpdateAboutSection } = require('../controller/addAboutSectionController');
+const packageController = require('../controller/packageController');
 const { adminLogin } = require('../controller/adminController/adminloginController');
    const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
@@ -49,6 +50,10 @@ router.post('/registerSalon', upload.single('profile_img'),  registerSalon);
 router.post('/Salonlogin',Salonlogin); 
 router.post('/addOrUpdateAboutSection',addOrUpdateAboutSection);
 
+router.get('/packages', packageController.getAllPackages);
+router.post('/packages', packageController.createPackage);
+router.put('/packages/:id', packageController.updatePackage);
+router.delete('/packages/:id', packageController.deletePackage);
 
 
 
@@ -70,6 +75,8 @@ router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken, 
 
 router.put('/change_password', verifyOtpAndChangePassword);
 router.post('/booking', booking);
+router.post('/packageBooking',packageBooking)
+router.get('/getUserPackageBookings/:user_id' , getUserPackageBookings)
 router.get('/getbooking' ,getAllBookings);
 router.get('/booking/user/:user_id', getUserBookings);
 router.get('/booking/artist/:artist_id', getArtistBookings);

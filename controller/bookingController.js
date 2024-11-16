@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const Booking = require('../models/bookingModel'); 
+const { Booking, PackageBooking } = require('../models/bookingModel'); 
+const Package  = require('../models/packageModel');
 
 const { sendGeneralResponse } = require('../utils/responseHelper');
 const { sendMail } = require('../utils/mailer');
@@ -150,6 +151,62 @@ const booking = async (req, res) => {
     }
 };
 
+const packageBooking = async (req, res) => {
+    try {
+        console.log('Package model:', Package);
+        
+        if (!req.body) {
+            return sendGeneralResponse(res, false, 'Request body is missing', 400);
+        }
+
+        const { 
+            user_id, 
+            user_info, 
+            package_details, 
+            booking_date,
+            booking_time, 
+            payment 
+        } = req.body;
+
+        // Basic validations
+        if (!user_id || !user_info || !package_details || !booking_date || !booking_time || !payment) {
+            return sendGeneralResponse(res, false, 'Missing required fields', 400);
+        }
+
+        // Verify user exists
+        const user = await User.findById(user_id);
+        if (!user) {
+            return sendGeneralResponse(res, false, 'User not found', 404);
+        }
+
+        // Verify package exists
+        const package = await Package.findById(package_details.package_id);
+        if (!package) {
+            return sendGeneralResponse(res, false, 'Package not found', 404);
+        }
+
+        // Create booking object
+        const newPackageBooking = new PackageBooking({
+            user_id,
+            user_info,
+            package_details,
+            booking_date,
+            booking_time,
+            payment,
+            status: 'pending'
+        });
+
+        // Save the booking
+        const savedBooking = await newPackageBooking.save();
+        
+        return sendGeneralResponse(res, true, 'Package booking created successfully', 201, savedBooking);
+
+    } catch (error) {
+        console.error('Package booking error:', error);
+        return sendGeneralResponse(res, false, 'Failed to create package booking: ' + error.message, 500);
+    }
+};
+
 const getUserBookings = async (req, res) => {
     const { user_id } = req.params;
 
@@ -239,9 +296,38 @@ const getAllBookings = async (req, res) => {
     }
 };
 
+const getUserPackageBookings = async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        if (!user_id) {
+            return sendGeneralResponse(res, false, 'User ID is required', 400);
+        }
+
+        // Verify user exists
+        const user = await User.findById(user_id);
+        if (!user) {
+            return sendGeneralResponse(res, false, 'User not found', 404);
+        }
+
+        // Find all package bookings for the user
+        const packageBookings = await PackageBooking.find({ user_id })
+            .sort({ createdAt: -1 }) // Sort by newest first
+            .populate('package_details.package_id'); // Get package details
+
+        return sendGeneralResponse(res, true, 'Package bookings fetched successfully', 200, packageBookings);
+
+    } catch (error) {
+        console.error('Error fetching user package bookings:', error);
+        return sendGeneralResponse(res, false, error.message || 'Internal server error', 500);
+    }
+};
+
 module.exports = {
     booking,
+    packageBooking,
     getUserBookings,
     getArtistBookings,
-    getAllBookings
+    getAllBookings,
+    getUserPackageBookings
 };

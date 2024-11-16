@@ -3,19 +3,20 @@ const { sendGeneralResponse } = require("../../../utils/responseHelper");
 const { uploadImage } = require("../../../utils/uploadImages");
 
 const uploadArtistImages = async (req, res) => {
-    // if (!req.body || !req.file) {
-    //     return sendGeneralResponse(res, false, 'Request body or image file is missing', 400);
-    // }
-
     const { artistId } = req.body;
+    const MAX_FILES = 10; // Maximum number of files allowed
 
     if (!artistId) {
         return sendGeneralResponse(res, false, 'Artist ID is required', 400);
     }
 
+    if (!req.files || req.files.length === 0) {
+        return sendGeneralResponse(res, false, 'No images provided', 400);
+    }
 
-    
-    // const existingUser = await User.Artist.findOne({ email });
+    if (req.files.length > MAX_FILES) {
+        return sendGeneralResponse(res, false, `Maximum ${MAX_FILES} images allowed per upload`, 400);
+    }
 
     try {
         const artist = await Artist.findById(artistId);
@@ -24,19 +25,26 @@ const uploadArtistImages = async (req, res) => {
         }
 
         // Handle multiple files
-        const imageUploadPromises = req.files.map(file => uploadImage(file.buffer, 'artist_img_' + Date.now()));
+        const imageUploadPromises = req.files.map(file => uploadImage(file.buffer, `artist_img_${artistId}_${Date.now()}`));
         const uploadedImages = await Promise.all(imageUploadPromises);
         
-        // Assuming artist has an 'images' field to store uploaded images
-        artist.images = artist.images ? [...artist.images, ...uploadedImages] : uploadedImages;
+        // Update artist's images array
+        artist.images = artist.images || [];
+        artist.images.push(...uploadedImages);
         await artist.save();
 
-        sendGeneralResponse(res, true, 'Images uploaded successfully', 200, {
+        return sendGeneralResponse(res, true, 'Images uploaded successfully', 200, {
             images: artist.images,
         });
     } catch (error) {
         console.error('Image upload error:', error);
-        sendGeneralResponse(res, false, 'Internal server error', 500);
+        
+        // More specific error handling
+        if (error.name === 'ValidationError') {
+            return sendGeneralResponse(res, false, 'Invalid image data', 400);
+        }
+        
+        return sendGeneralResponse(res, false, 'Failed to upload images', 500);
     }
 };
 
