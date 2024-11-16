@@ -18,6 +18,7 @@ app.use(cors({
         'http://localhost:3000',
         'http://localhost:3001',
         'https://makeupmunch-ui-testing.vercel.app'
+        'https://makeup-munch-admin-dashboard-testing.vercel.app'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
