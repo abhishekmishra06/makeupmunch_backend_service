@@ -32,8 +32,16 @@ const { likeBlogPost } = require('../controller/blog/blogLikeController');
 const { createJob, deleteJob, updateJob } = require('../controller/careers/createJob');
 const { uploadArtistImages, getArtistImages } = require('../controller/subscription/gallery/gallery');
 const { addOrUpdateAboutSection } = require('../controller/addAboutSectionController');
+const { adminLogin } = require('../controller/adminController/adminloginController');
    const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
+
+
+
+  
+
+router.post('/adminLogin',    adminLogin);
+
 
 router.post('/register', upload.single('profile_img'),  register);
 
