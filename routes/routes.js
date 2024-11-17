@@ -34,6 +34,7 @@ const { uploadArtistImages, getArtistImages } = require('../controller/subscript
 const { addOrUpdateAboutSection } = require('../controller/addAboutSectionController');
 const packageController = require('../controller/packageController');
 const { adminLogin } = require('../controller/adminController/adminloginController');
+const { formController } = require('../controller/formController');
    const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
@@ -144,6 +145,11 @@ router.get('/cities/:stateName', getCities);
 router.post('/verifyPayment', verifyPayment);
 
  
+
+// Form submission routes
+router.post('/form/submit', formController.createSubmission);
+router.get('/form/submissions', formController.getAllSubmissions);
+router.get('/form/submission/:phoneNumber', formController.getSubmissionByPhone);
 
 module.exports = router; 
 
