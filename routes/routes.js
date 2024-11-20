@@ -35,6 +35,7 @@ const { addOrUpdateAboutSection } = require('../controller/addAboutSectionContro
 const packageController = require('../controller/packageController');
 const { adminLogin } = require('../controller/adminController/adminloginController');
 const { formController } = require('../controller/formController');
+const { rateArtist } = require('../controller/rating');
    const router = express.Router();
  const upload = multer({ storage: multer.memoryStorage() });
 
@@ -101,7 +102,7 @@ router.delete('/artist/deleteService', deleteArtistService);
 
 
 
-router.post('/makeRating', rateUser);
+router.post('/makeRating', rateArtist);
 router.get('/getRatings/:rated_id', getRatings);
 
 router.post('/feedback', addFeedback);

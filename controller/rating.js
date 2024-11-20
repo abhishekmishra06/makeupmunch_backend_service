@@ -1,14 +1,13 @@
 const express = require('express');
 const Rating = require('../models/ratingModel');  
-const User = require('../models/userModel');  
+const { Customer, Artist } = require('../models/userModel'); 
 
+const rateArtist = async (req, res) => {
+    const { artist_id, stars, message } = req.body;
 
-const rateUser = async (req, res) => {
-    const { customer_id, rated_id, stars, message } = req.body;
-
-    // Ensure customer_id and rated_id are provided
-    if (!customer_id || !rated_id) {
-        return res.status(400).json({ success: false, message: 'customer_id and rated_id are required' });
+    // Ensure artist_id is provided
+    if (!artist_id) {
+        return res.status(400).json({ success: false, message: 'artist_id is required' });
     }
 
     // Ensure at least stars or message is provided
@@ -22,16 +21,16 @@ const rateUser = async (req, res) => {
     }
 
     try { 
-        // Check if rated_id is a valid artist or salon 
-        const user = await User.findById(rated_id);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'Artist or Salon not found' });
+        // Check if artist_id is a valid artist 
+        const artist = await Artist.findById(artist_id);
+        if (!artist) {
+            return res.status(404).json({ success: false, message: 'Artist not found' });
         }
 
         // Create a new rating
         const rating = new Rating({
-            customer_id,
-            rated_id,
+            customer_id: req.user.id,
+            rated_id: artist_id,
             stars: stars || null,  // If stars is not provided, set it to null
             message: message || ''  // If message is not provided, set it to an empty string
         });
@@ -46,4 +45,4 @@ const rateUser = async (req, res) => {
     }
 };
 
-module.exports = { rateUser };
+module.exports = { rateArtist };
