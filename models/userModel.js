@@ -71,7 +71,9 @@ const ArtistRegisterSchema = new mongoose.Schema({
             validator: Number.isInteger,
             message: '{VALUE} is not an integer value'
         }
-    }
+    } 
+,
+    about: { type: String } 
 }, { timestamps: true, collection: 'users' });
 
 const Artist = mongoose.model('Artist', ArtistRegisterSchema);
