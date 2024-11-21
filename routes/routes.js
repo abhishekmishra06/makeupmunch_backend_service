@@ -23,8 +23,8 @@ const { subscribe, unsubscribe } = require('../controller/subscription/subscript
 const { contactUs } = require('../controller/contactUs');
 const { addFavorite } = require('../controller/addFavorite/addFavorite');
 const { removeFavorite } = require('../controller/addFavorite/removeFavorite');
-const { rateUser } = require('../controller/rating');
-const { getRatings } = require('../controller/rating/getRating');
+// const { rateUser } = require('../controller/rating');
+// const { getRatings } = require('../controller/rating/getRating');
 const { addFeedback } = require('../controller/feedback/addFeedback');
 const { getFeedback } = require('../controller/feedback/getFeedback');
 const { applyForJob, getJobApplications } = require('../controller/careers/jobApplicationController');
@@ -35,9 +35,11 @@ const { addOrUpdateAboutSection } = require('../controller/addAboutSectionContro
 const packageController = require('../controller/packageController');
 const { adminLogin } = require('../controller/adminController/adminloginController');
 const { formController } = require('../controller/formController');
-const { rateArtist } = require('../controller/rating');
-   const router = express.Router();
- const upload = multer({ storage: multer.memoryStorage() });
+const {  makeRating } = require('../controller/rating/MakeRating');
+const { getRatings } = require('../controller/rating/getRating');
+const { deleteRating } = require('../controller/rating/deleteRating');
+const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 
 
@@ -102,8 +104,12 @@ router.delete('/artist/deleteService', deleteArtistService);
 
 
 
-router.post('/makeRating', rateArtist);
-router.get('/getRatings/:rated_id', getRatings);
+router.post('/makeRating', makeRating);
+router.post('/getRatings', getRatings);
+router.delete('/deleteRating', deleteRating);
+
+
+// router.get('/getRatings/:rated_id', getRatings);
 
 router.post('/feedback', addFeedback);
 router.get('/feedback/:feedback_for_id', getFeedback);

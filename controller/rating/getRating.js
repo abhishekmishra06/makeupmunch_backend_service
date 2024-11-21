@@ -1,39 +1,43 @@
-const express = require('express');
-const Rating = require('../../models/ratingModel');  
-const User = require('../../models/userModel');  // To verify if the artist/salon exists
+const Rating = require("../../models/ratingModel");
+const { sendGeneralResponse } = require("../../utils/responseHelper");
 
 const getRatings = async (req, res) => {
-    const { rated_id } = req.params;
+  const { reviewee_Id, customerId } = req.body;  
 
-    if (!rated_id) {
-        return res.status(400).json({ success: false, message: 'rated_id is required' });
+  if (!reviewee_Id || !customerId) {
+    return sendGeneralResponse(res, false, "Both reviewee_Id and customerId are required", 400);
+  }
+
+  try {
+    // Fetch all ratings for the given reviewee (salon/artist) and sort by latest first
+    const allRatings = await Rating.find({ reviewee_Id }).sort({ createdAt: -1 });
+
+    // Check if the customer has already rated this salon/artist
+    const customerRating = await Rating.findOne({ reviewee_Id, customerId });
+
+  
+    let customerRatingData = null;
+    let formattedRatings = [...allRatings]; 
+
+    // Step 2: If customer has rated, place their rating at the top and remove it from allRatings
+    if (customerRating) {
+      customerRatingData = customerRating;  // The customer's rating will be highlighted
+      // Remove the customer's rating from the allRatings array to avoid duplicating in ratings
+      formattedRatings = formattedRatings.filter(rating => rating._id.toString() !== customerRating._id.toString());
     }
 
-    try {
-        // Check if rated_id is a valid artist or salon
-        const user = await User.findById(rated_id);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'Artist or Salon not found' });
-        }
+   
+    return res.status(200).json({
+      success: true,
+      customerRating: customerRatingData, // The customer's rating (if available) at the top
+      ratings: formattedRatings // All ratings, without the customer's rating
+    });
 
-        // Fetch all ratings for this rated_id (artist or salon)
-        const ratings = await Rating.find({ rated_id });
+  } catch (error) {
+    console.error("Error fetching ratings:", error);
 
-        // If no ratings are found
-        if (!ratings || ratings.length === 0) {
-            return res.status(404).json({ success: false, message: 'No ratings found for this user' });
-        }
-
-        // Return the ratings
-        return res.status(200).json({
-            success: true,
-            message: 'Ratings retrieved successfully',
-            data: ratings
-        });
-    } catch (error) {
-        console.error('Error fetching ratings:', error);
-        return res.status(500).json({ success: false, message: 'Internal server error' });
-    }
+     return sendGeneralResponse(res, false, "Internal Server Error", 500);
+  }
 };
 
 module.exports = { getRatings };
