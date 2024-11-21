@@ -105,7 +105,7 @@ router.delete('/artist/deleteService', deleteArtistService);
 
 
 router.post('/makeRating', makeRating);
-router.post('/getRatings', getRatings);
+router.get('/getRatings', getRatings);
 router.delete('/deleteRating', deleteRating);
 
 

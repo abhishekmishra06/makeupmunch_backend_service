@@ -2,7 +2,7 @@ const Rating = require("../../models/ratingModel");
 const { sendGeneralResponse } = require("../../utils/responseHelper");
 
 const getRatings = async (req, res) => {
-  const { reviewee_Id, customerId } = req.body;  
+  const { reviewee_Id, customerId, reviewId } = req.query; // Use req.query for GET requests
 
   if (!reviewee_Id || !customerId) {
     return sendGeneralResponse(res, false, "Both reviewee_Id and customerId are required", 400);
@@ -15,7 +15,6 @@ const getRatings = async (req, res) => {
     // Check if the customer has already rated this salon/artist
     const customerRating = await Rating.findOne({ reviewee_Id, customerId });
 
-  
     let customerRatingData = null;
     let formattedRatings = [...allRatings]; 
 
@@ -26,7 +25,15 @@ const getRatings = async (req, res) => {
       formattedRatings = formattedRatings.filter(rating => rating._id.toString() !== customerRating._id.toString());
     }
 
-   
+    // New feature: If reviewId is provided, filter ratings to return only that review
+    if (reviewId) {
+      const specificRating = await Rating.findById(reviewId);
+      return res.status(200).json({
+        success: true,
+        specificRating, // Return the specific rating if found
+      });
+    }
+
     return res.status(200).json({
       success: true,
       customerRating: customerRatingData, // The customer's rating (if available) at the top
@@ -35,9 +42,11 @@ const getRatings = async (req, res) => {
 
   } catch (error) {
     console.error("Error fetching ratings:", error);
-
-     return sendGeneralResponse(res, false, "Internal Server Error", 500);
+    return sendGeneralResponse(res, false, "Internal Server Error", 500);
   }
 };
+
+// Update the route to use GET instead of POST
+
 
 module.exports = { getRatings };
