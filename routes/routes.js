@@ -23,8 +23,6 @@ const { subscribe, unsubscribe } = require('../controller/subscription/subscript
 const { contactUs } = require('../controller/contactUs');
 const { addFavorite } = require('../controller/addFavorite/addFavorite');
 const { removeFavorite } = require('../controller/addFavorite/removeFavorite');
-// const { rateUser } = require('../controller/rating');
-// const { getRatings } = require('../controller/rating/getRating');
 const { addFeedback } = require('../controller/feedback/addFeedback');
 const { getFeedback } = require('../controller/feedback/getFeedback');
 const { applyForJob, getJobApplications } = require('../controller/careers/jobApplicationController');
@@ -38,6 +36,7 @@ const { formController } = require('../controller/formController');
 const {  makeRating } = require('../controller/rating/MakeRating');
 const { getRatings } = require('../controller/rating/getRating');
 const { deleteRating } = require('../controller/rating/deleteRating');
+const { editReview } = require('../controller/rating/editRating');
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -107,9 +106,9 @@ router.delete('/artist/deleteService', deleteArtistService);
 router.post('/makeRating', makeRating);
 router.get('/getRatings', getRatings);
 router.delete('/deleteRating', deleteRating);
+router.post('/editReview', editReview);
+ 
 
-
-// router.get('/getRatings/:rated_id', getRatings);
 
 router.post('/feedback', addFeedback);
 router.get('/feedback/:feedback_for_id', getFeedback);
