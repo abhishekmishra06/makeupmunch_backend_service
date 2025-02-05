@@ -4,8 +4,7 @@ const { register, login, getAccessToken, registerSalon, Salonlogin,} = require('
 const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
-const { getUserPackageBookings ,packageBooking,booking,getAllBookings, getUserBookings, getArtistBookings } = require('../controller/bookingController');
- 
+const { getUserPackageBookings, packageBooking, booking, getAllBookings, getUserBookings, getArtistBookings, verifyAndCompletePayment } = require('../controller/bookingController');
 const { fetchData, getCountries, getStates, getCities } = require('../controller/stateCityController');
 const { artistList,customerList, getArtistServices, addArtistServices, deleteArtistService } = require('../controller/ArtistsListController');
 const { allUsersList } = require('../controller/allUsersList');
@@ -78,7 +77,8 @@ router.put('/editProfile/:id', upload.single('profile_img'), verifyToken,  editP
 router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken,   editArtistProfile);
 
 router.put('/change_password', verifyOtpAndChangePassword);
-router.post('/booking', booking);
+router.post('/booking', verifyToken, booking);
+router.post('/booking/verify-payment', verifyToken, verifyAndCompletePayment);
 router.post('/packageBooking',packageBooking)
 router.get('/getUserPackageBookings/:user_id' , getUserPackageBookings)
 router.get('/getbooking' ,getAllBookings);

@@ -2,12 +2,50 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { Booking, PackageBooking } = require('../models/bookingModel'); 
 const Package  = require('../models/packageModel');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
 
 const { sendGeneralResponse } = require('../utils/responseHelper');
 const { sendMail } = require('../utils/mailer');
 
 const { User, Service } = require('../models/userModel');  
 const moment = require('moment');
+
+// Initialize Razorpay
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
+// Create Razorpay order
+const createRazorpayOrder = async (amount, receipt) => {
+    try {
+        // Ensure receipt is no longer than 40 characters
+        const truncatedReceipt = receipt.substring(0, 40);
+        
+        const options = {
+            amount: amount * 100, // Razorpay expects amount in paise
+            currency: 'INR',
+            receipt: truncatedReceipt,
+            payment_capture: 1
+        };
+        const order = await razorpay.orders.create(options);
+        return order;
+    } catch (error) {
+        console.error('Razorpay order creation error:', error);
+        throw error;
+    }
+};
+
+// Verify Razorpay payment
+const verifyPayment = (razorpay_order_id, razorpay_payment_id, razorpay_signature) => {
+    const sign = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSign = crypto
+        .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+        .update(sign.toString())
+        .digest("hex");
+    return expectedSign === razorpay_signature;
+};
 
 const booking = async (req, res) => {
     if (!req.body) {
@@ -122,7 +160,15 @@ const booking = async (req, res) => {
             );
         }
 
-        // Create booking object with validated data
+        // Create a shorter receipt format
+        const timestamp = Date.now().toString().slice(-8); // Take last 8 digits of timestamp
+        const shortUserId = user_id.toString().slice(-8); // Take last 8 digits of user ID
+        const receipt = `bk_${timestamp}_${shortUserId}`; // Format: bk_TIMESTAMP_USERID
+        
+        // Create Razorpay order with shorter receipt
+        const razorpayOrder = await createRazorpayOrder(totalAmount, receipt);
+
+        // Create booking object with pending status
         const newBooking = new Booking({
             user_id,
             user_info,
@@ -133,21 +179,82 @@ const booking = async (req, res) => {
             status: 'pending',
             payment: {
                 ...payment,
-                payment_status: 'pending'
+                payment_status: 'pending',
+                razorpay_order_id: razorpayOrder.id,
+                amount: totalAmount,
+                booking_id: new mongoose.Types.ObjectId() // Generate a new ObjectId for booking_id
             }
         });
 
-        await newBooking.save();
+        // Save booking with pending status
+        const savedBooking = await newBooking.save();
 
-        // Add debug logging
-        console.log('Booking saved successfully:', newBooking);
+        // Return Razorpay order details to frontend
+        return sendGeneralResponse(res, true, 'Razorpay order created', 201, {
+            booking: savedBooking,
+            razorpayOrder: {
+                id: razorpayOrder.id,
+                amount: razorpayOrder.amount,
+                currency: razorpayOrder.currency,
+                booking_id: savedBooking._id // Send the booking ID back to frontend
+            }
+        });
 
-        // ... rest of the email sending code ...
-
-        sendGeneralResponse(res, true, 'Booking created successfully', 201, newBooking);
     } catch (error) {
-        console.error('Detailed booking error:', error);
-        sendGeneralResponse(res, false, error.message || 'Internal server error', 500);
+        console.error('Booking error:', error);
+        return sendGeneralResponse(res, false, error.message || 'Internal server error', 500);
+    }
+};
+
+// Add new endpoint to verify and complete payment
+const verifyAndCompletePayment = async (req, res) => {
+    try {
+        const {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            booking_id
+        } = req.body;
+
+        // Verify payment signature
+        const isValid = verifyPayment(
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature
+        );
+
+        if (!isValid) {
+            return sendGeneralResponse(res, false, 'Invalid payment signature', 400);
+        }
+
+        // Update booking status
+        const booking = await Booking.findById(booking_id);
+        if (!booking) {
+            return sendGeneralResponse(res, false, 'Booking not found', 404);
+        }
+
+        booking.payment.payment_status = 'success';
+        booking.payment.razorpay_payment_id = razorpay_payment_id;
+        booking.payment.razorpay_signature = razorpay_signature;
+        booking.status = 'confirmed';
+        
+        await booking.save();
+
+        // Send confirmation email
+        try {
+            await sendMail({
+                to: booking.user_info.email,
+                subject: 'Booking Confirmation',
+                text: `Your booking has been confirmed. Booking ID: ${booking._id}`
+            });
+        } catch (emailError) {
+            console.error('Error sending confirmation email:', emailError);
+        }
+
+        return sendGeneralResponse(res, true, 'Payment verified and booking confirmed', 200, booking);
+    } catch (error) {
+        console.error('Payment verification error:', error);
+        return sendGeneralResponse(res, false, error.message || 'Internal server error', 500);
     }
 };
 
@@ -329,5 +436,6 @@ module.exports = {
     getUserBookings,
     getArtistBookings,
     getAllBookings,
-    getUserPackageBookings
+    getUserPackageBookings,
+    verifyAndCompletePayment
 };
