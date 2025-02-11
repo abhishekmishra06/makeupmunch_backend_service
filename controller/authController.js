@@ -7,10 +7,12 @@ const { validateEmail, validatePhone, validateRequiredFields, validateRequiredAd
 const User = require('../models/userModel');
 const { sendMail } = require('../utils/mailer');
 const upload = multer({ storage: multer.memoryStorage() });
+const { OAuth2Client } = require('google-auth-library');
+const admin = require('../config/firebase-admin');
 
+// Initialize Google OAuth client
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-
- 
 const login = async (req, res) => {
     const { email, password } = req.body;
   
@@ -49,13 +51,6 @@ const login = async (req, res) => {
     }
   };
 
-
-
-
-
-
-
-   
 const Salonlogin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -94,128 +89,120 @@ const Salonlogin = async (req, res) => {
   }
 };
 
-
-
-
- 
-
-
-
 const registerUser = async (req, res) => {
-    if (!req.body) {
-        return sendGeneralResponse(res, false, 'Request body is missing', 400);
-    }
-  
-    const { username, email, password, phone, gender, role } = req.body;
-  
-    if (!username) {
-        return sendGeneralResponse(res, false, 'Username is required', 400);
-    }
-    if (!email) {
-        return sendGeneralResponse(res, false, 'Email is required', 400);
-    }
-    if (!password) {
-        return sendGeneralResponse(res, false, 'Password is required', 400);
-    }
-    if (!phone) {
-        return sendGeneralResponse(res, false, 'Phone number is required', 400);
-    }
-    if (!gender) {
-        return sendGeneralResponse(res, false, 'Gender is required', 400);
-    }
-    if (!role) {
-        return sendGeneralResponse(res, false, 'Role is required', 400);
-    }
-    if (!req.file) {
-        return sendGeneralResponse(res, false, 'Profile image is required', 400);
-    }
-  
-    if (!validateEmail(email)) {
-        return sendGeneralResponse(res, false, 'Invalid email', 400);
-    }
-     
     try {
+        if (!req.body) {
+            return sendGeneralResponse(res, false, 'Request body is missing', 400);
+        }
+      
+        const { username, email, password, phone, gender, role } = req.body;
+      
+        // Validate required fields
+        if (!username) {
+            return sendGeneralResponse(res, false, 'Username is required', 400);
+        }
+        if (!email) {
+            return sendGeneralResponse(res, false, 'Email is required', 400);
+        }
+        if (!password) {
+            return sendGeneralResponse(res, false, 'Password is required', 400);
+        }
+        if (!phone) {
+            return sendGeneralResponse(res, false, 'Phone number is required', 400);
+        }
+        if (!role) {
+            return sendGeneralResponse(res, false, 'Role is required', 400);
+        }
+      
+        if (!validateEmail(email)) {
+            return sendGeneralResponse(res, false, 'Invalid email', 400);
+        }
+         
+        // Check for existing user
         const existingUser = await User.Customer.findOne({ email });
         if (existingUser) {
             return sendGeneralResponse(res, false, 'Email already registered', 400);
         }
- 
-        let profile_img_url = null;
-        if (req.file) {
-            profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
-        }
-
+     
+        // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Create new user
         const user = new User.Customer({
             username,
             email,
             password: hashedPassword,
             phone,
-            gender,
-            profile_img: profile_img_url,
-            role
+            gender: gender || '', // Optional field
+            role,
+            profile_img: null // Optional field
         });
 
+        // Generate tokens
         const accessToken = generateAccessToken(user._id);
         const refreshToken = generateRefreshToken(user._id);
         user.refreshToken = refreshToken;
 
+        // Save user
         await user.save();
 
-        // Rest of the email sending code remains the same
+        // Send welcome email
         const subject = 'Welcome to MakeUp Munch!';
         const text = `Hi ${username},\n\nThank you for registering with us. We're excited to have you onboard!`;
-
         const html = `
-        <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-            <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-                <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
-                    <h1>Welcome to Our Service!</h1>
-                </div>
-                <div style="padding: 20px;">
-                    <h2 style="color: #333;">Hello, ${username}!</h2>
-                    <p>We are thrilled to have you on board. Thank you for registering with us!</p>
-                    <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
-                    <p>We hope you have a great experience with us!</p>
-                    <a href="https://makeup-adda.netlify.app/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
-                    <p style="margin-top: 20px;">Follow us on social media:</p>
-                    <div style="text-align: center; margin-top: 10px;"> 
-                        <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
-                            <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
-                        </a>
-                        <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
-                            <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
-                        </a>
-                        <a href="mailto:support@yourservice.com">
-                            <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
-                        </a>
-
-                             <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
-                    <p>&copy; 2024 Our Service. All Rights Reserved.</p>
-                </div>
+            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+                <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                    <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
+                        <h1>Welcome to Our Service!</h1>
                     </div>
-                </div>12
-                
+                    <div style="padding: 20px;">
+                        <h2 style="color: #333;">Hello, ${username}!</h2>
+                        <p>We are thrilled to have you on board. Thank you for registering with us!</p>
+                        <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
+                        <p>We hope you have a great experience with us!</p>
+                        <a href="https://makeup-adda.netlify.app/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
+                        <p style="margin-top: 20px;">Follow us on social media:</p>
+                        <div style="text-align: center; margin-top: 10px;"> 
+                            <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+                                <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
+                            </a>
+                            <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+                                <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
+                            </a>
+                            <a href="mailto:support@yourservice.com">
+                                <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    `;
+        `;
 
-        await sendMail(email, subject, text, html);
+        await sendMail({
+            to: email,
+            subject,
+            text,
+            html
+        });
         
-        sendGeneralResponse(res, true, 'Registered successfully', 200, { ...user._doc, accessToken, refreshToken });
+        // Send success response
+        return sendGeneralResponse(res, true, 'Registered successfully', 200, {
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            phone: user.phone,
+            gender: user.gender,
+            role: user.role,
+            profile_img: user.profile_img,
+            accessToken,
+            refreshToken
+        });
+
     } catch (error) {
         console.error('Registration error:', error);
-        sendGeneralResponse(res, false, 'Internal server error', 500);
+        return sendGeneralResponse(res, false, 'Internal server error', 500);
     }
 };
-
-
-
-
-
-
-
 
 const registerArtist = async (req, res) => {
   if (!req.body) {
@@ -340,17 +327,6 @@ const registerArtist = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
 const registerSalon = async (req, res) => {
   if (!req.body) {
     return sendGeneralResponse(res, false, 'Request body is missing', 400);
@@ -448,19 +424,6 @@ const registerSalon = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 const getAccessToken = async (req, res) => {
     const { refreshToken } = req.body;
 
@@ -495,15 +458,6 @@ const getAccessToken = async (req, res) => {
     }
   };
   
-
-
-
-
-
-
-
-  
-
 const generateAccessToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET_KEY, { expiresIn: '5000000h' });
   };
@@ -512,9 +466,7 @@ const generateAccessToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: '700000000d' });  
   };
 
-
-
-  const register = async (req, res) => {
+const register = async (req, res) => {
      if (!req.body) {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
@@ -528,11 +480,117 @@ const generateAccessToken = (userId) => {
         return registerUser(req, res);
     }
   };
-  
 
+// Add this new function for Google authentication
+const googleAuth = async (req, res) => {
+  const { token } = req.body;
 
+  try {
+    // Verify Google token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
 
-module.exports = { login, register , getAccessToken  , registerSalon , Salonlogin} 
+    const payload = ticket.getPayload();
+    const { email, name, picture } = payload;
+
+    // Check if user exists
+    let user = await User.Customer.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      const hashedPassword = await bcrypt.hash(Math.random().toString(36), 10);
+      
+      user = new User.Customer({
+        username: name,
+        email,
+        password: hashedPassword,
+        profile_img: picture,
+        role: 'customer',
+        phone: '', // You might want to ask for phone number separately
+        gender: '' // You might want to ask for gender separately
+      });
+
+      await user.save();
+    }
+
+    // Generate tokens
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    return sendGeneralResponse(res, true, 'Google login successful', 200, {
+      ...user._doc,
+      accessToken,
+      refreshToken
+    });
+
+  } catch (error) {
+    console.error('Google auth error:', error);
+    return sendGeneralResponse(res, false, 'Google authentication failed', 500);
+  }
+};
+
+// Add Firebase auth function
+const firebaseAuth = async (req, res) => {
+  const { token, email, name, photoURL } = req.body;
+
+  try {
+    // Verify the Firebase ID token
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    
+    if (email !== decodedToken.email) {
+      return sendGeneralResponse(res, false, 'Email verification failed', 401);
+    }
+
+    // Check if user exists
+    let user = await User.Customer.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      const hashedPassword = await bcrypt.hash(Math.random().toString(36), 10);
+      
+      user = new User.Customer({
+        username: name || decodedToken.name,
+        email,
+        password: hashedPassword,
+        profile_img: photoURL || decodedToken.picture,
+        role: 'customer', // Always set role as customer for Google sign-in
+        phone: '',
+        gender: ''
+      });
+
+      await user.save();
+    } else {
+      // If user exists, ensure role is set to customer
+      if (!user.role) {
+        user.role = 'customer';
+        await user.save();
+      }
+    }
+
+    // Generate tokens
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    return sendGeneralResponse(res, true, 'Firebase login successful', 200, {
+      ...user._doc,
+      accessToken,
+      refreshToken,
+      role: 'customer' // Explicitly include role in response
+    });
+
+  } catch (error) {
+    console.error('Firebase auth error:', error);
+    return sendGeneralResponse(res, false, 'Firebase authentication failed', 500);
+  }
+};
+
+module.exports = { login, register, getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth } 
 
 
 

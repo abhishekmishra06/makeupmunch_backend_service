@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { register, login, getAccessToken, registerSalon, Salonlogin,} = require('../controller/authController');
+const { register, login, getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth } = require('../controller/authController');
 const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
@@ -37,6 +37,7 @@ const { formController } = require('../controller/formController');
 const {  makeRating } = require('../controller/rating/MakeRating');
 const { getRatings } = require('../controller/rating/getRating');
 const { deleteRating } = require('../controller/rating/deleteRating');
+const errorHandler = require('../middleware/errorHandler');
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -157,6 +158,10 @@ router.post('/verifyPayment', verifyPayment);
 router.post('/form/submit', formController.createSubmission);
 router.get('/form/submissions', formController.getAllSubmissions);
 router.get('/form/submission/:phoneNumber', formController.getSubmissionByPhone);
+
+router.post('/auth/firebase', firebaseAuth);
+
+router.use(errorHandler);
 
 module.exports = router; 
 

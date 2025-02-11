@@ -6,9 +6,9 @@ const CustomerRegisterSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     phone: { type: String, required: true },
-    gender: { type: String, required: true },
+    gender: { type: String, required: false },
     role: { type: String, default: 'customer' },
-    profile_img: { type: String },
+    profile_img: { type: String, required: false },
     refreshToken: { type: String },
 }, { timestamps: true, collection: 'users' });
 

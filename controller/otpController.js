@@ -83,7 +83,12 @@ const sendEmailOtp = async (req, res) => {
 `;
 
     // Send the email
-    await sendMail(email, subject, "", html);
+    await sendMail({
+      to: email,
+      subject: subject,
+      text: "",
+      html: html
+    });
 
     // Send success response
     sendGeneralResponse(res, true, "OTP sent to email", 200);
@@ -336,7 +341,12 @@ const verifyOtpAndChangePassword = async (req, res) => {
         `;
 
     // Send the confirmation email
-    await sendMail(email, subject, text, html);
+    await sendMail({
+      to: email,
+      subject: subject,
+      text: text,
+      html: html
+    });
 
     // Send success response
 
