@@ -11,7 +11,7 @@ const { sendMail } = require('../utils/mailer');
 const { User, Service } = require('../models/userModel');  
 const moment = require('moment');
 
-// Initialize Razorpay
+// Initialize Razorpay with your credentials
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
     key_secret: process.env.RAZORPAY_KEY_SECRET
@@ -243,117 +243,78 @@ const verifyAndCompletePayment = async (req, res) => {
         }
 
         if (!booking) {
-            console.error('Booking not found:', booking_id);
             return sendGeneralResponse(res, false, 'Booking not found', 404);
         }
 
-        // First verify the payment signature
-        try {
-            const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-            hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`);
-            const generatedSignature = hmac.digest('hex');
+        // Verify payment signature
+        const sign = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSign = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(sign.toString())
+            .digest("hex");
 
-            if (generatedSignature !== razorpay_signature) {
-                console.error('Payment signature verification failed');
-                return sendGeneralResponse(res, false, 'Invalid payment signature', 400);
-            }
-        } catch (error) {
-            console.error('Signature verification error:', error);
-            return sendGeneralResponse(res, false, 'Error verifying payment signature', 500);
+        if (expectedSign !== razorpay_signature) {
+            return sendGeneralResponse(res, false, 'Invalid payment signature', 400);
         }
 
-        // Then verify the payment details
         try {
-            const order = await razorpay.orders.fetch(razorpay_order_id);
-            const payment = await razorpay.payments.fetch(razorpay_payment_id);
-            
-            if (!payment || !order) {
-                throw new Error('Payment or order not found');
+            // Update booking status based on booking type
+            if (isPackageBooking) {
+                booking.status = 'confirmed';
+                booking.payment.payment_status = 'paid';
+                booking.payment.razorpay_payment_id = razorpay_payment_id;
+                booking.payment.razorpay_signature = razorpay_signature;
+            } else {
+                booking.status = 'confirmed';
+                booking.payment.payment_status = 'paid';
+                booking.payment.razorpay_payment_id = razorpay_payment_id;
+                booking.payment.razorpay_signature = razorpay_signature;
             }
 
-            // Verify payment status
-            if (payment.status !== 'captured') {
-                throw new Error(`Invalid payment status: ${payment.status}`);
-            }
-
-            // For testing: Set fixed amount of 1 rupee (100 paise)
-            const expectedAmount = 100; // 1 rupee = 100 paise
-
-            console.log('Payment verification details:', {
-                orderAmount: order.amount,
-                paymentAmount: payment.amount,
-                expectedAmount,
-                paymentStatus: payment.status
-            });
-
-            // Verify amounts match
-            if (payment.amount !== expectedAmount || payment.amount !== order.amount) {
-                throw new Error('Payment amount mismatch');
-            }
-
-            // Update booking status
-            booking.payment.payment_status = 'paid';
-            booking.payment.razorpay_payment_id = razorpay_payment_id;
-            booking.payment.razorpay_signature = razorpay_signature;
-            booking.status = 'confirmed';
-            
             await booking.save();
 
-            // Send confirmation emails with proper error handling
+            // Send confirmation emails
             try {
-                // Get user email from booking or fetch from User model if not found
-                let userEmail = booking.user_info?.email;
-                if (!userEmail) {
-                    const user = await User.findById(booking.user_id);
-                    userEmail = user?.email;
-                }
+                const userEmail = booking.user_info.email || (await User.findById(booking.user_id))?.email;
 
-                if (!userEmail) {
-                    throw new Error(`No email found for user: ${booking.user_id}`);
-                }
-
-                console.log('Sending confirmation email to customer:', userEmail);
-
-                // Send email to customer
-                await sendMail({
-                    to: userEmail.trim(), // Ensure no whitespace
-                    subject: 'Booking Confirmation - Makeup Munch',
-                    text: `Dear ${booking.user_info.user_Fname || 'Customer'},
+                if (userEmail) {
+                    await sendMail({
+                        to: userEmail.trim(),
+                        subject: 'Booking Confirmation - Makeup Munch',
+                        text: `Dear ${booking.user_info.user_Fname},
 
 Your booking has been confirmed!
 
 Booking Details:
 - Booking ID: ${booking._id}
-- Payment ID: ${razorpay_payment_id}
 - Date: ${new Date(booking.booking_date).toLocaleDateString()}
 - Time: ${booking.booking_time}
+${isPackageBooking ? `- Package: ${booking.package_details.package_name}` : ''}
 
 Thank you for choosing Makeup Munch!`
-                });
+                    });
+                }
 
-                // Send notification to artist
-                const artist = await User.findById(booking.artist_id);
-                if (artist?.email) {
-                    console.log('Sending notification email to artist:', artist.email);
-
-                    await sendMail({
-                        to: artist.email.trim(), // Ensure no whitespace
-                        subject: 'New Booking Notification - Makeup Munch',
-                        text: `Dear ${artist.username || 'Artist'},
+                // Only send artist notification for regular bookings
+                if (!isPackageBooking && booking.artist_id) {
+                    const artist = await User.findById(booking.artist_id);
+                    if (artist?.email) {
+                        await sendMail({
+                            to: artist.email.trim(),
+                            subject: 'New Booking Notification - Makeup Munch',
+                            text: `Dear ${artist.username || 'Artist'},
 
 You have a new confirmed booking!
 
 Booking Details:
 - Booking ID: ${booking._id}
 - Customer Name: ${booking.user_info.user_Fname} ${booking.user_info.user_Lname}
-- Customer Email: ${userEmail}
 - Date: ${new Date(booking.booking_date).toLocaleDateString()}
 - Time: ${booking.booking_time}
 
 Please check your dashboard for more details.`
-                    });
-                } else {
-                    console.warn('Artist email not found for booking:', booking._id);
+                        });
+                    }
                 }
 
             } catch (emailError) {
@@ -386,8 +347,13 @@ Please check your dashboard for more details.`
 const packageBooking = async (req, res) => {
     try {
         if (!req.body) {
-            return sendGeneralResponse(res, false, 'Request body is missing', 400);
+            return res.status(400).json({
+                success: false,
+                message: 'Request body is missing'
+            });
         }
+
+        console.log('Received booking request:', req.body);
 
         const { 
             user_id, 
@@ -400,71 +366,115 @@ const packageBooking = async (req, res) => {
 
         // Basic validations
         if (!user_id || !user_info || !package_details || !booking_date || !booking_time || !payment) {
-            return sendGeneralResponse(res, false, 'Missing required fields', 400);
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
         }
 
         // Verify user exists
         const user = await User.findById(user_id);
         if (!user) {
-            return sendGeneralResponse(res, false, 'User not found', 404);
+            return res.status(404).json({
+                success: false,
+                message: 'User not found'
+            });
         }
 
         // Verify package exists and get its price
         const packageData = await Package.findById(package_details.package_id);
         if (!packageData) {
-            return sendGeneralResponse(res, false, 'Package not found', 404);
+            return res.status(404).json({
+                success: false,
+                message: 'Package not found'
+            });
         }
 
-        // Calculate total amount
-        const basePrice = parseInt(packageData.price.replace(/,/g, ''));
-        const totalAmount = basePrice * (parseInt(package_details.total_persons) || 1);
+        try {
+            // Calculate total amount in paise (Razorpay expects amount in smallest currency unit)
+            const basePrice = parseInt(packageData.price.replace(/,/g, ''));
+            const totalAmount = basePrice * (parseInt(package_details.total_persons) || 1);
+            const amountInPaise = totalAmount * 100;
 
-        // Create a shorter receipt format
-        const timestamp = Date.now().toString().slice(-8);
-        const shortUserId = user_id.toString().slice(-8);
-        const receipt = `pkg_${timestamp}_${shortUserId}`;
+            console.log('Calculated amounts:', {
+                basePrice,
+                totalAmount,
+                amountInPaise
+            });
 
-        // Create Razorpay order
-        const razorpayOrder = await createRazorpayOrder(totalAmount, receipt);
+            // Create a shorter receipt format
+            const timestamp = Date.now().toString().slice(-8);
+            const shortUserId = user_id.toString().slice(-8);
+            const receipt = `pkg_${timestamp}_${shortUserId}`;
+            const bookingId = `BK${timestamp}${shortUserId}`;
 
-        // Create booking object with pending status
-        const newPackageBooking = new PackageBooking({
-            user_id,
-            user_info,
-            package_details: {
-                ...package_details,
-                package_name: packageData.name,
-                package_price: basePrice
-            },
-            booking_date,
-            booking_time,
-            status: 'pending',
-            payment: {
-                ...payment,
-                payment_status: 'pending',
-                razorpay_order_id: razorpayOrder.id,
-                amount: totalAmount,
-                booking_id: new mongoose.Types.ObjectId()
-            }
-        });
+            // Create Razorpay order
+            console.log('Creating Razorpay order with amount:', amountInPaise);
+            const razorpayOrder = await razorpay.orders.create({
+                amount: amountInPaise,
+                currency: 'INR',
+                receipt: receipt,
+                payment_capture: 1
+            });
 
-        // Save the booking
-        const savedBooking = await newPackageBooking.save();
-        
-        // Return Razorpay order details to frontend
-        return sendGeneralResponse(res, true, 'Package booking created successfully', 201, {
-            booking: savedBooking,
-            razorpayOrder: {
-                id: razorpayOrder.id,
-                amount: razorpayOrder.amount,
-                currency: razorpayOrder.currency,
-                booking_id: savedBooking._id
-            }
-        });
+            console.log('Razorpay order created:', razorpayOrder);
+
+            // Create booking object
+            const newPackageBooking = new PackageBooking({
+                user_id,
+                user_info,
+                package_details: {
+                    ...package_details,
+                    package_name: packageData.name,
+                    package_price: basePrice
+                },
+                booking_date,
+                booking_time,
+                status: 'pending',
+                payment: {
+                    package_price: basePrice,
+                    total_amount: totalAmount,
+                    amount: amountInPaise,
+                    payment_method: 'online',
+                    payment_status: 'pending',
+                    booking_id: bookingId,
+                    razorpay_order_id: razorpayOrder.id
+                }
+            });
+
+            // Save the booking
+            const savedBooking = await newPackageBooking.save();
+            console.log('Booking saved:', savedBooking);
+
+            return res.status(201).json({
+                success: true,
+                message: 'Package booking created successfully',
+                data: {
+                    booking: savedBooking,
+                    razorpayOrder: {
+                        id: razorpayOrder.id,
+                        amount: amountInPaise,
+                        currency: 'INR'
+                    }
+                }
+            });
+
+        } catch (error) {
+            console.error('Error in package booking inner try block:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Error creating package booking',
+                error: error.message
+            });
+        }
 
     } catch (error) {
-        console.error('Package booking error:', error);
-        return sendGeneralResponse(res, false, 'Failed to create package booking: ' + error.message, 500);
+        console.error('Error in package booking outer try block:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
     }
 };
 
@@ -584,6 +594,148 @@ const getUserPackageBookings = async (req, res) => {
     }
 };
 
+const verifyPackagePayment = async (req, res) => {
+    try {
+        console.log('Headers received:', req.headers);
+        console.log('Body received:', req.body);
+
+        const {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            booking_id
+        } = req.body;
+
+        console.log('Package Payment verification request:', {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            booking_id
+        });
+
+        // Validate required fields
+        if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature || !booking_id) {
+            console.error('Missing required fields:', {
+                razorpay_payment_id: !!razorpay_payment_id,
+                razorpay_order_id: !!razorpay_order_id,
+                razorpay_signature: !!razorpay_signature,
+                booking_id: !!booking_id
+            });
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required payment verification fields'
+            });
+        }
+
+        // Find the package booking
+        console.log('Looking for booking with ID:', booking_id);
+        const booking = await PackageBooking.findById(booking_id);
+        
+        if (!booking) {
+            console.error('Booking not found for ID:', booking_id);
+            return res.status(404).json({
+                success: false,
+                message: 'Package booking not found'
+            });
+        }
+
+        console.log('Found booking:', booking);
+
+        try {
+            // Verify payment signature
+            const sign = razorpay_order_id + "|" + razorpay_payment_id;
+            const expectedSign = crypto
+                .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+                .update(sign.toString())
+                .digest("hex");
+
+            console.log('Signature verification:', {
+                expected: expectedSign,
+                received: razorpay_signature,
+                isValid: expectedSign === razorpay_signature
+            });
+
+            if (expectedSign !== razorpay_signature) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid payment signature'
+                });
+            }
+
+            // Verify payment with Razorpay
+            console.log('Fetching payment details from Razorpay:', razorpay_payment_id);
+            const payment = await razorpay.payments.fetch(razorpay_payment_id);
+            console.log('Razorpay payment details:', payment);
+
+            if (payment.status !== 'captured') {
+                console.error('Payment not captured:', payment.status);
+                return res.status(400).json({
+                    success: false,
+                    message: `Payment not captured. Status: ${payment.status}`
+                });
+            }
+
+            // Update booking status
+            booking.status = 'confirmed';
+            booking.payment.payment_status = 'paid';
+            booking.payment.razorpay_payment_id = razorpay_payment_id;
+            booking.payment.razorpay_signature = razorpay_signature;
+
+            console.log('Saving updated booking:', booking);
+            await booking.save();
+
+            // Send confirmation email
+            try {
+                const user = await User.findById(booking.user_id);
+                console.log('Found user for email:', user?.email);
+                
+                if (user?.email) {
+                    await sendMail({
+                        to: user.email,
+                        subject: 'Package Booking Confirmation - Makeup Munch',
+                        text: `Dear ${booking.user_info.user_Fname},\n\nYour package booking has been confirmed!\n\nBooking Details:\n- Booking ID: ${booking._id}\n- Package: ${booking.package_details.package_name}\n- Date: ${new Date(booking.booking_date).toLocaleDateString()}\n- Time: ${booking.booking_time}\n- Amount Paid: ₹${booking.payment.amount / 100}\n\nThank you for choosing Makeup Munch!`
+                    });
+                    console.log('Confirmation email sent');
+                }
+            } catch (emailError) {
+                console.error('Error sending confirmation email:', emailError);
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: 'Payment verified and package booking confirmed',
+                data: {
+                    booking,
+                    payment_id: razorpay_payment_id
+                }
+            });
+
+        } catch (verificationError) {
+            console.error('Verification error details:', {
+                error: verificationError,
+                stack: verificationError.stack,
+                message: verificationError.message
+            });
+            return res.status(400).json({
+                success: false,
+                message: `Payment verification failed: ${verificationError.message}`
+            });
+        }
+
+    } catch (error) {
+        console.error('Package payment verification error:', {
+            error,
+            stack: error.stack,
+            message: error.message
+        });
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error during payment verification',
+            details: error.message
+        });
+    }
+};
+
 module.exports = {
     booking,
     packageBooking,
@@ -591,5 +743,6 @@ module.exports = {
     getArtistBookings,
     getAllBookings,
     getUserPackageBookings,
-    verifyAndCompletePayment
+    verifyAndCompletePayment,
+    verifyPackagePayment
 };
