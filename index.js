@@ -17,6 +17,7 @@ app.use(cors({
     origin: [
         'http://localhost:3000',
         'http://localhost:3001',
+         'https://www.makeupmunch.in'
         'https://makeupmunch-ui-testing.vercel.app',
         'https://mekeupmunch-admin-dashboard.vercel.app'
     ],
