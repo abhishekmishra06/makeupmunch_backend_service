@@ -8,6 +8,7 @@ const { validateEmail, validatePhone } = require("../utils/validation");
 const Otp = require("../models/otp_model");
 
 const sendEmailOtp = async (req, res) => {
+  console.log("call send email api")
   const { email } = req.body;
 
   // Check if email is provided
