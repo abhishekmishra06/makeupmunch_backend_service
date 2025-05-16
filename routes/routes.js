@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { register, login, getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth } = require('../controller/authController');
+const { register, login, getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth, sendLoginLink, loginViaLink } = require('../controller/authController');
 const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
@@ -64,6 +64,13 @@ router.delete('/packages/:id', packageController.deletePackage);
 
 
 router.post('/login',login);
+
+router.post('/sendLoginLink',sendLoginLink);
+router.post('/loginViaLink', loginViaLink);
+
+  
+
+ 
 router.post('/getAccessToken',getAccessToken);
  
 
