@@ -38,6 +38,7 @@ const {  makeRating } = require('../controller/rating/MakeRating');
 const { getRatings } = require('../controller/rating/getRating');
 const { deleteRating } = require('../controller/rating/deleteRating');
 const errorHandler = require('../middleware/errorHandler');
+const sendPushNotification = require('../utils/sendReminderNotification');
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -79,7 +80,24 @@ router.post('/sendPhoneOtp',sendPhoneOtp);
   
 router.post('/verifyPhonOtp',verifyPhoneOtp); 
 router.post('/verifyEmailOtp',verifyEmailOtp);
+router.post('/sendPushNotification', async (req, res) => {
+  const { token, title, body, imageUrl, clickAction, channelId, actionType } = req.body;
 
+  try {
+    const result = await sendPushNotification({
+      token,
+      title,
+      body,
+      imageUrl,
+      clickAction,
+      channelId,
+      actionType,
+    });
+    res.status(200).json({ success: true, result });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
 
 router.put('/editProfile/:id', upload.single('profile_img'), verifyToken,  editProfile);
 router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken,   editArtistProfile);
