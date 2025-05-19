@@ -1,60 +1,3 @@
-// const admin = require('../config/firebase-admin');
-
-
-// /**
-//  * Send a structured push notification template with snooze options in data.
-//  * @param {string} deviceToken - The device's FCM token.
-//  * @param {string} activityName - The name of the activity.
-//  * @param {string} event_Id - Event ID to handle snooze actions (optional).
-//  */
-// async function sendPushNotification(deviceToken, activityName, event_Id = '') {
-//   const message = {
-//     token: deviceToken,
-     
-//     data: {
-//       event_Id: event_Id?.toString() || '',
-//       activityName: activityName?.toString() || '',
-//       actionType: 'REMINDER',
-//       snoozeOptions: JSON.stringify(['5', '30']), 
-//     },
-
-//     android: {
-//       notification: {
-//         title: '⏰ Reminder',
-//         body: activityName,
-//         clickAction: 'FLUTTER_NOTIFICATION_CLICK',
-//         channelId: 'reminder-channel',
-//         priority: 'high',
-//         visibility: 'public',
-//       },
-//       // priority:"high"
-//     },
-//     apns: {
-//       payload: {
-//         aps: {
-//           alert: {
-//             title: '⏰ Reminder',
-//             body: activityName || 'evnt'
-//           },
-//           category: 'REMINDER_CATEGORY',
-//           sound: 'default'
-//         }
-//       }
-//     }
-//   };
-
-//   try {
-//     const response = await admin.messaging().send(message);
-//     console.log('✅ Notification sent:', response);
-//   } catch (error) {
-//     console.error(' Error sending push notification:', error.message);
-//   }
-// }
-
-// module.exports = sendPushNotification;
-
-
-
 const admin = require('../config/firebase-admin');
 
 /**
@@ -130,5 +73,5 @@ async function sendPushNotification({
     throw error;
   }
 }
- 
+
 module.exports = sendPushNotification;

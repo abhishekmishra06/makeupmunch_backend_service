@@ -77,12 +77,12 @@ const sendLoginLink = async (req, res) => {
     console.log(loginToken);
     const loginUrl = `https://www.makeupmunch.in/login-via-link?token=${loginToken}`;
 
-console.log(user.username); 
+    console.log(user.username);
 
 
     const subject = "Your Secure Login Link";
-const text = ``;
-const html = `
+    const text = ``;
+    const html = `
   <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
     <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
       <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
@@ -130,7 +130,7 @@ const html = `
     </div>
   </div>
 `;
- 
+
 
 
     // Send email (pseudo-code)
@@ -343,6 +343,7 @@ const registerUser = async (req, res) => {
   }
 };
 
+
 const registerArtist = async (req, res) => {
   if (!req.body) {
     return sendGeneralResponse(res, false, 'Request body is missing', 400);
@@ -465,6 +466,8 @@ const registerArtist = async (req, res) => {
     sendGeneralResponse(res, false, 'Internal server error', 500);
   }
 };
+
+
 
 const registerSalon = async (req, res) => {
   if (!req.body) {
