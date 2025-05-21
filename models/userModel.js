@@ -9,6 +9,8 @@ const CustomerRegisterSchema = new mongoose.Schema({
     gender: { type: String, required: false },
     role: { type: String, default: 'customer' },
     profile_img: { type: String, required: false },
+      fcmToken: { type: String },
+
     refreshToken: { type: String },
 }, { timestamps: true, collection: 'users' });
 
@@ -37,8 +39,11 @@ const ArtistRegisterSchema = new mongoose.Schema({
     specialties: [{ type: String, required: true }],
     profile_img: { type: String, required: true },
     role: { type: String, required: true },
+    fcmToken: { type: String },
+    providedByUs: { type: Boolean , default : false},
+
     availability: {
-        type: String,
+        type: String, 
         enum: ['day', 'night', 'both'],
         required: true
     },

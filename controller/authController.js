@@ -14,7 +14,7 @@ const admin = require('../config/firebase-admin');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, fcmToken } = req.body;
 
   if (!email) {
     return sendGeneralResponse(res, false, "Email field is required", 400);
@@ -36,10 +36,21 @@ const login = async (req, res) => {
       const accessToken = generateAccessToken(user._id);
       const refreshToken = generateRefreshToken(user._id);
 
-      user.refreshToken = refreshToken;
+      // user.refreshToken = refreshToken;
+
+      const updateData = {
+        refreshToken,
+      };
+
+      if (fcmToken) {
+        updateData.fcmToken = fcmToken;
+      }
+
+
+
 
       // await user.save();
-      await User.User.updateOne({ _id: user._id }, { $set: { refreshToken } });
+      await User.User.updateOne({ _id: user._id }, { $set: updateData });
 
       return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, accessToken, refreshToken });
     } else {
@@ -234,7 +245,7 @@ const registerUser = async (req, res) => {
       return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
 
-    const { username, email, password, phone, gender, role } = req.body;
+    const { username, email, password, phone, gender, role, fcmToken } = req.body;
 
     // Validate required fields
     if (!username) {
@@ -274,7 +285,8 @@ const registerUser = async (req, res) => {
       phone,
       gender: gender || '', // Optional field
       role,
-      profile_img: null // Optional field
+      profile_img: null, // Optional field,
+      fcmToken
     });
 
     // Generate tokens
@@ -358,10 +370,12 @@ const registerArtist = async (req, res) => {
     city,
     specialties,
     role,
+    fcmToken,
     availability,
     gender,
     paymentMethods,
-    advanceAmount
+    advanceAmount,
+
   } = req.body;
 
   const requiredFields = [
@@ -427,6 +441,7 @@ const registerArtist = async (req, res) => {
       profile_img: profile_img_url,
       specialties,
       role,
+      fcmToken,
       availability,
       gender,
       paymentMethods,

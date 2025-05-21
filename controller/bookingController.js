@@ -1,14 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { Booking, PackageBooking } = require('../models/bookingModel'); 
-const Package  = require('../models/packageModel');
+const { Booking, PackageBooking } = require('../models/bookingModel');
+const Package = require('../models/packageModel');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
 const { sendGeneralResponse } = require('../utils/responseHelper');
 const { sendMail } = require('../utils/mailer');
 
-const { User, Service } = require('../models/userModel');  
+const { User, Service } = require('../models/userModel');
 const moment = require('moment');
 
 // Initialize Razorpay with your credentials
@@ -22,7 +22,7 @@ const createRazorpayOrder = async (amount, receipt) => {
     try {
         // Ensure receipt is no longer than 40 characters
         const truncatedReceipt = receipt.substring(0, 40);
-        
+
         const options = {
             amount: 100, // Fixed amount: 1 rupee = 100 paise
             currency: 'INR',
@@ -52,14 +52,14 @@ const booking = async (req, res) => {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
 
-    const { 
-        user_id, 
-        user_info, 
-        service_details, 
-        artist_id, 
+    const {
+        user_id,
+        user_info,
+        service_details,
+        artist_id,
         booking_date,
-        booking_time, 
-        payment 
+        booking_time,
+        payment
     } = req.body;
 
     // Basic validations
@@ -69,9 +69,9 @@ const booking = async (req, res) => {
 
     // Validate service details structure
     for (const service of service_details) {
-        if (!service.service_id || 
-            !service.serviceName || 
-            !Array.isArray(service.selected_services) || 
+        if (!service.service_id ||
+            !service.serviceName ||
+            !Array.isArray(service.selected_services) ||
             service.selected_services.length === 0) {
             return sendGeneralResponse(res, false, 'Invalid service details structure', 400);
         }
@@ -81,7 +81,7 @@ const booking = async (req, res) => {
         // Verify user exists
         const user = await User.findById(user_id);
         console.log('Found user:', user);
-        
+
         if (!user || (user.role !== 'customer' && user.role !== 'costumer')) {
             return sendGeneralResponse(res, false, 'User not found or invalid role', 404);
         }
@@ -89,7 +89,7 @@ const booking = async (req, res) => {
         // Verify artist exists
         const artist = await User.findById(artist_id);
         console.log('Found artist:', artist);
-        
+
         if (!artist || artist.role !== 'artist') {
             return sendGeneralResponse(res, false, 'Makeup Artist not found or invalid role', 404);
         }
@@ -100,7 +100,7 @@ const booking = async (req, res) => {
         // Process each service
         for (const serviceDetail of service_details) {
             // Fetch artist services from Service model
-            const artistService = await Service.findOne({ 
+            const artistService = await Service.findOne({
                 userId: artist_id,
                 'services.serviceName': { $regex: new RegExp(serviceDetail.serviceName, 'i') }
             });
@@ -112,12 +112,12 @@ const booking = async (req, res) => {
             }
 
             // Find the main service category
-            const serviceCategory = artistService.services.find(s => 
+            const serviceCategory = artistService.services.find(s =>
                 s.serviceName.toLowerCase() === serviceDetail.serviceName.toLowerCase()
             );
 
             if (!serviceCategory) {
-                return sendGeneralResponse(res, false, 
+                return sendGeneralResponse(res, false,
                     `Service category "${serviceDetail.serviceName}" not found for this artist`, 404
                 );
             }
@@ -129,14 +129,14 @@ const booking = async (req, res) => {
                 );
 
                 if (!subService) {
-                    return sendGeneralResponse(res, false, 
+                    return sendGeneralResponse(res, false,
                         `Sub-service "${selected.subService_name}" not found in ${serviceDetail.serviceName} category`, 400
                     );
                 }
 
                 // Verify price matches
                 if (subService.price !== selected.price) {
-                    return sendGeneralResponse(res, false, 
+                    return sendGeneralResponse(res, false,
                         `Price mismatch for ${selected.subService_name}. Expected: ${subService.price}, Received: ${selected.price}`, 400
                     );
                 }
@@ -155,7 +155,7 @@ const booking = async (req, res) => {
 
         // Validate total amount matches
         if (totalAmount !== payment.base_amount) {
-            return sendGeneralResponse(res, false, 
+            return sendGeneralResponse(res, false,
                 `Total amount mismatch. Calculated: ${totalAmount}, Received: ${payment.base_amount}`, 400
             );
         }
@@ -164,7 +164,7 @@ const booking = async (req, res) => {
         const timestamp = Date.now().toString().slice(-8); // Take last 8 digits of timestamp
         const shortUserId = user_id.toString().slice(-8); // Take last 8 digits of user ID
         const receipt = `bk_${timestamp}_${shortUserId}`; // Format: bk_TIMESTAMP_USERID
-        
+
         // Create Razorpay order with shorter receipt
         const razorpayOrder = await createRazorpayOrder(totalAmount, receipt);
 
@@ -329,16 +329,16 @@ Please check your dashboard for more details.`
 
         } catch (error) {
             console.error('Payment verification error:', error);
-            return sendGeneralResponse(res, false, 
-                `Payment verification failed: ${error.message}. Please contact support with payment ID: ${razorpay_payment_id}`, 
+            return sendGeneralResponse(res, false,
+                `Payment verification failed: ${error.message}. Please contact support with payment ID: ${razorpay_payment_id}`,
                 400
             );
         }
 
     } catch (error) {
         console.error('Payment verification error:', error);
-        return sendGeneralResponse(res, false, 
-            `Payment verification failed. Please contact support with payment ID: ${req.body?.razorpay_payment_id}`, 
+        return sendGeneralResponse(res, false,
+            `Payment verification failed. Please contact support with payment ID: ${req.body?.razorpay_payment_id}`,
             500
         );
     }
@@ -355,13 +355,13 @@ const packageBooking = async (req, res) => {
 
         console.log('Received booking request:', req.body);
 
-        const { 
-            user_id, 
-            user_info, 
-            package_details, 
+        const {
+            user_id,
+            user_info,
+            package_details,
             booking_date,
-            booking_time, 
-            payment 
+            booking_time,
+            payment
         } = req.body;
 
         // Basic validations
@@ -534,15 +534,15 @@ const getAllBookings = async (req, res) => {
     try {
         // Get query parameters for filtering
         const { status, date_from, date_to } = req.query;
-        
+
         // Build query object
         let query = {};
-        
+
         // Add status filter if provided
         if (status) {
             query.status = status;
         }
-        
+
         // Add date range filter if provided
         if (date_from || date_to) {
             query.booking_date = {};
@@ -630,7 +630,7 @@ const verifyPackagePayment = async (req, res) => {
         // Find the package booking
         console.log('Looking for booking with ID:', booking_id);
         const booking = await PackageBooking.findById(booking_id);
-        
+
         if (!booking) {
             console.error('Booking not found for ID:', booking_id);
             return res.status(404).json({
@@ -688,7 +688,7 @@ const verifyPackagePayment = async (req, res) => {
             try {
                 const user = await User.findById(booking.user_id);
                 console.log('Found user for email:', user?.email);
-                
+
                 if (user?.email) {
                     await sendMail({
                         to: user.email,
