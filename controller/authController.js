@@ -9,56 +9,200 @@ const { sendMail } = require('../utils/mailer');
 const upload = multer({ storage: multer.memoryStorage() });
 const { OAuth2Client } = require('google-auth-library');
 const admin = require('../config/firebase-admin');
+
 const { verifyPhoneOtp } = require('./otpController');
 
+// Initialize Google OAuth client
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-
- 
 const login = async (req, res) => {
-    const { email, password } = req.body;
-  
-    if (!email) {
-      return sendGeneralResponse(res, false, "Email field is required", 400);
+  const { email, password, fcmToken } = req.body;
+
+  if (!email) {
+    return sendGeneralResponse(res, false, "Email field is required", 400);
+  }
+
+  if (!password) {
+    return sendGeneralResponse(res, false, "Password field is required", 400);
+  }
+
+  try {
+    const user = await User.User.findOne({ email });
+
+    if (!user) {
+      return sendGeneralResponse(res, false, 'User not registered', 400);
     }
-  
-    if (!password) {
-      return sendGeneralResponse(res, false, "Password field is required", 400);
-    }
-  
-    try {
-      const user = await User.User.findOne({ email });
-  
-      if (!user) {
-        return sendGeneralResponse(res, false, 'User not registered', 400);
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      const accessToken = generateAccessToken(user._id);
+      const refreshToken = generateRefreshToken(user._id);
+
+      // user.refreshToken = refreshToken;
+
+      const updateData = {
+        refreshToken,
+      };
+
+      if (fcmToken) {
+        updateData.fcmToken = fcmToken;
       }
-  
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (isMatch) {
-        const accessToken = generateAccessToken(user._id);
-        const refreshToken = generateRefreshToken(user._id);
-  
-        user.refreshToken = refreshToken;
-  
-        // await user.save();
-        await User.User.updateOne({ _id: user._id }, { $set: { refreshToken } });
 
-        return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, accessToken, refreshToken });
-      } else {
-        return sendGeneralResponse(res, false, 'Invalid password', 400);
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      return sendGeneralResponse(res, false, "Internal server error", 500);
+
+
+
+      // await user.save();
+      await User.User.updateOne({ _id: user._id }, { $set: updateData });
+
+      return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, accessToken, refreshToken });
+    } else {
+      return sendGeneralResponse(res, false, 'Invalid password', 400);
     }
-  };
+  } catch (error) {
+    console.error('Login error:', error);
+    return sendGeneralResponse(res, false, "Internal server error", 500);
+  }
+};
 
 
 
 
+// POST /api/auth/send-login-link
+const sendLoginLink = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return sendGeneralResponse(res, false, "Email is required", 400);
+  }
+
+  try {
+    const user = await User.User.findOne({ email });
+    if (!user) {
+      return sendGeneralResponse(res, false, "User not found", 404);
+    }
+
+    const loginToken = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: '10m' } // Token valid for 10 minutes
+    );
+
+    console.log(loginToken);
+    const loginUrl = `https://www.makeupmunch.in/login-via-link?token=${loginToken}`;
+
+    console.log(user.username);
+
+
+    const subject = "Your Secure Login Link";
+    const text = ``;
+    const html = `
+  <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+    <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+      <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
+        <h1>Login to Your Account</h1>
+      </div>
+      <div style="padding: 20px;">
+        <h2 style="color: #333;">Hello, ${user.username}!</h2>
+        <p>You requested to log in without a password. Just click the button below to securely log into your account. This link will expire in 10 minutes.</p>
+        
+        <div style="text-align: center; margin-top: 30px;">
+          <a href="${loginUrl}" style="
+            background-color: #FF69B4;
+            color: white;
+            padding: 15px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            display: inline-block;
+            font-weight: bold;
+          ">
+            Click to Login Securely
+          </a>
+        </div>
+
+        <p style="margin-top: 30px; color: #999; font-size: 14px;">
+          If you did not request this login, you can safely ignore this email.
+        </p>
+
+        <p style="margin-top: 30px;">Follow us on social media:</p>
+        <div style="text-align: center; margin-top: 10px;">
+          <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+            <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
+          </a>
+          <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+            <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
+          </a>
+          <a href="mailto:support@yourservice.com">
+            <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
+          </a>
+        </div>
+      </div>
+      <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
+        <p>&copy; 2024 Our Service. All Rights Reserved.</p>
+      </div>
+    </div>
+  </div>
+`;
 
 
 
-   
+    // Send email (pseudo-code)
+
+    await sendMail({
+      to: email,
+      subject,
+      text: text,
+      html
+    });
+
+    return sendGeneralResponse(res, true, "Login link sent to your email", 200);
+  } catch (error) {
+    console.error("Error sending login link:", error);
+    return sendGeneralResponse(res, false, "Internal server error", 500);
+  }
+};
+
+
+
+
+const loginViaLink = async (req, res) => {
+  const { token } = req.body;
+  console.log(token);
+
+
+  if (!token) {
+    return sendGeneralResponse(res, false, "Token is required", 400);
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    console.log(decoded);
+    console.log(decoded);
+    const user = await User.User.findById(decoded.userId);
+
+    if (!user) {
+      return sendGeneralResponse(res, false, "User not found", 404);
+    }
+
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+
+    await User.User.updateOne({ _id: user._id }, { $set: { refreshToken } });
+
+    return sendGeneralResponse(res, true, "Login successful", 200, {
+      ...user._doc,
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    console.error("Login via link error:", error);
+    return sendGeneralResponse(res, false, "Invalid or expired token", 400);
+  }
+};
+
+
+
+
 const Salonlogin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -97,6 +241,56 @@ const Salonlogin = async (req, res) => {
   }
 };
 
+const registerUser = async (req, res) => {
+  try {
+    if (!req.body) {
+      return sendGeneralResponse(res, false, 'Request body is missing', 400);
+    }
+
+    const { username, email, password, phone, gender, role, fcmToken } = req.body;
+
+    // Validate required fields
+    if (!username) {
+      return sendGeneralResponse(res, false, 'Username is required', 400);
+    }
+    if (!email) {
+      return sendGeneralResponse(res, false, 'Email is required', 400);
+    }
+    if (!password) {
+      return sendGeneralResponse(res, false, 'Password is required', 400);
+    }
+    if (!phone) {
+      return sendGeneralResponse(res, false, 'Phone number is required', 400);
+    }
+    if (!role) {
+      return sendGeneralResponse(res, false, 'Role is required', 400);
+    }
+
+    if (!validateEmail(email)) {
+      return sendGeneralResponse(res, false, 'Invalid email', 400);
+    }
+
+    // Check for existing user
+    const existingUser = await User.Customer.findOne({ email });
+    if (existingUser) {
+      return sendGeneralResponse(res, false, 'Email already registered', 400);
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new user
+    const user = new User.Customer({
+      username,
+      email,
+      password: hashedPassword,
+      phone,
+      gender: gender || '', // Optional field
+      role,
+      profile_img: null, // Optional field,
+      fcmToken
+    });
+=======
 // const registerUser = async (req, res) => {
 //   try {
 //     if (!req.body) {
@@ -216,69 +410,61 @@ const Salonlogin = async (req, res) => {
 
  
 
-const registerUser = async (req, res) => {
-  try {
-    const { phone, otp, email, password, fcmToken } = req.body;
 
-    // Step 1: Validate required fields
-    if (!phone) return sendGeneralResponse(res, false, 'Phone number is required', 400);
-    if (!otp) return sendGeneralResponse(res, false, 'OTP is required', 400);
-    if (!email) return sendGeneralResponse(res, false, 'Email is required', 400);
-    if (!validateEmail(email)) return sendGeneralResponse(res, false, 'Invalid email format', 400);
-
-    // Step 2: Check if user phone already exists
-    const existingPhone = await User.Customer.findOne({ phone });
-    if (existingPhone) {
-      return sendGeneralResponse(res, false, 'Phone number already registered', 400);
-    }
-
-    // Step 3: Check if user already exists by email
-    const existingEmail = await User.Customer.findOne({ email });
-    if (existingEmail) {
-      return sendGeneralResponse(res, false, 'Email already registered', 400);
-    }
-
-    // Optional: Verify OTP from DB or service
-    const isOtpValid = await verifyPhoneOtp(phone, otp); // create this helper
-    if (!isOtpValid) {
-      return sendGeneralResponse(res, false, 'Invalid or expired OTP', 400);
-    }
-
-    // Step 3: Hash password if provided
-    let hashedPassword = null;
-    if (password) {
-      hashedPassword = await bcrypt.hash(password, 10);
-    }
-
-    // Step 4: Create user
-    const user = new User.Customer({
-      email,
-      phone,
-      password: hashedPassword,
-      fcmToken,
-      role: 'customer', // default
-      
-    });
-
-    // Step 5: Generate tokens
+    // Generate tokens
     const accessToken = generateAccessToken(user._id);
     const refreshToken = generateRefreshToken(user._id);
     user.refreshToken = refreshToken;
 
+    // Save user
     await user.save();
 
-    // Step 6: Send welcome email
+    // Send welcome email
+    const subject = 'Welcome to MakeUp Munch!';
+    const text = `Hi ${username},\n\nThank you for registering with us. We're excited to have you onboard!`;
+    const html = `
+            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+                <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                    <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
+                        <h1>Welcome to Our Service!</h1>
+                    </div>
+                    <div style="padding: 20px;">
+                        <h2 style="color: #333;">Hello, ${username}!</h2>
+                        <p>We are thrilled to have you on board. Thank you for registering with us!</p>
+                        <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
+                        <p>We hope you have a great experience with us!</p>
+                        <a href="https://makeup-adda.netlify.app/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
+                        <p style="margin-top: 20px;">Follow us on social media:</p>
+                        <div style="text-align: center; margin-top: 10px;"> 
+                            <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+                                <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
+                            </a>
+                            <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+                                <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
+                            </a>
+                            <a href="mailto:support@yourservice.com">
+                                <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
     await sendMail({
       to: email,
-      subject: 'Welcome to MakeUp Munch!',
-      text: `Hi,\n\nThanks for registering!`,
-      html: `<h2>Welcome to MakeUp Munch</h2><p>We're excited to have you!</p>`,
+      subject,
+      text,
+      html
     });
 
+    // Send success response
     return sendGeneralResponse(res, true, 'Registered successfully', 200, {
       _id: user._id,
+      username: user.username,
       email: user.email,
       phone: user.phone,
+      gender: user.gender,
       role: user.role,
       profile_img: user.profile_img,
       accessToken,
@@ -290,12 +476,6 @@ const registerUser = async (req, res) => {
     return sendGeneralResponse(res, false, 'Internal server error', 500);
   }
 };
-
-
-
-
-
-
 
 
 const registerArtist = async (req, res) => {
@@ -312,17 +492,19 @@ const registerArtist = async (req, res) => {
     city,
     specialties,
     role,
+    fcmToken,
     availability,
     gender,
     paymentMethods,
-    advanceAmount
+    advanceAmount,
+
   } = req.body;
 
   const requiredFields = [
     'businessName', 'username', 'email', 'password', 'phone', 'role', 'city', 'specialties',
     'availability', 'gender', 'paymentMethods', 'advanceAmount'
   ];
-  
+
   if (!req.file) {
     return sendGeneralResponse(res, false, 'Profile image is required', 400);
   }
@@ -369,7 +551,7 @@ const registerArtist = async (req, res) => {
     if (req.file) {
       profile_img_url = await uploadImage(req.file.buffer, 'profile_img_' + Date.now());
     }
-    
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const userData = {
       businessName,
@@ -381,6 +563,7 @@ const registerArtist = async (req, res) => {
       profile_img: profile_img_url,
       specialties,
       role,
+      fcmToken,
       availability,
       gender,
       paymentMethods,
@@ -423,15 +606,6 @@ const registerArtist = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
 const registerSalon = async (req, res) => {
   if (!req.body) {
     return sendGeneralResponse(res, false, 'Request body is missing', 400);
@@ -453,7 +627,7 @@ const registerSalon = async (req, res) => {
 
 
   const requiredFields = [
-    'businessName', 'username', 'email', 'password', 'phone', 'city', 'role' ,  'numberOfArtists',
+    'businessName', 'username', 'email', 'password', 'phone', 'city', 'role', 'numberOfArtists',
   ];
 
   if (!req.file) {
@@ -473,7 +647,7 @@ const registerSalon = async (req, res) => {
     return sendGeneralResponse(res, false, 'Number of artists must be a positive integer greater than 0', 400);
   }
 
-  
+
   try {
     const existingUser = await User.Salon.findOne({ email });
 
@@ -514,7 +688,7 @@ const registerSalon = async (req, res) => {
       username: salon.username,
       email: salon.email,
       phone: salon.phone,
-      role:salon.role,
+      role: salon.role,
       city: salon.city,
       profile_img: salon.profile_img,
       refreshToken: salon.refreshToken,
@@ -529,91 +703,173 @@ const registerSalon = async (req, res) => {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 const getAccessToken = async (req, res) => {
-    const { refreshToken } = req.body;
+  const { refreshToken } = req.body;
 
-   
-    if (!refreshToken) {
-      return sendGeneralResponse(res, false, 'Refresh token is missing', 400);
+
+  if (!refreshToken) {
+    return sendGeneralResponse(res, false, 'Refresh token is missing', 400);
+  }
+
+  try {
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
+
+    const user = await User.findById(decoded.id);
+
+    if (!user || user.refreshToken !== refreshToken) {
+      return sendGeneralResponse(res, false, 'Invalid refresh token', 403);
     }
-  
-    try {
-       
-      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET_KEY);
-  
-      const user = await User.findById(decoded.id);
-   
-      if (!user || user.refreshToken !== refreshToken) {
-        return sendGeneralResponse(res, false, 'Invalid refresh token', 403);
-      }
-  
-      
-      const newAccessToken = generateAccessToken(user._id);
-      const newRefreshToken = generateRefreshToken(user._id);
-  
-      // Update user's refresh token in the database
-      user.refreshToken = newRefreshToken;
-      await user.save();
-  
-      // Return new access token
-      sendGeneralResponse(res, true, 'Token refreshed successfully', 200, { accessToken: newAccessToken , refreshToken: newRefreshToken });
-    } catch (error) {
-      console.error('Error refreshing token:', error);
-      sendGeneralResponse(res, false, 'Invalid or expired refresh token', 403);
-    }
-  };
-  
 
 
+    const newAccessToken = generateAccessToken(user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
 
+    // Update user's refresh token in the database
+    user.refreshToken = newRefreshToken;
+    await user.save();
 
-
-
-
-  
+    // Return new access token
+    sendGeneralResponse(res, true, 'Token refreshed successfully', 200, { accessToken: newAccessToken, refreshToken: newRefreshToken });
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    sendGeneralResponse(res, false, 'Invalid or expired refresh token', 403);
+  }
+};
 
 const generateAccessToken = (userId) => {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET_KEY, { expiresIn: '5000000h' });
-  };
-  
-  const generateRefreshToken = (userId) => {
-    return jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: '700000000d' });  
-  };
+  return jwt.sign({ id: userId }, process.env.JWT_SECRET_KEY, { expiresIn: '5000000h' });
+};
 
+const generateRefreshToken = (userId) => {
+  return jwt.sign({ id: userId }, process.env.JWT_REFRESH_SECRET_KEY, { expiresIn: '700000000d' });
+};
 
+const register = async (req, res) => {
+  if (!req.body) {
+    return sendGeneralResponse(res, false, 'Request body is missing', 400);
+  }
 
-  const register = async (req, res) => {
-     if (!req.body) {
-        return sendGeneralResponse(res, false, 'Request body is missing', 400);
+  const { role } = req.body;
+
+  // Handle role-specific registration
+  if (role === 'artist') {
+    return registerArtist(req, res);
+  } else {
+    return registerUser(req, res);
+  }
+};
+
+// Add this new function for Google authentication
+const googleAuth = async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    // Verify Google token
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, picture } = payload;
+
+    // Check if user exists
+    let user = await User.Customer.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      const hashedPassword = await bcrypt.hash(Math.random().toString(36), 10);
+
+      user = new User.Customer({
+        username: name,
+        email,
+        password: hashedPassword,
+        profile_img: picture,
+        role: 'customer',
+        phone: '', // You might want to ask for phone number separately
+        gender: '' // You might want to ask for gender separately
+      });
+
+      await user.save();
     }
-  
-    const { role } = req.body;
-  
-    // Handle role-specific registration
-    if (role === 'artist') {
-         return registerArtist(req, res);
+
+    // Generate tokens
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    return sendGeneralResponse(res, true, 'Google login successful', 200, {
+      ...user._doc,
+      accessToken,
+      refreshToken
+    });
+
+  } catch (error) {
+    console.error('Google auth error:', error);
+    return sendGeneralResponse(res, false, 'Google authentication failed', 500);
+  }
+};
+
+// Add Firebase auth function
+const firebaseAuth = async (req, res) => {
+  const { token, email, name, photoURL } = req.body;
+
+  try {
+    // Verify the Firebase ID token
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    if (email !== decodedToken.email) {
+      return sendGeneralResponse(res, false, 'Email verification failed', 401);
+    }
+
+    // Check if user exists
+    let user = await User.Customer.findOne({ email });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      const hashedPassword = await bcrypt.hash(Math.random().toString(36), 10);
+
+      user = new User.Customer({
+        username: name || decodedToken.name,
+        email,
+        password: hashedPassword,
+        profile_img: photoURL || decodedToken.picture,
+        role: 'customer', // Always set role as customer for Google sign-in
+        phone: '',
+        gender: ''
+      });
+
+      await user.save();
     } else {
-        return registerUser(req, res);
+      // If user exists, ensure role is set to customer
+      if (!user.role) {
+        user.role = 'customer';
+        await user.save();
+      }
     }
-  };
-  
 
+    // Generate tokens
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
+    user.refreshToken = refreshToken;
+    await user.save();
 
+    return sendGeneralResponse(res, true, 'Firebase login successful', 200, {
+      ...user._doc,
+      accessToken,
+      refreshToken,
+      role: 'customer' // Explicitly include role in response
+    });
 
-module.exports = { login, register , getAccessToken  , registerSalon , Salonlogin} 
+  } catch (error) {
+    console.error('Firebase auth error:', error);
+    return sendGeneralResponse(res, false, 'Firebase authentication failed', 500);
+  }
+};
+
+module.exports = { login, sendLoginLink, loginViaLink, register, getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth }
 
 
 

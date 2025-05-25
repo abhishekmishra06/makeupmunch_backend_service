@@ -5,27 +5,34 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',  
     auth: {
         user: process.env.EMAIL_USER,  
-        pass: process.env.EMAIL_PASS  
+        pass: process.env.EMAIL_PASS 
     }
 });
 
- 
-const sendMail = async (to, subject, text,  html) => {
+const sendMail = async ({ to, subject, text, html }) => {
+    if (!to || !subject) {
+        throw new Error("Missing email parameters");
+    }
+
     try {
-        await transporter.sendMail({
+        const mailOptions = {
             from: process.env.EMAIL_USER,
-            to,
-            subject,
-            text,
-            html,
-        });
+            to: to,
+            subject: subject,
+            text: text || 'This is an HTML email',
+            html: html
+        };
+
+        // console.log('Sending email with options:', mailOptions);
+
+        const info = await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully:', info.response);
+        return info;
     } catch (error) {
-        console.error('Error sending email:', error);
-        throw error; 
+        console.error('Error in sendMail:', error);
+        throw error;
     }
 };
-
-
 
 // const sendSubscribeMail = async (to, subject, text) => {
 //     try {
@@ -44,5 +51,5 @@ const sendMail = async (to, subject, text,  html) => {
 //     }
 // };
 
-module.exports = { sendMail ,  };
+module.exports = { sendMail };
  

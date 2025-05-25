@@ -8,6 +8,7 @@ const { validateEmail, validatePhone } = require("../utils/validation");
 const Otp = require("../models/otp_model");
 
 const sendEmailOtp = async (req, res) => {
+  console.log("call send email api")
   const { email } = req.body;
 
   // Check if email is provided
@@ -83,7 +84,12 @@ const sendEmailOtp = async (req, res) => {
 `;
 
     // Send the email
-    await sendMail(email, subject, "", html);
+    await sendMail({
+      to: email,
+      subject: subject,
+      text: "",
+      html: html
+    });
 
     // Send success response
     sendGeneralResponse(res, true, "OTP sent to email", 200);
@@ -336,7 +342,12 @@ const verifyOtpAndChangePassword = async (req, res) => {
         `;
 
     // Send the confirmation email
-    await sendMail(email, subject, text, html);
+    await sendMail({
+      to: email,
+      subject: subject,
+      text: text,
+      html: html
+    });
 
     // Send success response
 

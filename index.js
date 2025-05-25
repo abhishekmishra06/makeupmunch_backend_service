@@ -3,12 +3,11 @@ const dotenv = require('dotenv');
 const connectDB = require('./utils/db');
 const cors = require('cors');
 const crypto = require('crypto');
- 
-  
+
+
 const authRoutes = require('./routes/routes');
+
 const adminRoutes = require('./routes/admin_routes');
-
-
 
 // connect to database
 dotenv.config();
@@ -20,25 +19,30 @@ app.use(cors({
     origin: [
         'http://localhost:3000',
         'http://localhost:3001',
+        'https://www.makeupmunch.in',
+        'admin.makeupmunch.in',
         'https://makeupmunch-ui-testing.vercel.app',
-        'https://mekeupmunch-admin-dashboard.vercel.app'
+        'https://mekeupmunch-admin-dashboard.vercel.app',
+        'https://admin.makeupmunch.in'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 }));
- // Routes
+// Routes
 app.get('', (req, res) => {
     res.send('Welcome to Makeup munch app.');
-}); 
+});
 
 app.get('/', (req, res) => {
     res.send('Welcome to makeup munch app');
-}); 
-   
-   
+});
+
+
 app.use('', authRoutes);
 
+
 app.use('/admin', adminRoutes);
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
