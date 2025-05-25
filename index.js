@@ -6,7 +6,10 @@ const crypto = require('crypto');
  
   
 const authRoutes = require('./routes/routes');
-  
+const adminRoutes = require('./routes/admin_routes');
+
+
+
 // connect to database
 dotenv.config();
 connectDB();
@@ -34,7 +37,8 @@ app.get('/', (req, res) => {
    
    
 app.use('', authRoutes);
- 
+
+app.use('/admin', adminRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

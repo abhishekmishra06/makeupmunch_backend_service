@@ -1,19 +1,36 @@
 const mongoose = require('mongoose');
 
+// old
+// const CustomerRegisterSchema = new mongoose.Schema({
+//     username: { type: String, required: true },
+//     email: { type: String, required: true, unique: true },
+//     password: { type: String, required: true },
+//     phone: { type: String, required: true },
+//     gender: { type: String, required: false },
+//     role: { type: String, default: 'customer' },
+//     profile_img: { type: String, required: false },
+//       fcmToken: { type: String },
+
+//     refreshToken: { type: String },
+// }, { timestamps: true, collection: 'users' });
+
+// const Customer = mongoose.model('Customer', CustomerRegisterSchema);
 
 const CustomerRegisterSchema = new mongoose.Schema({
-    username: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    phone: { type: String, required: true },
-    gender: { type: String, required: true },
-    role: { type: String, default: 'customer' },
-    profile_img: { type: String },
-    refreshToken: { type: String },
+  username: { type: String },
+  email: { type: String , required: true },
+  password: { type: String },
+  phone: { type: String, required: true ,  unique: true },
+  gender: { type: String },
+  role: { type: String, default: 'customer' },
+  profile_img: { type: String },
+  fcmToken: { type: String },
+  refreshToken: { type: String },
+  isActive: { type: Boolean, default: false }, // 👈 NEW
+  lastActiveAt: { type: Date }, 
 }, { timestamps: true, collection: 'users' });
 
 const Customer = mongoose.model('Customer', CustomerRegisterSchema);
- 
 
 
 // const SubServiceSchema = new mongoose.Schema({

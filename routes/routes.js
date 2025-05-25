@@ -36,7 +36,9 @@ const { formController } = require('../controller/formController');
 const {  makeRating } = require('../controller/rating/MakeRating');
 const { getRatings } = require('../controller/rating/getRating');
 const { deleteRating } = require('../controller/rating/deleteRating');
-const { editReview } = require('../controller/rating/editRating');
+const errorHandler = require('../middleware/errorHandler');
+const sendPushNotification = require('../utils/sendReminderNotification');
+const { Userlogin } = require('../controller/auth/login');
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -62,9 +64,19 @@ router.delete('/packages/:id', packageController.deletePackage);
 
 
 
-router.post('/login',login);
-router.post('/getAccessToken',getAccessToken);
+router.post('/login', login);
+router.post('/userlogin', Userlogin);
+
  
+
+router.post('/sendLoginLink', sendLoginLink);
+router.post('/loginViaLink', loginViaLink);
+
+
+
+
+router.post('/getAccessToken', getAccessToken);
+
 
 router.post('/sendEmailOtp',sendEmailOtp);
 router.post('/sendPhoneOtp',sendPhoneOtp);
