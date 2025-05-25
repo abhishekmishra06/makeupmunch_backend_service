@@ -22,8 +22,6 @@ const { subscribe, unsubscribe } = require('../controller/subscription/subscript
 const { contactUs } = require('../controller/contactUs');
 const { addFavorite } = require('../controller/addFavorite/addFavorite');
 const { removeFavorite } = require('../controller/addFavorite/removeFavorite');
-// const { rateUser } = require('../controller/rating');
-// const { getRatings } = require('../controller/rating/getRating');
 const { addFeedback } = require('../controller/feedback/addFeedback');
 const { getFeedback } = require('../controller/feedback/getFeedback');
 const { applyForJob, getJobApplications } = require('../controller/careers/jobApplicationController');
@@ -39,6 +37,7 @@ const { getRatings } = require('../controller/rating/getRating');
 const { deleteRating } = require('../controller/rating/deleteRating');
 const errorHandler = require('../middleware/errorHandler');
 const sendPushNotification = require('../utils/sendReminderNotification');
+
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -66,9 +65,11 @@ router.delete('/packages/:id', packageController.deletePackage);
 
 router.post('/login', login);
 
+
 router.post('/sendLoginLink', sendLoginLink);
 router.post('/loginViaLink', loginViaLink);
 
+router.post('/userlogin', Userlogin);
 
 
 
@@ -82,6 +83,7 @@ router.post('/verifyPhonOtp', verifyPhoneOtp);
 router.post('/verifyEmailOtp', verifyEmailOtp);
 router.post('/sendPushNotification', async (req, res) => {
   const { token, title, body, imageUrl, clickAction, channelId, actionType } = req.body;
+
 
   try {
     const result = await sendPushNotification({
@@ -133,9 +135,9 @@ router.delete('/artist/deleteService', deleteArtistService);
 router.post('/makeRating', makeRating);
 router.get('/getRatings', getRatings);
 router.delete('/deleteRating', deleteRating);
+router.post('/editReview', editReview);
+ 
 
-
-// router.get('/getRatings/:rated_id', getRatings);
 
 router.post('/feedback', addFeedback);
 router.get('/feedback/:feedback_for_id', getFeedback);
