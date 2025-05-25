@@ -37,6 +37,7 @@ const { getRatings } = require('../controller/rating/getRating');
 const { deleteRating } = require('../controller/rating/deleteRating');
 const errorHandler = require('../middleware/errorHandler');
 const sendPushNotification = require('../utils/sendReminderNotification');
+const { Userlogin } = require('../controller/auth/login');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -135,7 +136,7 @@ router.delete('/artist/deleteService', deleteArtistService);
 router.post('/makeRating', makeRating);
 router.get('/getRatings', getRatings);
 router.delete('/deleteRating', deleteRating);
-router.post('/editReview', editReview);
+// router.post('/editReview', editRe);
  
 
 
