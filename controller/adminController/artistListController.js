@@ -39,7 +39,7 @@ const getAllArtistsForAdmin = async (req, res) => {
         }));
 
         console.log(fullArtistInfo);
-        return sendGeneralResponse(res, false, "Get Artists List Successful", 400, fullArtistInfo);
+        return sendGeneralResponse(res, true, "Get Artists List Successful", 200, fullArtistInfo);
 
     } catch (error) {
         console.error('Error fetching artists for admin:', error);

@@ -12,10 +12,6 @@ const getAllUsersForAdmin = async (req, res) => {
       const address = await Address.findOne({ userId: user._id });
       const bookingCount = await Booking.countDocuments({ userId: user._id });
 
-
-
-
-
       return {
         _id: user._id,
         username: user.username,
@@ -33,7 +29,7 @@ const getAllUsersForAdmin = async (req, res) => {
     }));
 
 
-    return sendGeneralResponse(res, false, "Get Users List Successfull", 400, fullUserInfo);
+    return sendGeneralResponse(res, true, "Get Users List Successfull", 200, fullUserInfo);
 
 
   } catch (error) {
