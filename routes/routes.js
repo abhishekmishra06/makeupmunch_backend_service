@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { register, login, getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth, sendLoginLink, loginViaLink } = require('../controller/authController');
+const { getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth, sendLoginLink, loginViaLink } = require('../controller/authController');
 const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
@@ -37,7 +37,10 @@ const { getRatings } = require('../controller/rating/getRating');
 const { deleteRating } = require('../controller/rating/deleteRating');
 const errorHandler = require('../middleware/errorHandler');
 const sendPushNotification = require('../utils/sendReminderNotification');
-const { Userlogin } = require('../controller/auth/login');
+const { Userlogin, login } = require('../controller/auth/login');
+const { registerUsers, register } = require('../controller/auth/register');
+const { addUserAddress, updateUserAddress, deleteUserAddress, getUserAddresses } = require('../controller/profileController/UserAddress');
+
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -49,6 +52,14 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.post('/adminLogin', adminLogin);
 
 
+// for constumer and artist login
+router.post('/login', login);
+
+
+router.post('/sendLoginLink', sendLoginLink);
+router.post('/loginViaLink', loginViaLink);
+
+//  for artist and costumer login
 router.post('/register', upload.single('profile_img'), register);
 
 router.post('/registerSalon', upload.single('profile_img'), registerSalon);
@@ -64,13 +75,6 @@ router.delete('/packages/:id', packageController.deletePackage);
 
 
 
-router.post('/login', login);
-
-
-router.post('/sendLoginLink', sendLoginLink);
-router.post('/loginViaLink', loginViaLink);
-
-router.post('/userlogin', Userlogin);
 
 
 
@@ -101,6 +105,15 @@ router.post('/sendPushNotification', async (req, res) => {
     res.status(400).json({ success: false, message: error.message });
   }
 });
+
+
+router.post('/addUserAddress', addUserAddress);
+router.put('/updateUserAddress', updateUserAddress);
+router.delete('/deleteUserAddress', deleteUserAddress);
+router.get('/getUserAddresses/:userId', getUserAddresses);
+
+
+ 
 
 router.put('/editProfile/:id', upload.single('profile_img'), verifyToken, editProfile);
 router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken, editArtistProfile);
@@ -137,7 +150,7 @@ router.post('/makeRating', makeRating);
 router.get('/getRatings', getRatings);
 router.delete('/deleteRating', deleteRating);
 // router.post('/editReview', editRe);
- 
+
 
 
 router.post('/feedback', addFeedback);

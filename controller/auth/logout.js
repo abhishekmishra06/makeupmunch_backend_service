@@ -14,9 +14,9 @@ const logout = async (req, res) => {
 
         await User.updateOne({ _id: userId }, {
             $set: {
-                isActive: false,
-                lastActiveAt: new Date(),
-                fcmToken: null,
+                isLogin: false,
+                lastLoginAt: new Date(),
+                // fcmToken: null,
                 refreshToken: null
             }
         });

@@ -1,11 +1,10 @@
 const User = require("../../models/userModel");
-// const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 
 const { sendGeneralResponse } = require("../../utils/responseHelper");
 const { generateAccessToken, generateRefreshToken } = require("../../utils/jwt_token");
 
-const Userlogin = async (req, res) => {
+const login = async (req, res) => {
     const { email, password, fcmToken } = req.body;
 
     if (!email) {
@@ -32,11 +31,11 @@ const Userlogin = async (req, res) => {
 
             const updateData = {
                 refreshToken,
-                isActive: true,                   
-                lastActiveAt: new Date(),
+                isLogin: true,
+                lastLoginAt: new Date(),
             };
 
-            if (fcmToken) { 
+            if (fcmToken) {
                 updateData.fcmToken = fcmToken;
 
             }
@@ -59,4 +58,4 @@ const Userlogin = async (req, res) => {
 
 
 
-module.exports = { Userlogin }
+module.exports = { login }

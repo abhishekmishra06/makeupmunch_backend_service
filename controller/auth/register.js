@@ -1,9 +1,14 @@
 const User = require("../../models/userModel");
 const { generateAccessToken, generateRefreshToken } = require("../../utils/jwt_token");
+const { sendMail } = require("../../utils/mailer");
 
 const { sendGeneralResponse } = require("../../utils/responseHelper");
+const { validateEmail } = require("../../utils/validation");
+const bcrypt = require('bcrypt');
 
-const registerUsers = async (req, res) => {
+
+// for user register 
+const registerUser = async (req, res) => {
     try {
         if (!req.body) {
             return sendGeneralResponse(res, false, 'Request body is missing', 400);
@@ -58,8 +63,8 @@ const registerUsers = async (req, res) => {
             role,
             profile_img: null, // Optional field,
             fcmToken,
-            isActive: true,
-            lastActiveAt: new Date(),
+            isLogin: true,
+            lastLoginAt: new Date(),
         });
 
         // Generate tokens
@@ -119,7 +124,9 @@ const registerUsers = async (req, res) => {
             role: user.role,
             profile_img: user.profile_img,
             accessToken,
-            refreshToken
+            refreshToken,
+            isLogin: true,
+            lastLoginAt: new Date(),
         });
 
     } catch (error) {
@@ -130,6 +137,8 @@ const registerUsers = async (req, res) => {
 
 
 
+
+//  for artist register 
 const registerArtist = async (req, res) => {
     if (!req.body) {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
@@ -357,6 +366,7 @@ const registerSalon = async (req, res) => {
 
 
 
+// register function
 const register = async (req, res) => {
     if (!req.body) {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
@@ -374,4 +384,4 @@ const register = async (req, res) => {
 
 
 
-module.exports = { login, sendLoginLink, loginViaLink, register, getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth }
+module.exports = {   registerUser,  registerArtist , registerSalon , register }

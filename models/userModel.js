@@ -18,17 +18,17 @@ const mongoose = require('mongoose');
 
 const CustomerRegisterSchema = new mongoose.Schema({
 
-  username: { type: String },
-  email: { type: String , required: true },
-  password: { type: String },
-  phone: { type: String, required: true ,  unique: true },
-  gender: { type: String },
-  role: { type: String, default: 'customer' },
-  profile_img: { type: String },
-  fcmToken: { type: String },
-  refreshToken: { type: String },
-  isActive: { type: Boolean, default: false }, // 👈 NEW
-  lastActiveAt: { type: Date }, 
+    username: { type: String },
+    email: { type: String, required: true },
+    password: { type: String },
+    phone: { type: String, required: true, unique: true },
+    gender: { type: String },
+    role: { type: String, default: 'customer' },
+    profile_img: { type: String },
+    fcmToken: { type: String },
+    refreshToken: { type: String },
+    isLogin: { type: Boolean, default: false }, // 👈 NEW
+    lastLoginAt: { type: Date },
 }, { timestamps: true, collection: 'users' });
 
 const Customer = mongoose.model('Customer', CustomerRegisterSchema);
@@ -58,10 +58,19 @@ const ArtistRegisterSchema = new mongoose.Schema({
     profile_img: { type: String, required: true },
     role: { type: String, required: true },
     fcmToken: { type: String },
-    providedByUs: { type: Boolean , default : false},
+    providedByUs: { type: Boolean, default: false },
+    isLogin: { type: Boolean, default: false },
+    lastLoginAt: { type: Date },
+    Status: {
+        type: String,
+        enum: ['pending', 'approved', 'blocked'],
+        default: 'approved'
+    },
 
+    approvedAt: { type: Date }, // Set when admin approves
+    blockedAt: { type: Date },  // Set when admin blocks
     availability: {
-        type: String, 
+        type: String,
         enum: ['day', 'night', 'both'],
         required: true
     },
@@ -83,9 +92,9 @@ const ArtistRegisterSchema = new mongoose.Schema({
             validator: Number.isInteger,
             message: '{VALUE} is not an integer value'
         }
-    } 
-,
-    about: { type: String } 
+    }
+    ,
+    about: { type: String }
 }, { timestamps: true, collection: 'users' });
 
 const Artist = mongoose.model('Artist', ArtistRegisterSchema);
