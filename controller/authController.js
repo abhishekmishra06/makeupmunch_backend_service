@@ -10,6 +10,8 @@ const upload = multer({ storage: multer.memoryStorage() });
 const { OAuth2Client } = require('google-auth-library');
 const admin = require('../config/firebase-admin');
 
+const { verifyPhoneOtp } = require('./otpController');
+
 // Initialize Google OAuth client
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -239,6 +241,59 @@ const Salonlogin = async (req, res) => {
   }
 };
 
+// const registerUser = async (req, res) => {
+//   try {
+//     if (!req.body) {
+//       return sendGeneralResponse(res, false, 'Request body is missing', 400);
+//     }
+
+//     const { username, email, password, phone, gender, role, fcmToken } = req.body;
+
+//     // Validate required fields
+//     if (!username) {
+//       return sendGeneralResponse(res, false, 'Username is required', 400);
+//     }
+//     if (!email) {
+//       return sendGeneralResponse(res, false, 'Email is required', 400);
+//     }
+//     if (!password) {
+//       return sendGeneralResponse(res, false, 'Password is required', 400);
+//     }
+//     if (!phone) {
+//       return sendGeneralResponse(res, false, 'Phone number is required', 400);
+//     }
+//     if (!role) {
+//       return sendGeneralResponse(res, false, 'Role is required', 400);
+//     }
+
+//     if (!validateEmail(email)) {
+//       return sendGeneralResponse(res, false, 'Invalid email', 400);
+//     }
+
+//     // Check for existing user
+//     const existingUser = await User.Customer.findOne({ email });
+//     if (existingUser) {
+//       return sendGeneralResponse(res, false, 'Email already registered', 400);
+//     }
+
+//     // Hash password
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // Create new user
+//     const user = new User.Customer({
+//       username,
+//       email,
+//       password: hashedPassword,
+//       phone,
+//       gender: gender || '', // Optional field
+//       role,
+//       profile_img: null, // Optional field,
+//       fcmToken
+//     });
+
+
+
+
 const registerUser = async (req, res) => {
   try {
     if (!req.body) {
@@ -354,6 +409,76 @@ const registerUser = async (req, res) => {
     return sendGeneralResponse(res, false, 'Internal server error', 500);
   }
 };
+
+
+ 
+
+
+    // Generate tokens
+//     const accessToken = generateAccessToken(user._id);
+//     const refreshToken = generateRefreshToken(user._id);
+//     user.refreshToken = refreshToken;
+
+//     // Save user
+//     await user.save();
+
+//     // Send welcome email
+//     const subject = 'Welcome to MakeUp Munch!';
+//     const text = `Hi ${username},\n\nThank you for registering with us. We're excited to have you onboard!`;
+//     const html = `
+//             <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+//                 <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+//                     <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
+//                         <h1>Welcome to Our Service!</h1>
+//                     </div>
+//                     <div style="padding: 20px;">
+//                         <h2 style="color: #333;">Hello, ${username}!</h2>
+//                         <p>We are thrilled to have you on board. Thank you for registering with us!</p>
+//                         <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
+//                         <p>We hope you have a great experience with us!</p>
+//                         <a href="https://makeup-adda.netlify.app/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
+//                         <p style="margin-top: 20px;">Follow us on social media:</p>
+//                         <div style="text-align: center; margin-top: 10px;"> 
+//                             <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+//                                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
+//                             </a>
+//                             <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+//                                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
+//                             </a>
+//                             <a href="mailto:support@yourservice.com">
+//                                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
+//                             </a>
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//         `;
+
+//     await sendMail({
+//       to: email,
+//       subject,
+//       text,
+//       html
+//     });
+
+//     // Send success response
+//     return sendGeneralResponse(res, true, 'Registered successfully', 200, {
+//       _id: user._id,
+//       username: user.username,
+//       email: user.email,
+//       phone: user.phone,
+//       gender: user.gender,
+//       role: user.role,
+//       profile_img: user.profile_img,
+//       accessToken,
+//       refreshToken
+//     });
+
+//   } catch (error) {
+//     console.error('Registration error:', error);
+//     return sendGeneralResponse(res, false, 'Internal server error', 500);
+//   }
+// };
 
 
 const registerArtist = async (req, res) => {

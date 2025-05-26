@@ -123,7 +123,7 @@ const sendPhoneOtp = async (req, res) => {
       { upsert: true, new: true }
     );
  
-
+ await  sendSMS(phone , otp);
     console.log(otp);
     sendGeneralResponse(res, true, "OTP sent to phone no", 200, { otp });
   } catch (error) {
