@@ -30,7 +30,7 @@ const createRazorpayOrder = async (amountInPaise, receipt) => {
         const truncatedReceipt = receipt.substring(0, 40);
 
         const options = {
-            amount: amountInPaise, // Fixed amount: 1 rupee = 100 paise
+            amount: amountInRupees, // Fixed amount: 1 rupee = 100 paise
             currency: 'INR',
             receipt: truncatedReceipt,
             payment_capture: 1
