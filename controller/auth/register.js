@@ -18,8 +18,6 @@ const registerUser = async (req, res) => {
 
         // Validate required fields
 
-
-
         if (!email) {
             return sendGeneralResponse(res, false, 'Email is required', 400);
         }
@@ -33,7 +31,10 @@ const registerUser = async (req, res) => {
             return sendGeneralResponse(res, false, 'Role is required', 400);
         }
 
-
+        const allowedRoles = ['customer'];  // only customer is allowed here
+        if (!allowedRoles.includes(role)) {
+            return sendGeneralResponse(res, false, `Invalid role '${role}'. Allowed role: ${allowedRoles.join(', ')}`, 400);
+        }
 
 
 
@@ -138,6 +139,8 @@ const registerUser = async (req, res) => {
 
 
 
+
+
 //  for artist register 
 const registerArtist = async (req, res) => {
     if (!req.body) {
@@ -154,6 +157,7 @@ const registerArtist = async (req, res) => {
         specialties,
         role,
         fcmToken,
+        
         availability,
         gender,
         paymentMethods,
@@ -225,6 +229,8 @@ const registerArtist = async (req, res) => {
             specialties,
             role,
             fcmToken,
+            isLogin: true,
+            lastLoginAt: new Date(),
             availability,
             gender,
             paymentMethods,
@@ -384,4 +390,4 @@ const register = async (req, res) => {
 
 
 
-module.exports = {   registerUser,  registerArtist , registerSalon , register }
+module.exports = { registerUser, registerArtist, registerSalon, register }

@@ -38,8 +38,7 @@ const getAllArtistsForAdmin = async (req, res) => {
             };
         }));
 
-        console.log(fullArtistInfo);
-        return sendGeneralResponse(res, true, "Get Artists List Successful", 200, fullArtistInfo);
+         return sendGeneralResponse(res, true, "Get Artists List Successful", 200, fullArtistInfo);
 
     } catch (error) {
         console.error('Error fetching artists for admin:', error);
@@ -49,5 +48,54 @@ const getAllArtistsForAdmin = async (req, res) => {
         });
     }
 };
+
+
+
+
+
+// const approveArtist = async (req, res) => {
+//   const { artistId } = req.params;
+
+//   const artist = await Artist.findByIdAndUpdate(
+//     artistId,
+//     {
+//       adminStatus: 'approved',
+//       approvedAt: new Date(),
+//       blockedAt: null // Clear if previously blocked
+//     },
+//     { new: true }
+//   );
+
+//   if (!artist) {
+//     return res.status(404).json({ success: false, message: 'Artist not found' });
+//   }
+
+//   res.status(200).json({ success: true, message: 'Artist approved successfully', data: artist });
+// };
+
+
+
+
+
+// const blockArtist = async (req, res) => {
+//   const { artistId } = req.params;
+
+//   const artist = await Artist.findByIdAndUpdate(
+//     artistId,
+//     {
+//       adminStatus: 'blocked',
+//       blockedAt: new Date(),
+//       approvedAt: null // Optional: clear previous approval
+//     },
+//     { new: true }
+//   );
+
+//   if (!artist) {
+//     return res.status(404).json({ success: false, message: 'Artist not found' });
+//   }
+
+//   res.status(200).json({ success: true, message: 'Artist blocked successfully', data: artist });
+// };
+
 
 module.exports = { getAllArtistsForAdmin };

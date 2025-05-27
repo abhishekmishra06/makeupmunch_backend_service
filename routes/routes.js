@@ -113,7 +113,7 @@ router.delete('/deleteUserAddress', deleteUserAddress);
 router.get('/getUserAddresses/:userId', getUserAddresses);
 
 
- 
+
 
 router.put('/editProfile/:id', upload.single('profile_img'), verifyToken, editProfile);
 router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken, editArtistProfile);

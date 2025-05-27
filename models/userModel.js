@@ -23,7 +23,7 @@ const CustomerRegisterSchema = new mongoose.Schema({
     password: { type: String },
     phone: { type: String, required: true, unique: true },
     gender: { type: String },
-    role: { type: String, default: 'customer' },
+    role: { type: String, required: true, enum: ['customer'], default: 'customer' },
     profile_img: { type: String },
     fcmToken: { type: String },
     refreshToken: { type: String },
@@ -56,7 +56,7 @@ const ArtistRegisterSchema = new mongoose.Schema({
     city: { type: String, required: true },
     specialties: [{ type: String, required: true }],
     profile_img: { type: String, required: true },
-    role: { type: String, required: true },
+    role: { type: String, required: true ,enum: ['artist'], default: 'artist' },
     fcmToken: { type: String },
     providedByUs: { type: Boolean, default: false },
     isLogin: { type: Boolean, default: false },
@@ -100,7 +100,7 @@ const ArtistRegisterSchema = new mongoose.Schema({
 const Artist = mongoose.model('Artist', ArtistRegisterSchema);
 module.exports = Artist;
 
-
+ 
 
 
 const UserSchema = new mongoose.Schema({
@@ -111,9 +111,10 @@ const UserSchema = new mongoose.Schema({
     gender: { type: String, required: true },
     role: { type: String, enum: ['customer', 'artist'], default: 'customer' },
     profile_img: { type: String },
-    // services: [ServiceSchema], 
-    // services: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Service' }],  
     refreshToken: { type: String },
+    fcmToken: { type: String },
+     isLogin: { type: Boolean, default: false }, // 👈 NEW
+    lastLoginAt: { type: Date },
 }, { timestamps: true, collection: 'users' });
 
 const User = mongoose.model('User', UserSchema);
