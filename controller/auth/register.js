@@ -14,21 +14,22 @@ const registerUser = async (req, res) => {
             return sendGeneralResponse(res, false, 'Request body is missing', 400);
         }
 
-        const { email, password, phone, gender, role, fcmToken } = req.body;
+        const { email, otp, phone, gender, role, fcmToken } = req.body;
 
         // Validate required fields
 
         if (!email) {
             return sendGeneralResponse(res, false, 'Email is required', 400);
         }
-        if (!password) {
-            return sendGeneralResponse(res, false, 'Password is required', 400);
-        }
+
         if (!phone) {
             return sendGeneralResponse(res, false, 'Phone number is required', 400);
         }
         if (!role) {
             return sendGeneralResponse(res, false, 'Role is required', 400);
+        }
+        if (!otp) {
+            return sendGeneralResponse(res, false, 'OTP is required', 400);
         }
 
         const allowedRoles = ['customer'];  // only customer is allowed here
@@ -42,6 +43,11 @@ const registerUser = async (req, res) => {
             return sendGeneralResponse(res, false, 'Invalid email', 400);
         }
 
+
+        if (otp !== '1234') {
+            return sendGeneralResponse(res, false, 'Invalid OTP', 400);
+        }
+
         let username = email.split('@')[0]; // Get text before '@'
         username = username.replace(/(\d{3,})$/, '');
 
@@ -52,13 +58,15 @@ const registerUser = async (req, res) => {
         }
 
         // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+
+
+        // const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create new user
         const user = new User.Customer({
             username,
             email,
-            password: hashedPassword,
+            password: '',
             phone,
             gender: gender || '', // Optional field
             role,
@@ -157,7 +165,7 @@ const registerArtist = async (req, res) => {
         specialties,
         role,
         fcmToken,
-        
+
         availability,
         gender,
         paymentMethods,
