@@ -1,12 +1,12 @@
 const { Booking } = require("../../models/bookingModel");
-const { User } = require("../../models/userModel");
+const { User, Customer } = require("../../models/userModel");
 const { sendGeneralResponse } = require("../../utils/responseHelper");
 const Address = require('../../models/userAddressModel');
 
 
 const getAllUsersForAdmin = async (req, res) => {
   try {
-    const users = await User.find({ role: 'customer' });
+    const users = await Customer.find({ role: 'customer' });
 
     const fullUserInfo = await Promise.all(users.map(async (user) => {
       const address = await Address.findOne({ userId: user._id });

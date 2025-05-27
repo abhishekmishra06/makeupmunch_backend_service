@@ -298,13 +298,13 @@ const verifyOtpAndChangePassword = async (req, res) => {
     }
 
     // Find the user by email
-    const user = await User.User.findOne({ email });
+    const user = await User.Artist.findOne({ email });
     if (!user) {
       return sendGeneralResponse(res, false, "User not found", 404);
     }
  
    const Password = await bcrypt.hash(newPassword, 10);
-    await User.User.updateOne({ email }, { $set: { password: Password } });
+    await User.Artist.updateOne({ email }, { $set: { password: Password } });
  
     await Otp.deleteMany({ email });
 

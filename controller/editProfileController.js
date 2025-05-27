@@ -1,4 +1,4 @@
-const { User} = require('../models/userModel');  
+const { User, Customer, Artist} = require('../models/userModel');  
 const { sendGeneralResponse } = require('../utils/responseHelper');  
 const { uploadImage } = require('../utils/uploadImages'); 
 const { validateEmail, validatePhone } = require('../utils/validation'); 
@@ -45,7 +45,7 @@ const editProfile = async (req, res) => {
             }
         } 
 
-        const user = await User.findByIdAndUpdate(
+        const user = await Customer.findByIdAndUpdate(
             userId, 
             updateFields, 
             { new: true, runValidators: true }
@@ -112,7 +112,7 @@ const editArtistProfile = async (req, res) => {
 
     try {
         // Find and update the artist profile
-        const user = await User.Artist.findByIdAndUpdate(userId, updateFields, { new: true, runValidators: true });
+        const user = await Artist.findByIdAndUpdate(userId, updateFields, { new: true, runValidators: true });
         
 
 

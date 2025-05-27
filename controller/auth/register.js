@@ -3,7 +3,8 @@ const { generateAccessToken, generateRefreshToken } = require("../../utils/jwt_t
 const { sendMail } = require("../../utils/mailer");
 
 const { sendGeneralResponse } = require("../../utils/responseHelper");
-const { validateEmail } = require("../../utils/validation");
+const { uploadImage } = require("../../utils/uploadImages");
+const { validateEmail, validateRequiredFields } = require("../../utils/validation");
 const bcrypt = require('bcrypt');
 
 

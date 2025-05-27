@@ -29,7 +29,7 @@
 // // module.exports = { userDetail };
 
 const { sendGeneralResponse } = require("../utils/responseHelper");
-const { User, Service } = require("../models/userModel");
+const { User, Service, Artist } = require("../models/userModel");
 
 const userDetail = async (req, res) => {
   try {
@@ -41,7 +41,7 @@ const userDetail = async (req, res) => {
     }
 
     // Artist model के बजाय Service model का उपयोग
-    const user = await User.findById(id);
+    const user = await Artist.findById(id);
 
     // Handle case where the user is not found
     if (!user) {

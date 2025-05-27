@@ -12,7 +12,7 @@ const getFeedback = async (req, res) => {
 
     try {
         // Verify the artist or salon exists
-        const feedbackFor = await User.findById(feedback_for_id);
+        const feedbackFor = await User.Artist.findById(feedback_for_id);
         if (!feedbackFor) {
             return res.status(404).json({ success: false, message: 'Artist or Salon not found' });
         }

@@ -95,7 +95,7 @@ const ArtistRegisterSchema = new mongoose.Schema({
     }
     ,
     about: { type: String }
-}, { timestamps: true, collection: 'users' });
+}, { timestamps: true, collection: 'artists'});
 
 const Artist = mongoose.model('Artist', ArtistRegisterSchema);
 module.exports = Artist;

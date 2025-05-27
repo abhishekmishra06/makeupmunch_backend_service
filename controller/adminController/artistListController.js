@@ -1,7 +1,7 @@
 const { Booking } = require("../../models/bookingModel");
 const { User, Artist } = require("../../models/userModel");
 const { sendGeneralResponse } = require("../../utils/responseHelper");
- 
+
 const getAllArtistsForAdmin = async (req, res) => {
     try {
         // const artists = await User.Artist.find({ role: 'artist' });
@@ -9,13 +9,11 @@ const getAllArtistsForAdmin = async (req, res) => {
 
 
         const fullArtistInfo = await Promise.all(artists.map(async (artist) => {
-             const bookingCount = await Booking.countDocuments({ artist_id: artist._id });
+            const bookingCount = await Booking.countDocuments({ artist_id: artist._id });
 
 
 
             return {
-               
-
                 _id: artist._id,
                 businessName: artist.businessName,
                 username: artist.username,
@@ -28,17 +26,17 @@ const getAllArtistsForAdmin = async (req, res) => {
                 availability: artist.availability,
                 role: artist.role,
                 providedByUs: artist.providedByUs,
-                Status:artist.Status,
+                Status: artist.Status,
                 isLogin: artist.isLogin ? 'Active' : 'Inactive',
                 joinedDate: artist.createdAt,
                 bookingCount,
                 lastActiveAt: artist.lastActiveAt,
 
- 
+
             };
         }));
 
-         return sendGeneralResponse(res, true, "Get Artists List Successful", 200, fullArtistInfo);
+        return sendGeneralResponse(res, true, "Get Artists List Successful", 200, fullArtistInfo);
 
     } catch (error) {
         console.error('Error fetching artists for admin:', error);

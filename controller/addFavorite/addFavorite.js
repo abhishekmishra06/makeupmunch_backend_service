@@ -16,7 +16,7 @@ const addFavorite = async (req, res) => {
 
     try {
         // Check if favorite_id is a valid artist/salon
-        const user = await User.findById(favorite_id);
+        const user = await User.Customer.findById(favorite_id);
         if (!user) {
             return res.status(404).json({ success: false, message: 'Artist or Salon not found' });
         }

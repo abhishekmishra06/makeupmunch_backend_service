@@ -6,13 +6,13 @@ const logout = async (req, res) => {
     const userId = req.userId; // Assuming `userId` is extracted from middleware
 
     try {
-        const user = await User.findById(userId);
+        const user = await User.Customer.findById(userId);
 
         if (!user) {
             return sendGeneralResponse(res, false, "User not found", 404);
         }
 
-        await User.updateOne({ _id: userId }, {
+        await User.Customer.updateOne({ _id: userId }, {
             $set: {
                 isLogin: false,
                 lastLoginAt: new Date(),

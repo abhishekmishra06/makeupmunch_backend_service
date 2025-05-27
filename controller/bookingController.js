@@ -8,7 +8,7 @@ const crypto = require('crypto');
 const { sendGeneralResponse } = require('../utils/responseHelper');
 const { sendMail } = require('../utils/mailer');
 
-const { User, Service } = require('../models/userModel');
+const { User, Service, Artist, Customer } = require('../models/userModel');
 const moment = require('moment');
 
 // Initialize Razorpay with your credentials
@@ -79,7 +79,7 @@ const booking = async (req, res) => {
 
     try {
         // Verify user exists
-        const user = await User.findById(user_id);
+        const user = await Customer.findById(user_id);
         console.log('Found user:', user);
 
         if (!user || (user.role !== 'customer' && user.role !== 'costumer')) {
@@ -87,7 +87,7 @@ const booking = async (req, res) => {
         }
 
         // Verify artist exists
-        const artist = await User.findById(artist_id);
+        const artist = await Artist.findById(artist_id);
         console.log('Found artist:', artist);
 
         if (!artist || artist.role !== 'artist') {
@@ -275,7 +275,7 @@ const verifyAndCompletePayment = async (req, res) => {
 
             // Send confirmation emails
             try {
-                const userEmail = booking.user_info.email || (await User.findById(booking.user_id))?.email;
+                const userEmail = booking.user_info.email || (await Customer.findById(booking.user_id))?.email;
 
                 if (userEmail) {
                     await sendMail({
@@ -297,7 +297,7 @@ Thank you for choosing Makeup Munch!`
 
                 // Only send artist notification for regular bookings
                 if (!isPackageBooking && booking.artist_id) {
-                    const artist = await User.findById(booking.artist_id);
+                    const artist = await Artist.findById(booking.artist_id);
                     if (artist?.email) {
                         await sendMail({
                             to: artist.email.trim(),
@@ -373,7 +373,7 @@ const packageBooking = async (req, res) => {
         }
 
         // Verify user exists
-        const user = await User.findById(user_id);
+        const user = await Customer.findById(user_id);
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -487,7 +487,7 @@ const getUserBookings = async (req, res) => {
 
     try {
         // Verify user exists
-        const user = await User.findById(user_id);
+        const user = await Customer.findById(user_id);
         if (!user) {
             return sendGeneralResponse(res, false, 'User not found', 404);
         }
@@ -513,7 +513,7 @@ const getArtistBookings = async (req, res) => {
 
     try {
         // Verify artist exists and has artist role
-        const artist = await User.findById(artist_id);
+        const artist = await Artist.findById(artist_id);
         if (!artist || artist.role !== 'artist') {
             return sendGeneralResponse(res, false, 'Artist not found or invalid role', 404);
         }
@@ -576,7 +576,7 @@ const getUserPackageBookings = async (req, res) => {
         }
 
         // Verify user exists
-        const user = await User.findById(user_id);
+        const user = await Customer.findById(user_id);
         if (!user) {
             return sendGeneralResponse(res, false, 'User not found', 404);
         }
@@ -686,7 +686,7 @@ const verifyPackagePayment = async (req, res) => {
 
             // Send confirmation email
             try {
-                const user = await User.findById(booking.user_id);
+                const user = await Customer.findById(booking.user_id);
                 console.log('Found user for email:', user?.email);
 
                 if (user?.email) {

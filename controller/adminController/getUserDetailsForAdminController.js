@@ -1,5 +1,5 @@
 const { Booking } = require("../../models/bookingModel");
-const { User } = require("../../models/userModel");
+const { User, Customer } = require("../../models/userModel");
 const Address = require('../../models/userAddressModel');
 const { sendGeneralResponse } = require("../../utils/responseHelper");
 
@@ -8,7 +8,7 @@ const getUserDetailsForAdmin = async (req, res) => {
     const userId = req.params.userId;
 
     // Find the user
-    const user = await User.findById(userId);
+    const user = await Customer.findById(userId);
     if (!user) {
       return sendGeneralResponse(res, false, "User not found", 404, null);
     }

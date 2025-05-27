@@ -1,5 +1,5 @@
 const { sendGeneralResponse } = require("../utils/responseHelper");
-const {   User, Service }  = require("../models/userModel");
+const {   User, Service, Artist }  = require("../models/userModel");
 const Favorite = require('../models/favoriteModel');  
 const { validateServicesFormat } = require("../utils/validation");
  
@@ -10,7 +10,7 @@ const artistList = async (req, res) => {
     try {
         console.log("Fetching artist list...");
         
-        const artists = await User.find({ role: 'artist' }).select('-password -refreshToken -token'); // Exclude password field
+        const artists = await Artist.find({ role: 'artist' }).select('-password -refreshToken -token'); // Exclude password field
 
          if (!artists || artists.length === 0) {
             return sendGeneralResponse(res, false, 'No artists found', 404);
@@ -23,7 +23,8 @@ const artistList = async (req, res) => {
         const artistsWithFavoriteStatus = await Promise.all(artists.map(async (artist) => {
           const services = await Service.findOne({ userId: artist._id });
           
-      
+       
+
           return {
               ...artist._doc,
               is_favorite: favoriteArtistIds.includes(artist._id.toString()),
@@ -53,7 +54,7 @@ const addArtistServices = async (req, res) => {
   console.log("Received services:", services);
 
   try {
-    const user = await User.findById(id);
+    const user = await Artist.findById(id);
     if (!user) {
       return sendGeneralResponse(res, false, 'Artist not found', 404);
     }
@@ -128,7 +129,7 @@ const getArtistServices = async (req, res) => {
   const { id } = req.params; // Assuming you'll pass the artist's ID as a URL parameter
 
   try {
-    const user = await User.findById(id);
+    const user = await Artist.findById(id);
     if (!user) {
       return sendGeneralResponse(res, false, 'Artist not found', 404);
     }
@@ -161,7 +162,7 @@ const deleteArtistService = async (req, res) => {
   }
 
   try {
-    const user = await User.findById(id);
+    const user = await Artist.findById(id);
     if (!user) {
       return sendGeneralResponse(res, false, 'Artist not found', 404);
     }
