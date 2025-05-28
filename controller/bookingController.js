@@ -273,15 +273,18 @@ const verifyAndCompletePayment = async (req, res) => {
 
             await booking.save();
 
-            // Send confirmation emails
+            // Send confirmation emails in user's email
             try {
                 const userEmail = booking.user_info.email || (await Customer.findById(booking.user_id))?.email;
 
+
+
+
                 if (userEmail) {
-                    await sendMail({
-                        to: userEmail.trim(),
-                        subject: 'Booking Confirmation - Makeup Munch',
-                        text: `Dear ${booking.user_info.user_Fname},
+                    const subject = 'Booking Confirmation - Makeup Munch';
+
+
+                    const text = `Dear ${booking.user_info.user_Fname},
 
 Your booking has been confirmed!
 
@@ -291,28 +294,146 @@ Booking Details:
 - Time: ${booking.booking_time}
 ${isPackageBooking ? `- Package: ${booking.package_details.package_name}` : ''}
 
-Thank you for choosing Makeup Munch!`
+Thank you for choosing Makeup Munch!`;
+
+
+
+                    const html = `
+  <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+    <div style="background-color: #fff; max-width: 600px; margin: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); overflow: hidden;">
+      <div style="background-color: #FFB6C1; padding: 20px; color: white; text-align: center;">
+        <h1 style="margin: 0;">Booking Confirmed!</h1>
+      </div>
+      <div style="padding: 20px; color: #333;">
+        <h2>Hi ${booking.user_info.user_Fname},</h2>
+        <p>Thank you for choosing <strong>Makeup Munch</strong>. Your booking is successfully confirmed. Here are the details:</p>
+        <ul style="line-height: 1.6;">
+          <li><strong>Booking ID:</strong> ${booking._id}</li>
+          <li><strong>Date:</strong> ${new Date(booking.booking_date).toLocaleDateString()}</li>
+          <li><strong>Time:</strong> ${booking.booking_time}</li>
+          ${isPackageBooking ? `<li><strong>Package:</strong> ${booking.package_details.package_name}</li>` : ''}
+        </ul>
+        <p>You can view or manage your booking anytime by visiting your dashboard.</p>
+        <a href="https://www.makeupmunch.in/userdashboard" style="display: inline-block; background-color: #FF69B4; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Go to Dashboard</a>
+        <hr style="margin: 30px 0;">
+        <p style="margin: 0;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <div style="margin-top: 20px; text-align: center;">
+          <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
+            <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
+          </a>
+          <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
+            <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
+          </a>
+          <a href="mailto:support@makeupmunch.in" style="margin: 0 10px;">
+            <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+
+
+                    await sendMail({
+                        to: userEmail.trim(),
+                        subject: subject,
+                        text: text,
+                        html: html
+
+                        //                         `Dear ${booking.user_info.user_Fname},
+
+                        // Your booking has been confirmed!
+
+                        // Booking Details:
+                        // - Booking ID: ${booking._id}
+                        // - Date: ${new Date(booking.booking_date).toLocaleDateString()}
+                        // - Time: ${booking.booking_time}
+                        // ${isPackageBooking ? `- Package: ${booking.package_details.package_name}` : ''}
+
+                        // Thank you for choosing Makeup Munch!`
                     });
                 }
 
                 // Only send artist notification for regular bookings
                 if (!isPackageBooking && booking.artist_id) {
                     const artist = await Artist.findById(booking.artist_id);
+                    console.log(` this is artist ${artist}`);
                     if (artist?.email) {
-                        await sendMail({
-                            to: artist.email.trim(),
-                            subject: 'New Booking Notification - Makeup Munch',
-                            text: `Dear ${artist.username || 'Artist'},
 
-You have a new confirmed booking!
 
-Booking Details:
+                        const subject = '🎉 You Have a New Booking on Makeup Munch!';
+                        const text = `Hi ${artist.username || 'Artist'},
+
+Great news! You have received a new confirmed booking.
+
+📋 Booking Details:
 - Booking ID: ${booking._id}
 - Customer Name: ${booking.user_info.user_Fname} ${booking.user_info.user_Lname}
 - Date: ${new Date(booking.booking_date).toLocaleDateString()}
 - Time: ${booking.booking_time}
 
-Please check your dashboard for more details.`
+🧾 Please log in to your artist dashboard to view all the details and get ready to delight your client!
+
+Login here: https://www.makeupmunch.in/artistbooking
+
+Best regards,
+Team Makeup Munch`;
+
+                        const html = `
+  <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff0f5; padding: 30px;">
+    <div style="background-color: white; max-width: 600px; margin: auto; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); overflow: hidden;">
+      <div style="background-color: #FF69B4; padding: 20px; color: white; text-align: center;">
+        <h2 style="margin: 0;">🎉 You Have a New Booking!</h2>
+      </div>
+      <div style="padding: 25px 20px;">
+        <p style="font-size: 16px;">Hi <strong>${artist.username || 'Artist'}</strong>,</p>
+        <p style="font-size: 16px;">You’ve just received a <strong>new confirmed booking</strong> on <strong>Makeup Munch</strong>!</p>
+        <div style="background-color: #f9f9f9; border: 1px dashed #ddd; padding: 15px; margin: 20px 0; border-radius: 8px;">
+          <p style="margin: 5px 0;"><strong>Booking ID:</strong> ${booking._id}</p>
+          <p style="margin: 5px 0;"><strong>Customer:</strong> ${booking.user_info.user_Fname} ${booking.user_info.user_Lname}</p>
+          <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(booking.booking_date).toLocaleDateString()}</p>
+          <p style="margin: 5px 0;"><strong>Time:</strong> ${booking.booking_time}</p>
+        </div>
+        <p>Visit your dashboard to view the full details and prepare accordingly.</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="https://www.makeupmunch.in/artistbooking" style="background-color: #FF69B4; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px;">Go to Artist Dashboard</a>
+        </div>
+        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <hr style="margin: 30px 0;">
+        <div style="text-align: center;">
+          <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
+            <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook">
+          </a>
+          <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
+            <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram">
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+
+                        await sendMail({
+                            to: artist.email.trim(),
+                            subject: subject,
+                            text: text,
+
+                            //                             `Dear ${artist.username || 'Artist'},
+
+                            // You have a new confirmed booking!
+
+                            // Booking Details:
+                            // - Booking ID: ${booking._id}
+                            // - Customer Name: ${booking.user_info.user_Fname} ${booking.user_info.user_Lname}
+                            // - Date: ${new Date(booking.booking_date).toLocaleDateString()}
+                            // - Time: ${booking.booking_time}
+
+                            // Please check your dashboard for more details.`,
+
+
+                            html: html
                         });
                     }
                 }
@@ -684,7 +805,7 @@ const verifyPackagePayment = async (req, res) => {
             console.log('Saving updated booking:', booking);
             await booking.save();
 
-            // Send confirmation email
+            // Send confirmation email in user's email
             try {
                 const user = await Customer.findById(booking.user_id);
                 console.log('Found user for email:', user?.email);
