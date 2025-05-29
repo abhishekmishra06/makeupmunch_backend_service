@@ -28,7 +28,7 @@ app.use(cors({
         'https://makeupmunch-ui-testing.vercel.app',
         'https://mekeupmunch-admin-dashboard.vercel.app',
         'https://admin.makeupmunch.in',
-        'https://lab.makeupmunch.in'
+        'https://lab.development.makeupmunch.in'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
