@@ -4,6 +4,10 @@ const connectDB = require('./utils/db');
 const cors = require('cors');
 const crypto = require('crypto');
 
+const envFile = `.env.${process.env.NODE_ENV || "development"}`;
+dotenv.config({ path: envFile });
+console.log("Loading environment variables from:", envFile);
+// const CORS_ORIGIN = process.env.CORS_ORIGIN;
 
 const authRoutes = require('./routes/routes');
 

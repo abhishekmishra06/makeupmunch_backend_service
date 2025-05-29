@@ -1,10 +1,11 @@
 const { v2: cloudinary } = require('cloudinary');
+require('dotenv').config();
 
 // Configuration
-cloudinary.config({ 
-    cloud_name: 'ddxqvcz2j', 
-    api_key: '862636515494291', 
-    api_secret: 'Znl4FjD0PoD5yVal7RlGjxi7fxU'  
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
 /**
@@ -15,7 +16,7 @@ cloudinary.config({
  * @param {string} resourceType 
  * @returns {Promise<string>} - The URL of the uploaded image.
  */
- 
+
 const uploadImage = async (imageBuffer, publicId) => {
     return new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
@@ -46,4 +47,4 @@ const uploadFile = async (fileBuffer, publicId, resourceType) => {
     });
 };
 
-module.exports = { uploadImage , uploadFile };
+module.exports = { uploadImage, uploadFile };
