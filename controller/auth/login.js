@@ -6,15 +6,17 @@ const { generateAccessToken, generateRefreshToken } = require("../../utils/jwt_t
 const Otp = require("../../models/otp_model");
 
 const login = async (req, res) => {
-    const { email, otp, password, fcmToken, role } = req.body;
+    const { email, password, fcmToken, role } = req.body;
+
+    console.log("login running")
 
     if (!email) {
         return sendGeneralResponse(res, false, "Email field is required", 400);
     }
 
-    // if (!password) {
-    //     return sendGeneralResponse(res, false, "Password field is required", 400);
-    // }
+    if (!password) {
+        return sendGeneralResponse(res, false, "Password field is required", 400);
+    }
 
     if (!role || !['customer', 'artist'].includes(role)) {
         return sendGeneralResponse(res, false, "Invalid or missing role", 400);
@@ -59,24 +61,39 @@ const login = async (req, res) => {
 
         } else if (isCustomer) {
 
-            if (!otp) {
-                return sendGeneralResponse(res, false, "OTP is required for customer login", 400);
+            // for otp login 
+            // if (!otp) {
+            //     return sendGeneralResponse(res, false, "OTP is required for customer login", 400);
+            // }
+
+
+            // const fixedOTP = '1234'; // replace with real OTP logic if needed
+
+            // if (otp !== fixedOTP) {
+            //     return sendGeneralResponse(res, false, 'Invalid OTP', 400);
+            // }
+
+            if (!password) {
+                return sendGeneralResponse(res, false, "Password is required for artist login", 400);
             }
-
-
-            const fixedOTP = '1234'; // replace with real OTP logic if needed
-
-            if (otp !== fixedOTP) {
-                return sendGeneralResponse(res, false, 'Invalid OTP', 400);
-            }
-
-
+console.log(password);
 
             user = await User.Customer.findOne({ email, role: "customer" });
 
             if (!user) {
                 return sendGeneralResponse(res, false, 'Customer not registered', 400);
             }
+
+
+
+            const isMatch = await bcrypt.compare(password, user.password);
+
+console.log(isMatch);
+
+            if (!isMatch) {
+                return sendGeneralResponse(res, false, 'Invalid password', 400);
+            }
+
         }
 
 

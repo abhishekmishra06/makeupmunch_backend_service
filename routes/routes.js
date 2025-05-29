@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth, sendLoginLink, loginViaLink } = require('../controller/authController');
-const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
+const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp, verifyOtpAndChangeArtistPassword } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
 const { getUserPackageBookings, packageBooking, booking, getAllBookings, getUserBookings, getArtistBookings, verifyAndCompletePayment, verifyPackagePayment } = require('../controller/bookingController');
@@ -119,6 +119,9 @@ router.put('/editProfile/:id', upload.single('profile_img'), verifyToken, editPr
 router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken, editArtistProfile);
 
 router.put('/change_password', verifyOtpAndChangePassword);
+router.put('/changeArtistPassword', verifyOtpAndChangeArtistPassword);
+
+ 
 router.post('/booking', verifyToken, booking);
 router.post('/booking/verify-payment', verifyToken, verifyAndCompletePayment);
 router.post('/packageBooking', packageBooking);

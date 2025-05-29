@@ -15,7 +15,7 @@ const registerUser = async (req, res) => {
             return sendGeneralResponse(res, false, 'Request body is missing', 400);
         }
 
-        const { email, otp, phone, gender, role, fcmToken } = req.body;
+        const { email, password, phone, gender, role, fcmToken } = req.body;
 
         // Validate required fields
 
@@ -29,8 +29,8 @@ const registerUser = async (req, res) => {
         if (!role) {
             return sendGeneralResponse(res, false, 'Role is required', 400);
         }
-        if (!otp) {
-            return sendGeneralResponse(res, false, 'OTP is required', 400);
+        if (!password) {
+            return sendGeneralResponse(res, false, 'password is required', 400);
         }
 
         const allowedRoles = ['customer'];  // only customer is allowed here
@@ -45,9 +45,9 @@ const registerUser = async (req, res) => {
         }
 
 
-        if (otp !== '1234') {
-            return sendGeneralResponse(res, false, 'Invalid OTP', 400);
-        }
+        // if (otp !== '1234') {
+        //     return sendGeneralResponse(res, false, 'Invalid OTP', 400);
+        // }
 
         let username = email.split('@')[0]; // Get text before '@'
         username = username.replace(/(\d{3,})$/, '');
@@ -61,13 +61,13 @@ const registerUser = async (req, res) => {
         // Hash password
 
 
-        // const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create new user
         const user = new User.Customer({
             username,
             email,
-            password: '',
+            password: hashedPassword,
             phone,
             gender: gender || '', // Optional field
             role,
