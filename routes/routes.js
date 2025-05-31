@@ -39,7 +39,7 @@ const errorHandler = require('../middleware/errorHandler');
 const sendPushNotification = require('../utils/sendReminderNotification');
 const { Userlogin, login } = require('../controller/auth/login');
 const { registerUsers, register } = require('../controller/auth/register');
-const { addUserAddress, updateUserAddress, deleteUserAddress, getUserAddresses } = require('../controller/profileController/UserAddress');
+const { addUserAddress, updateUserAddress, deleteUserAddress, getUserAddresses } = require('../controller/profileController/userAddress');
 
 
 const router = express.Router();
