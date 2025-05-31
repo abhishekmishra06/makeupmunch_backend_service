@@ -25,6 +25,7 @@ app.use(cors({
     'http://localhost:3001',
     'https://www.makeupmunch.in',
     'https://lab.development.makeupmunch.in',
+    'lab.development.makeupmunch.in',
     'https://admin.dashboard.makeupmunch.in'
   ],
     credentials: true,
