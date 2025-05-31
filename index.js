@@ -21,17 +21,12 @@ const app = express();
 app.use(express.json());
 app.use(cors({
     origin: [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'https://www.makeupmunch.in',
-        'admin.makeupmunch.in',
-        'https://makeupmunch-ui-testing.vercel.app',
-        'https://mekeupmunch-admin-dashboard.vercel.app',
-        'https://admin.makeupmunch.in',
-        'https://lab.development.makeupmunch.in',
-        'admin.dashboard.makeupmunch.in'
-
-    ],
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://www.makeupmunch.in',
+    'https://lab.development.makeupmunch.in',
+    'https://admin.dashboard.makeupmunch.in'
+  ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 }));
