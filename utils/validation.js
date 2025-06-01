@@ -16,7 +16,7 @@ const validateRequiredFields = ( res, body, fields) => {
             return sendGeneralResponse(res, false, `${field.charAt(0).toUpperCase() + field.slice(1)} is required`, 400);
         }
     }
-    return null;
+    return null;    
   };
   
   const validateRequiredAddressFields = (res, address, fields) => {

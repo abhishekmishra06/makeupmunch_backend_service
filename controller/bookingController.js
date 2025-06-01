@@ -18,13 +18,19 @@ const razorpay = new Razorpay({
 });
 
 // Create Razorpay order
-const createRazorpayOrder = async (amount, receipt) => {
+const createRazorpayOrder = async (amountInRupees, receipt) => {
+    
     try {
+
+        const amountInPaise = Math.round(amountInRupees * 100);
+
+
+
         // Ensure receipt is no longer than 40 characters
         const truncatedReceipt = receipt.substring(0, 40);
 
         const options = {
-            amount: 100, // Fixed amount: 1 rupee = 100 paise
+            amount: amountInPaise, // Fixed amount: 1 rupee = 100 paise
             currency: 'INR',
             receipt: truncatedReceipt,
             payment_capture: 1
