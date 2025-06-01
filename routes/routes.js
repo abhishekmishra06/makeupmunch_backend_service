@@ -38,16 +38,15 @@ const { deleteRating } = require('../controller/rating/deleteRating');
 const errorHandler = require('../middleware/errorHandler');
 const sendPushNotification = require('../utils/sendReminderNotification');
 const { Userlogin } = require('../controller/auth/login');
+const { createConsultation, getAllConsultations, getConsultationById, updateConsultationStatus } = require('../controller/consultationController');
+
+// Import artist profile routes
+const artistProfileRoutes = require('./artistProfileRoutes');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-
-
-
-
 router.post('/adminLogin', adminLogin);
-
 
 router.post('/register', upload.single('profile_img'), register);
 
@@ -60,22 +59,14 @@ router.post('/packages', packageController.createPackage);
 router.put('/packages/:id', packageController.updatePackage);
 router.delete('/packages/:id', packageController.deletePackage);
 
-
-
-
-
 router.post('/login', login);
-
 
 router.post('/sendLoginLink', sendLoginLink);
 router.post('/loginViaLink', loginViaLink);
 
 router.post('/userlogin', Userlogin);
 
-
-
 router.post('/getAccessToken', getAccessToken);
-
 
 router.post('/sendEmailOtp', sendEmailOtp);
 router.post('/sendPhoneOtp', sendPhoneOtp);
@@ -84,7 +75,6 @@ router.post('/verifyPhonOtp', verifyPhoneOtp);
 router.post('/verifyEmailOtp', verifyEmailOtp);
 router.post('/sendPushNotification', async (req, res) => {
   const { token, title, body, imageUrl, clickAction, channelId, actionType } = req.body;
-
 
   try {
     const result = await sendPushNotification({
@@ -123,7 +113,6 @@ router.get('/user/role/:role', getUsersByRole);
 router.post('/addFavorite', addFavorite);
 router.post('/removeFavorite', removeFavorite);
 
-// router.post('/uploadArtistImages',   upload.array('images'), uploadArtistImages);
 router.post('/uploadArtistImages', upload.array('images[]'), uploadArtistImages);
 
 router.get('/artist-images/:artistId', getArtistImages);
@@ -131,14 +120,9 @@ router.get('/artist/services/:id', getArtistServices);
 router.post('/artist/addservices', addArtistServices);
 router.delete('/artist/deleteService', deleteArtistService);
 
-
-
 router.post('/makeRating', makeRating);
 router.get('/getRatings', getRatings);
 router.delete('/deleteRating', deleteRating);
-// router.post('/editReview', editRe);
- 
-
 
 router.post('/feedback', addFeedback);
 router.get('/feedback/:feedback_for_id', getFeedback);
@@ -149,9 +133,6 @@ router.post('/createJob', createJob);
 router.put('/updateJob/:jobId', updateJob);
 router.delete('/deleteJob/:jobId', deleteJob);
 
-
-
-
 router.get('/bookingHistory/:user_id', bookingHistory);
 router.post('/order', bookingpayment);
 router.post('/createServiceType', createService);
@@ -159,30 +140,28 @@ router.get('/getServiceType', getServices);
 
 router.post('/updateServiceType/:id', updateService);
 
-
 router.post('/blog/create', createBlogPost);
 router.get('/blog/get', readBlogPosts);
 router.put('/blog/:id', updateBlogPost);
 router.delete('/blog/:id', deleteBlogPost);
 router.post('/like', likeBlogPost);
 
-
 router.post('/subscribe', subscribe);
 router.post('/unsubscribe', unsubscribe);
 
 router.post('/contactus', contactUs);
 
-
-
+// Consultation routes
+router.post('/consultation', createConsultation);
+router.get('/consultations', getAllConsultations);
+router.get('/consultation/:id', getConsultationById);
+router.put('/consultation/:id/status', updateConsultationStatus);
 
 router.get('/countries', getCountries);
 router.get('/states/:countryName', getStates);
 router.get('/cities/:stateName', getCities);
 router.post('/verifyPayment', verifyPayment);
 
-
-
-// Form submission routes
 router.post('/form/submit', formController.createSubmission);
 router.get('/form/submissions', formController.getAllSubmissions);
 router.get('/form/submission/:phoneNumber', formController.getSubmissionByPhone);
@@ -190,6 +169,8 @@ router.get('/form/submission/:phoneNumber', formController.getSubmissionByPhone)
 router.post('/auth/firebase', firebaseAuth);
 
 router.post('/verify-package-payment', verifyToken, verifyPackagePayment);
+
+router.use('/artist', artistProfileRoutes);
 
 router.use(errorHandler);
 
