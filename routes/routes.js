@@ -62,7 +62,7 @@ router.post('/login', login);
 
 router.post('/sendLoginLink', sendLoginLink);
 router.post('/loginViaLink', loginViaLink);
-router.post('/userlogin', Userlogin);
+// router.post('/userlogin', Userlogin);
 
 //  for artist and costumer login
  
