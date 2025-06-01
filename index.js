@@ -4,6 +4,10 @@ const connectDB = require('./utils/db');
 const cors = require('cors');
 const crypto = require('crypto');
 
+const envFile = `.env.${process.env.NODE_ENV || "development"}`;
+dotenv.config({ path: envFile });
+console.log("Loading environment variables from:", envFile);
+// const CORS_ORIGIN = process.env.CORS_ORIGIN;
 
 const authRoutes = require('./routes/routes');
 
@@ -17,11 +21,15 @@ const app = express();
 app.use(express.json());
 app.use(cors({
     origin: [
-        'http://localhost:3000',
-        'http://localhost:3001',
-        'https://www.makeupmunch.in',
-        'https://admin.dashboard.makeupmunch.in'
-    ],
+ 
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://www.makeupmunch.in',
+    'https://lab.development.makeupmunch.in',
+    'lab.development.makeupmunch.in',
+    'https://admin.dashboard.makeupmunch.in'
+  ],
+ 
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
 }));

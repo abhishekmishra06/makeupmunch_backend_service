@@ -22,13 +22,13 @@ const addFeedback = async (req, res) => {
 
     try {
         // Verify the user providing feedback exists
-        const user = await User.findById(user_id);
+        const user = await User.Customer.findById(user_id);
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
         // Verify the artist or salon receiving feedback exists
-        const feedbackFor = await User.findById(feedback_for_id);
+        const feedbackFor = await User.Artist.findById(feedback_for_id);
         if (!feedbackFor) {
             return res.status(404).json({ success: false, message: 'Artist or Salon not found' });
         }

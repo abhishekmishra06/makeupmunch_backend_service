@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
-const { register, login, getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth, sendLoginLink, loginViaLink } = require('../controller/authController');
-const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp } = require('../controller/otpController');
+const { getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth, sendLoginLink, loginViaLink } = require('../controller/authController');
+const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp, verifyOtpAndChangeArtistPassword } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
 const { getUserPackageBookings, packageBooking, booking, getAllBookings, getUserBookings, getArtistBookings, verifyAndCompletePayment, verifyPackagePayment } = require('../controller/bookingController');
@@ -37,7 +37,13 @@ const { getRatings } = require('../controller/rating/getRating');
 const { deleteRating } = require('../controller/rating/deleteRating');
 const errorHandler = require('../middleware/errorHandler');
 const sendPushNotification = require('../utils/sendReminderNotification');
-const { Userlogin } = require('../controller/auth/login');
+
+const { Userlogin, login } = require('../controller/auth/login');
+const { registerUsers, register } = require('../controller/auth/register');
+const { addUserAddress, updateUserAddress, deleteUserAddress, getUserAddresses } = require('../controller/profileController/userAddress');
+
+
+// const { Userlogin } = require('../controller/auth/login');
 const { createConsultation, getAllConsultations, getConsultationById, updateConsultationStatus } = require('../controller/consultationController');
 
 // Import artist profile routes
@@ -48,6 +54,18 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/adminLogin', adminLogin);
 
+ 
+
+// for constumer and artist login
+router.post('/login', login);
+
+
+router.post('/sendLoginLink', sendLoginLink);
+router.post('/loginViaLink', loginViaLink);
+router.post('/userlogin', Userlogin);
+
+//  for artist and costumer login
+ 
 router.post('/register', upload.single('profile_img'), register);
 
 router.post('/registerSalon', upload.single('profile_img'), registerSalon);
@@ -59,13 +77,7 @@ router.post('/packages', packageController.createPackage);
 router.put('/packages/:id', packageController.updatePackage);
 router.delete('/packages/:id', packageController.deletePackage);
 
-router.post('/login', login);
-
-router.post('/sendLoginLink', sendLoginLink);
-router.post('/loginViaLink', loginViaLink);
-
-router.post('/userlogin', Userlogin);
-
+ 
 router.post('/getAccessToken', getAccessToken);
 
 router.post('/sendEmailOtp', sendEmailOtp);
@@ -92,10 +104,22 @@ router.post('/sendPushNotification', async (req, res) => {
   }
 });
 
+
+router.post('/addUserAddress', addUserAddress);
+router.put('/updateUserAddress', updateUserAddress);
+router.delete('/deleteUserAddress', deleteUserAddress);
+router.get('/getUserAddresses/:userId', getUserAddresses);
+
+
+
+
 router.put('/editProfile/:id', upload.single('profile_img'), verifyToken, editProfile);
 router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken, editArtistProfile);
 
 router.put('/change_password', verifyOtpAndChangePassword);
+router.put('/changeArtistPassword', verifyOtpAndChangeArtistPassword);
+
+ 
 router.post('/booking', verifyToken, booking);
 router.post('/booking/verify-payment', verifyToken, verifyAndCompletePayment);
 router.post('/packageBooking', packageBooking);
@@ -123,6 +147,10 @@ router.delete('/artist/deleteService', deleteArtistService);
 router.post('/makeRating', makeRating);
 router.get('/getRatings', getRatings);
 router.delete('/deleteRating', deleteRating);
+ 
+// router.post('/editReview', editRe);
+
+ 
 
 router.post('/feedback', addFeedback);
 router.get('/feedback/:feedback_for_id', getFeedback);

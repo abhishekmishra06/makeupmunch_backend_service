@@ -241,6 +241,7 @@ const Salonlogin = async (req, res) => {
   }
 };
 
+
 // const registerUser = async (req, res) => {
 //   try {
 //     if (!req.body) {
@@ -411,10 +412,10 @@ const registerUser = async (req, res) => {
 };
 
 
- 
 
 
-    // Generate tokens
+
+// Generate tokens
 //     const accessToken = generateAccessToken(user._id);
 //     const refreshToken = generateRefreshToken(user._id);
 //     user.refreshToken = refreshToken;
