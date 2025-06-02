@@ -27,7 +27,8 @@ app.use(cors({
     'https://www.makeupmunch.in',
     'https://lab.development.makeupmunch.in',
     'lab.development.makeupmunch.in',
-    'https://admin.dashboard.makeupmunch.in'
+    'https://admin.dashboard.makeupmunch.in',
+    'https://artist.makeupmunch.in'
   ],
  
     credentials: true,

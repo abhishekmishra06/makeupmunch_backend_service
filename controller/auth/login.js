@@ -76,7 +76,7 @@ const login = async (req, res) => {
             if (!password) {
                 return sendGeneralResponse(res, false, "Password is required for artist login", 400);
             }
-console.log(password);
+            console.log(password);
 
             user = await User.Customer.findOne({ email, role: "customer" });
 
@@ -88,7 +88,7 @@ console.log(password);
 
             const isMatch = await bcrypt.compare(password, user.password);
 
-console.log(isMatch);
+            console.log(isMatch);
 
             if (!isMatch) {
                 return sendGeneralResponse(res, false, 'Invalid password', 400);
