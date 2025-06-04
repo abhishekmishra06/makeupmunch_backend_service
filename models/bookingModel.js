@@ -47,7 +47,10 @@ const bookingSchema = new mongoose.Schema({
     cancellation: {
         cancelled_by: { type: String, enum: ['user', 'artist'] },
         cancellation_reason: { type: String },
-        cancellation_date: { type: Date }
+        cancellation_date: { type: Date },
+        cancellation_fee: { type: Number, default: 0 },
+        refund_amount: { type: Number, default: 0 },
+        cancellation_status: { type: String, enum: ['pending', 'processed', 'refunded'], default: 'pending' }
     } 
 }, { timestamps: true });
 
@@ -105,6 +108,14 @@ const packageBookingSchema = new mongoose.Schema({
         razorpay_order_id: String,
         razorpay_payment_id: String,
         razorpay_signature: String
+    },
+    cancellation: {
+        cancelled_by: { type: String, enum: ['user', 'artist'] },
+        cancellation_reason: { type: String },
+        cancellation_date: { type: Date },
+        cancellation_fee: { type: Number, default: 0 },
+        refund_amount: { type: Number, default: 0 },
+        cancellation_status: { type: String, enum: ['pending', 'processed', 'refunded'], default: 'pending' }
     }
 }, { timestamps: true });
 

@@ -35,6 +35,7 @@ const { formController } = require('../controller/formController');
 const { makeRating } = require('../controller/rating/MakeRating');
 const { getRatings } = require('../controller/rating/getRating');
 const { deleteRating } = require('../controller/rating/deleteRating');
+const { cancelBooking, cancelPackageBooking, getCancellationDetails } = require('../controller/cancellationController');
 const errorHandler = require('../middleware/errorHandler');
 const sendPushNotification = require('../utils/sendReminderNotification');
 
@@ -127,6 +128,12 @@ router.get('/getUserPackageBookings/:user_id', getUserPackageBookings)
 router.get('/getbooking', getAllBookings);
 router.get('/booking/user/:user_id', getUserBookings);
 router.get('/booking/artist/:artist_id', getArtistBookings);
+
+// Cancellation routes
+router.post('/booking/cancel', verifyToken, cancelBooking);
+router.post('/packageBooking/cancel', verifyToken, cancelPackageBooking);
+router.get('/booking/cancellation/:booking_id/:booking_type', getCancellationDetails);
+
 router.get('/shopsList', shopsList);
 router.get('/artistsList', artistList);
 router.get('/customerList', customerList);
