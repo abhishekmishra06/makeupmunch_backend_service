@@ -27,7 +27,7 @@ const bookingSchema = new mongoose.Schema({
         special_requirements: { type: String }
     }],
 
-    artist_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    artist_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Artist', required: true },
     booking_date: { type: Date, required: true },
     booking_time: { type: String, required: true },
     status: { type: String, enum: ['pending', 'confirmed', 'completed', 'cancelled'], default: 'pending' },

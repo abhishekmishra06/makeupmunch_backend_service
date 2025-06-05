@@ -122,10 +122,10 @@ const sendPhoneOtp = async (req, res) => {
       { otpHash, expiresAt, email: null },
       { upsert: true, new: true }
     );
- 
- await  sendSMS(phone , otp);
+
+    await sendSMS(phone, otp);
     console.log(otp);
-    sendGeneralResponse(res, true, "OTP sent to phone no", 200, { otp });
+    sendGeneralResponse(res, true, "OTP sent to phone no", 200,);
   } catch (error) {
     console.error("Error sending OTP:", error.message || error);
     sendGeneralResponse(res, false, "Internal server error", 500);
@@ -248,6 +248,121 @@ const verifyPhoneOtp = async (req, res) => {
 
 
 
+
+const verifyPhoneOtpHelper = async (phone, otp) => {
+  if (!phone) {
+    return { status: false, message: "phone is required", code: 400 };
+  }
+
+  if (!otp) {
+    return { status: false, message: "OTP is required", code: 400 };
+  }
+
+  if (!validatePhone(phone)) {
+    return { status: false, message: "Invalid phone", code: 400 };
+  }
+
+  try {
+    const otpEntry = await Otp.findOne({ phone });
+
+    if (!otpEntry) {
+      return { status: false, message: "Please request a new OTP", code: 400 };
+    }
+
+    const { otpHash, expiresAt } = otpEntry;
+
+    if (Date.now() > expiresAt) {
+      return {
+        status: false,
+        message: "The OTP has expired. Please request a new one.",
+        code: 400,
+      };
+    }
+
+    const isValid = await bcrypt.compare(otp, otpHash);
+
+    if (!isValid) {
+      return { status: false, message: "Invalid OTP", code: 400 };
+    }
+
+    // Success - delete OTP entry
+    await Otp.deleteMany({ phone });
+
+    return { status: true, message: "OTP verified successfully", code: 200 };
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    return { status: false, message: "Internal server error", code: 500 };
+  }
+};
+
+
+
+
+
+const verifyEmaiOtpHelper = async (email, otp) => {
+
+  // Check if email is provided
+  if (!email) {
+    return sendGeneralResponse(res, false, "Email is required", 400);
+  }
+
+  // Check if OTP is provided
+  if (!otp) {
+    return sendGeneralResponse(res, false, "OTP is required", 400);
+  }
+
+  // Validate email format
+  if (!validateEmail(email)) {
+    return sendGeneralResponse(res, false, "Invalid email", 400);
+  }
+
+  try {
+    // Find OTP entry in the database
+    const otpEntry = await Otp.findOne({ email });
+
+    // Check if OTP entry exists
+    if (!otpEntry) {
+      return { status: false, message: "Please request a new OTP", code: 400 };
+
+    }
+
+    const { otpHash, expiresAt } = otpEntry;
+
+    // Log current time and expiration time for debugging
+    console.log("Current Time:", Date.now());
+    console.log("OTP Expiration Time:", expiresAt);
+
+    // Check if OTP has expired
+    if (Date.now() > expiresAt) {
+      // Clean up expired OTP
+      await Otp.deleteMany({ email });
+
+      return { status: false, message: "The OTP has expired. Please request a new one", code: 400 };
+    }
+
+    // Compare provided OTP with stored OTP hash
+    const isValid = await bcrypt.compare(otp, otpHash);
+    if (isValid) {
+      // Delete OTP entry after successful verification
+      await Otp.deleteMany({ email });
+
+
+      return { status: true, message: "OTP verified successfully", code: 200 };
+
+
+    } else {
+      return { status: false, message: "Invalid OTP", code: 400 };
+
+    }
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    return { status: false, message: "Internal server error", code: 500 };
+
+  }
+};
+
+
+
 const verifyOtpAndChangePassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
 
@@ -270,12 +385,12 @@ const verifyOtpAndChangePassword = async (req, res) => {
 
     // Check if OTP entry exists
     if (!otpEntry) {
-        return sendGeneralResponse(res, false, "Please request a new OTP", 400);
-      }
+      return sendGeneralResponse(res, false, "Please request a new OTP", 400);
+    }
 
     const { otpHash, expiresAt } = otpEntry;
 
-     
+
 
     // Check if OTP has expired
     if (Date.now() > expiresAt) {
@@ -292,8 +407,8 @@ const verifyOtpAndChangePassword = async (req, res) => {
     // Verify the OTP
     const isValid = await bcrypt.compare(otp, otpHash);
     if (!isValid) {
- 
-        return sendGeneralResponse(res, false, "Invalid OTP. Please try again.", 400);
+
+      return sendGeneralResponse(res, false, "Invalid OTP. Please try again.", 400);
 
     }
 
@@ -302,10 +417,10 @@ const verifyOtpAndChangePassword = async (req, res) => {
     if (!user) {
       return sendGeneralResponse(res, false, "User not found", 404);
     }
- 
-   const Password = await bcrypt.hash(newPassword, 10);
+
+    const Password = await bcrypt.hash(newPassword, 10);
     await User.Customer.updateOne({ email }, { $set: { password: Password } });
- 
+
     await Otp.deleteMany({ email });
 
     // Email subject and HTML content
@@ -352,14 +467,14 @@ const verifyOtpAndChangePassword = async (req, res) => {
     // Send success response
 
 
-      sendGeneralResponse(res, true, "Password changed successfully", 200);
+    sendGeneralResponse(res, true, "Password changed successfully", 200);
 
-     
+
   } catch (error) {
     console.error("Error changing password:", error);
     sendGeneralResponse(res, false, "Internal server error", 500);
 
-   }
+  }
 };
 
 
@@ -388,12 +503,12 @@ const verifyOtpAndChangeArtistPassword = async (req, res) => {
 
     // Check if OTP entry exists
     if (!otpEntry) {
-        return sendGeneralResponse(res, false, "Please request a new OTP", 400);
-      }
+      return sendGeneralResponse(res, false, "Please request a new OTP", 400);
+    }
 
     const { otpHash, expiresAt } = otpEntry;
 
-     
+
 
     // Check if OTP has expired
     if (Date.now() > expiresAt) {
@@ -410,8 +525,8 @@ const verifyOtpAndChangeArtistPassword = async (req, res) => {
     // Verify the OTP
     const isValid = await bcrypt.compare(otp, otpHash);
     if (!isValid) {
- 
-        return sendGeneralResponse(res, false, "Invalid OTP. Please try again.", 400);
+
+      return sendGeneralResponse(res, false, "Invalid OTP. Please try again.", 400);
 
     }
 
@@ -420,10 +535,10 @@ const verifyOtpAndChangeArtistPassword = async (req, res) => {
     if (!user) {
       return sendGeneralResponse(res, false, "User not found", 404);
     }
- 
-   const Password = await bcrypt.hash(newPassword, 10);
+
+    const Password = await bcrypt.hash(newPassword, 10);
     await User.Artist.updateOne({ email }, { $set: { password: Password } });
- 
+
     await Otp.deleteMany({ email });
 
     // Email subject and HTML content
@@ -470,14 +585,14 @@ const verifyOtpAndChangeArtistPassword = async (req, res) => {
     // Send success response
 
 
-      sendGeneralResponse(res, true, "Password changed successfully", 200);
+    sendGeneralResponse(res, true, "Password changed successfully", 200);
 
-     
+
   } catch (error) {
     console.error("Error changing password:", error);
     sendGeneralResponse(res, false, "Internal server error", 500);
 
-   }
+  }
 };
 
 
@@ -498,5 +613,7 @@ module.exports = {
   verifyEmailOtp,
   verifyPhoneOtp,
   verifyOtpAndChangePassword,
-  verifyOtpAndChangeArtistPassword
+  verifyOtpAndChangeArtistPassword,
+  verifyPhoneOtpHelper , 
+  verifyEmaiOtpHelper
 };

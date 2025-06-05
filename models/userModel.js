@@ -19,12 +19,13 @@ const mongoose = require('mongoose');
 const CustomerRegisterSchema = new mongoose.Schema({
 
     username: { type: String },
-    email: { type: String, required: true },
+    email: { type: String, },
     password: { type: String },
     phone: { type: String, required: true, unique: true },
     gender: { type: String },
     role: { type: String, required: true, enum: ['customer'], default: 'customer' },
     profile_img: { type: String },
+    email_verify: { type: String  , default:false },
     fcmToken: { type: String },
     refreshToken: { type: String },
     isLogin: { type: Boolean, default: false }, // 👈 NEW
@@ -52,7 +53,7 @@ const ArtistRegisterSchema = new mongoose.Schema({
     username: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    phone: { type: String, required: true },
+    phone: { type: String, required: true, unique: true },
     city: { type: String, required: true },
     specialties: [{ type: String, required: true }],
     profile_img: { type: String, required: true },

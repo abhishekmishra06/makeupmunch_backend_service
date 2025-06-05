@@ -84,7 +84,7 @@ router.post('/getAccessToken', getAccessToken);
 router.post('/sendEmailOtp', sendEmailOtp);
 router.post('/sendPhoneOtp', sendPhoneOtp);
 
-router.post('/verifyPhonOtp', verifyPhoneOtp);
+router.post('/verifyPhoneOtp', verifyPhoneOtp);
 router.post('/verifyEmailOtp', verifyEmailOtp);
 router.post('/sendPushNotification', async (req, res) => {
   const { token, title, body, imageUrl, clickAction, channelId, actionType } = req.body;

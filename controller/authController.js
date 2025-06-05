@@ -301,48 +301,64 @@ const registerUser = async (req, res) => {
       return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
 
-    const { username, email, password, phone, gender, role, fcmToken } = req.body;
+    const { email, phone, phoneOtp, role, fcmToken } = req.body;
 
     // Validate required fields
-    if (!username) {
-      return sendGeneralResponse(res, false, 'Username is required', 400);
-    }
     if (!email) {
       return sendGeneralResponse(res, false, 'Email is required', 400);
-    }
-    if (!password) {
-      return sendGeneralResponse(res, false, 'Password is required', 400);
     }
     if (!phone) {
       return sendGeneralResponse(res, false, 'Phone number is required', 400);
     }
-    if (!role) {
-      return sendGeneralResponse(res, false, 'Role is required', 400);
+    if (!phoneOtp) {
+      return sendGeneralResponse(res, false, 'Phone OTP is required', 400);
     }
 
     if (!validateEmail(email)) {
       return sendGeneralResponse(res, false, 'Invalid email', 400);
     }
 
-    // Check for existing user
-    const existingUser = await User.Customer.findOne({ email });
-    if (existingUser) {
+    if (!validatePhone(phone)) {
+      return sendGeneralResponse(res, false, 'Invalid phone number', 400);
+    }
+
+    // First verify phone OTP
+    const { verifyPhoneOtpHelper } = require('./otpController');
+    const otpVerification = await verifyPhoneOtpHelper(phone, phoneOtp);
+    
+    if (!otpVerification.status) {
+      return sendGeneralResponse(res, false, otpVerification.message, otpVerification.code);
+    }
+
+    // Check for existing user by email or phone
+    const existingUserByEmail = await User.Customer.findOne({ email });
+    if (existingUserByEmail) {
       return sendGeneralResponse(res, false, 'Email already registered', 400);
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const existingUserByPhone = await User.Customer.findOne({ phone });
+    if (existingUserByPhone) {
+      return sendGeneralResponse(res, false, 'Phone number already registered', 400);
+    }
+
+    // Generate a default username from email
+    const defaultUsername = email.split('@')[0] + '_' + Math.floor(Math.random() * 1000);
+    
+    // Generate a random password since login will be via phone OTP or email
+    const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+    const hashedPassword = await bcrypt.hash(randomPassword, 10);
 
     // Create new user
     const user = new User.Customer({
-      username,
+      username: defaultUsername, // Auto-generated username
       email,
-      password: hashedPassword,
+      password: hashedPassword, // Random password since login is via OTP
       phone,
-      gender: gender || '', // Optional field
-      role,
-      profile_img: null, // Optional field,
-      fcmToken
+      role: role || 'customer',
+      gender: '', // Optional field
+      profile_img: null, // Optional field
+      fcmToken,
+      email_verify: true // Set email as verified since no email verification required
     });
 
     // Generate tokens
@@ -355,19 +371,19 @@ const registerUser = async (req, res) => {
 
     // Send welcome email
     const subject = 'Welcome to MakeUp Munch!';
-    const text = `Hi ${username},\n\nThank you for registering with us. We're excited to have you onboard!`;
+    const text = `Hi there,\n\nThank you for registering with us. We're excited to have you onboard!`;
     const html = `
             <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
                 <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
                     <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
-                        <h1>Welcome to Our Service!</h1>
+                        <h1>Welcome to MakeUp Munch!</h1>
                     </div>
                     <div style="padding: 20px;">
-                        <h2 style="color: #333;">Hello, ${username}!</h2>
+                        <h2 style="color: #333;">Hello!</h2>
                         <p>We are thrilled to have you on board. Thank you for registering with us!</p>
                         <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
                         <p>We hope you have a great experience with us!</p>
-                        <a href="https://makeup-adda.netlify.app/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
+                        <a href="https://www.makeupmunch.in/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
                         <p style="margin-top: 20px;">Follow us on social media:</p>
                         <div style="text-align: center; margin-top: 10px;"> 
                             <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
@@ -376,7 +392,7 @@ const registerUser = async (req, res) => {
                             <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
                                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
                             </a>
-                            <a href="mailto:support@yourservice.com">
+                            <a href="mailto:support@makeupmunch.in">
                                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
                             </a>
                         </div>
@@ -385,12 +401,17 @@ const registerUser = async (req, res) => {
             </div>
         `;
 
-    await sendMail({
-      to: email,
-      subject,
-      text,
-      html
-    });
+    try {
+      await sendMail({
+        to: email,
+        subject,
+        text,
+        html
+      });
+    } catch (emailError) {
+      console.error('Welcome email error:', emailError);
+      // Don't fail registration if email fails
+    }
 
     // Send success response
     return sendGeneralResponse(res, true, 'Registered successfully', 200, {
@@ -398,7 +419,6 @@ const registerUser = async (req, res) => {
       username: user.username,
       email: user.email,
       phone: user.phone,
-      gender: user.gender,
       role: user.role,
       profile_img: user.profile_img,
       accessToken,

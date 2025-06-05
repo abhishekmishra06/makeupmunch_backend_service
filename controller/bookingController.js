@@ -394,7 +394,7 @@ Team Makeup Munch`;
       </div>
       <div style="padding: 25px 20px;">
         <p style="font-size: 16px;">Hi <strong>${artist.username || 'Artist'}</strong>,</p>
-        <p style="font-size: 16px;">You’ve just received a <strong>new confirmed booking</strong> on <strong>Makeup Munch</strong>!</p>
+        <p style="font-size: 16px;">You've just received a <strong>new confirmed booking</strong> on <strong>Makeup Munch</strong>!</p>
         <div style="background-color: #f9f9f9; border: 1px dashed #ddd; padding: 15px; margin: 20px 0; border-radius: 8px;">
           <p style="margin: 5px 0;"><strong>Booking ID:</strong> ${booking._id}</p>
           <p style="margin: 5px 0;"><strong>Customer:</strong> ${booking.user_info.user_Fname} ${booking.user_info.user_Lname}</p>
@@ -622,7 +622,7 @@ const getUserBookings = async (req, res) => {
         // Find all bookings for the user
         const bookings = await Booking.find({ user_id })
             .sort({ createdAt: -1 }) // Sort by newest first
-            .populate('artist_id', 'name email phone profile_image'); // Get artist details
+            .populate('artist_id', 'username name email phone profile_img'); // Get artist details with correct field names
 
         return sendGeneralResponse(res, true, 'Bookings fetched successfully', 200, bookings);
     } catch (error) {
@@ -648,7 +648,7 @@ const getArtistBookings = async (req, res) => {
         // Find all bookings for the artist
         const bookings = await Booking.find({ artist_id })
             .sort({ createdAt: -1 }) // Sort by newest first
-            .populate('user_id', 'name email phone profile_image'); // Get customer details
+            .populate('user_id', 'username email phone profile_img'); // Get customer details
 
         return sendGeneralResponse(res, true, 'Bookings fetched successfully', 200, bookings);
     } catch (error) {
@@ -684,8 +684,8 @@ const getAllBookings = async (req, res) => {
         // Find bookings with populated user and artist details
         const bookings = await Booking.find(query)
             .sort({ createdAt: -1 })
-            .populate('user_id', 'name email phone profile_image')
-            .populate('artist_id', 'name email phone profile_image');
+            .populate('user_id', 'username email phone profile_img')
+            .populate('artist_id', 'username email phone profile_img');
 
         return sendGeneralResponse(res, true, 'Bookings fetched successfully', 200, bookings);
     } catch (error) {

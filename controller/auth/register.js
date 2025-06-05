@@ -6,31 +6,34 @@ const { sendGeneralResponse } = require("../../utils/responseHelper");
 const { uploadImage } = require("../../utils/uploadImages");
 const { validateEmail, validateRequiredFields } = require("../../utils/validation");
 const bcrypt = require('bcrypt');
+const { verifyPhoneOtpHelper } = require("../otpController");
 
 
 // for user register 
 const registerUser = async (req, res) => {
+    console.log('=== REGISTER USER FUNCTION CALLED ===');
+    console.log('Request body in registerUser:', JSON.stringify(req.body, null, 2));
+    
     try {
         if (!req.body) {
+            console.log('Request body is missing');
             return sendGeneralResponse(res, false, 'Request body is missing', 400);
         }
 
-        const { email, password, phone, gender, role, fcmToken } = req.body;
+        const { email, phone, phoneOtp, gender, role, fcmToken } = req.body;
+        console.log('Extracted fields:', { email, phone, phoneOtp, gender, role, fcmToken });
 
         // Validate required fields
-
-        if (!email) {
-            return sendGeneralResponse(res, false, 'Email is required', 400);
-        }
-
         if (!phone) {
             return sendGeneralResponse(res, false, 'Phone number is required', 400);
         }
+
         if (!role) {
             return sendGeneralResponse(res, false, 'Role is required', 400);
         }
-        if (!password) {
-            return sendGeneralResponse(res, false, 'password is required', 400);
+
+        if (!phoneOtp) {
+            return sendGeneralResponse(res, false, 'phoneOtp is required', 400);
         }
 
         const allowedRoles = ['customer'];  // only customer is allowed here
@@ -38,40 +41,58 @@ const registerUser = async (req, res) => {
             return sendGeneralResponse(res, false, `Invalid role '${role}'. Allowed role: ${allowedRoles.join(', ')}`, 400);
         }
 
+        const existingUser = await User.Customer.findOne({ phone });
+        if (existingUser) {
+            return sendGeneralResponse(res, false, 'Phone number already registered', 400);
+        }
 
-
-        if (!validateEmail(email)) {
+        // Validate email if provided
+        if (email && !validateEmail(email)) {
             return sendGeneralResponse(res, false, 'Invalid email', 400);
         }
 
-
-        // if (otp !== '1234') {
-        //     return sendGeneralResponse(res, false, 'Invalid OTP', 400);
-        // }
-
-        let username = email.split('@')[0]; // Get text before '@'
-        username = username.replace(/(\d{3,})$/, '');
-
-        // Check for existing user
-        const existingUser = await User.Customer.findOne({ email });
-        if (existingUser) {
-            return sendGeneralResponse(res, false, 'Email already registered', 400);
+        // Check if email already exists if provided
+        if (email) {
+            const existingEmail = await User.Customer.findOne({ email });
+            if (existingEmail) {
+                return sendGeneralResponse(res, false, 'Email already registered', 400);
+            }
         }
 
-        // Hash password
+        // Verify phone OTP
+        console.log('Verifying phone OTP...');
+        const otpResult = await verifyPhoneOtpHelper(phone, phoneOtp);
+        console.log('OTP verification result:', otpResult);
+        if (!otpResult.status) {
+            return sendGeneralResponse(res, false, otpResult.message, otpResult.code);
+        }
 
+        // Generate username from email or phone
+        let username = email ? email.split('@')[0].replace(/(\d{3,})$/, '') : `user${phone.slice(-4)}`;
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Generate a random password since login will be via phone OTP
+        const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+        const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+        console.log('Creating user with data:', {
+            username,
+            email: email || '',
+            phone,
+            role,
+            gender: gender || '',
+            hasPasswordHash: !!hashedPassword
+        });
 
         // Create new user
         const user = new User.Customer({
             username,
-            email,
-            password: hashedPassword,
+            email: email || '',
+            password: hashedPassword, // Use hashed random password instead of empty string
             phone,
             gender: gender || '', // Optional field
             role,
-            profile_img: null, // Optional field,
+            profile_img: null, // Optional field
+            email_verify: email ? false : '', // Set to false if email provided, empty string if not
             fcmToken,
             isLogin: true,
             lastLoginAt: new Date(),
@@ -82,48 +103,59 @@ const registerUser = async (req, res) => {
         const refreshToken = generateRefreshToken(user._id);
         user.refreshToken = refreshToken;
 
+        console.log('Saving user to database...');
         // Save user
         await user.save();
+        console.log('User saved successfully with ID:', user._id);
 
-        // Send welcome email
-        const subject = 'Welcome to MakeUp Munch!';
-        const text = `Hi ${username},\n\nThank you for registering with us. We're excited to have you onboard!`;
-        const html = `
-            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
-                <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
-                    <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
-                        <h1>Welcome to Our Service!</h1>
-                    </div>
-                    <div style="padding: 20px;">
-                        <h2 style="color: #333;">Hello, ${username}!</h2>
-                        <p>We are thrilled to have you on board. Thank you for registering with us!</p>
-                        <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
-                        <p>We hope you have a great experience with us!</p>
-                        <a href="https://makeup-adda.netlify.app/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
-                        <p style="margin-top: 20px;">Follow us on social media:</p>
-                        <div style="text-align: center; margin-top: 10px;"> 
-                            <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
-                                <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
-                            </a>
-                            <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
-                                <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
-                            </a>
-                            <a href="mailto:support@yourservice.com">
-                                <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
-                            </a>
+        // Send welcome email only if email is provided
+        if (email) {
+            const subject = 'Welcome to MakeUp Munch!';
+            const text = `Hi ${username},\n\nThank you for registering with us. We're excited to have you onboard!`;
+            const html = `
+                <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+                    <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                        <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
+                            <h1>Welcome to MakeUp Munch!</h1>
+                        </div>
+                        <div style="padding: 20px;">
+                            <h2 style="color: #333;">Hello, ${username}!</h2>
+                            <p>We are thrilled to have you on board. Thank you for registering with us!</p>
+                            <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
+                            <p>We hope you have a great experience with us!</p>
+                            <a href="https://makeup-adda.netlify.app/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
+                            <p style="margin-top: 20px;">Follow us on social media:</p>
+                            <div style="text-align: center; margin-top: 10px;"> 
+                                <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+                                    <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
+                                </a>
+                                <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+                                    <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
+                                </a>
+                                <a href="mailto:support@yourservice.com">
+                                    <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
 
-        await sendMail({
-            to: email,
-            subject,
-            text,
-            html
-        });
+            try {
+                await sendMail({
+                    to: email,
+                    subject,
+                    text,
+                    html
+                });
+                console.log('Welcome email sent successfully');
+            } catch (emailError) {
+                console.error('Failed to send welcome email:', emailError);
+                // Don't fail registration if email sending fails
+            }
+        }
 
+        console.log('Registration completed successfully');
         // Send success response
         return sendGeneralResponse(res, true, 'Registered successfully', 200, {
             _id: user._id,
@@ -162,20 +194,19 @@ const registerArtist = async (req, res) => {
         email,
         password,
         phone,
+        phoneOtp,
         city,
         specialties,
         role,
         fcmToken,
-
         availability,
         gender,
         paymentMethods,
         advanceAmount,
-
     } = req.body;
 
     const requiredFields = [
-        'businessName', 'username', 'email', 'password', 'phone', 'role', 'city', 'specialties',
+        'businessName', 'username', 'email', 'password', 'phone', 'phoneOtp', 'role', 'city', 'specialties',
         'availability', 'gender', 'paymentMethods', 'advanceAmount'
     ];
 
@@ -214,10 +245,24 @@ const registerArtist = async (req, res) => {
     }
 
     try {
-        const existingUser = await User.Artist.findOne({ email });
-
-        if (existingUser) {
+        // Check if email already exists
+        const existingUserByEmail = await User.Artist.findOne({ email });
+        if (existingUserByEmail) {
             return sendGeneralResponse(res, false, 'Email already registered', 400);
+        }
+
+        // Check if phone already exists
+        const existingUserByPhone = await User.Artist.findOne({ phone });
+        if (existingUserByPhone) {
+            return sendGeneralResponse(res, false, 'Phone number already registered', 400);
+        }
+
+        // Verify phone OTP
+        console.log('Verifying phone OTP for artist registration...');
+        const otpResult = await verifyPhoneOtpHelper(phone, phoneOtp);
+        console.log('OTP verification result:', otpResult);
+        if (!otpResult.status) {
+            return sendGeneralResponse(res, false, otpResult.message, otpResult.code);
         }
 
         let profile_img_url = null;
@@ -254,7 +299,41 @@ const registerArtist = async (req, res) => {
         user.refreshToken = refreshToken;
         await user.save();
 
-        sendGeneralResponse(res, true, 'Registered successfully', 200, {
+        // Send welcome email
+        const subject = 'Welcome to MakeUp Munch - Artist Registration Successful!';
+        const text = `Hi ${username},\n\nCongratulations! Your artist account has been successfully created. Welcome to MakeUp Munch!`;
+        const html = `
+            <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+                <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+                    <div style="background-color: #FFB6C1; padding: 10px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
+                        <h1>Welcome to MakeUp Munch!</h1>
+                    </div>
+                    <div style="padding: 20px;">
+                        <h2 style="color: #333;">Hello, ${username}!</h2>
+                        <p>Congratulations! Your artist account has been successfully created.</p>
+                        <p><strong>Business Name:</strong> ${businessName}</p>
+                        <p><strong>Specialties:</strong> ${specialties.join(', ')}</p>
+                        <p>You can now start offering your services and connecting with customers. Access your dashboard to manage your profile and bookings.</p>
+                        <a href="https://makeup-adda.netlify.app/artistdashboard" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Access Artist Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        try {
+            await sendMail({
+                to: email,
+                subject,
+                text,
+                html
+            });
+            console.log('Welcome email sent successfully to artist');
+        } catch (emailError) {
+            console.error('Failed to send welcome email:', emailError);
+            // Don't fail registration if email sending fails
+        }
+
+        sendGeneralResponse(res, true, 'Artist registered successfully', 200, {
             _id: user._id,
             businessName: user.businessName,
             username: user.username,
@@ -275,7 +354,7 @@ const registerArtist = async (req, res) => {
             refreshToken
         });
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('Artist registration error:', error);
         sendGeneralResponse(res, false, 'Internal server error', 500);
     }
 };
@@ -383,16 +462,23 @@ const registerSalon = async (req, res) => {
 
 // register function
 const register = async (req, res) => {
+    console.log('=== REGISTER FUNCTION CALLED ===');
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('Request headers:', req.headers);
+    
     if (!req.body) {
         return sendGeneralResponse(res, false, 'Request body is missing', 400);
     }
 
     const { role } = req.body;
+    console.log('Role from request:', role);
 
     // Handle role-specific registration
     if (role === 'artist') {
+        console.log('Calling registerArtist');
         return registerArtist(req, res);
     } else {
+        console.log('Calling registerUser');
         return registerUser(req, res);
     }
 };
