@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth, sendLoginLink, loginViaLink } = require('../controller/authController');
-const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp, verifyOtpAndChangeArtistPassword } = require('../controller/otpController');
+const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp, verifyOtpAndChangeArtistPassword, sendUserLoginOtp, sendArtistLoginOtp } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
 const { getUserPackageBookings, packageBooking, booking, getAllBookings, getUserBookings, getArtistBookings, verifyAndCompletePayment, verifyPackagePayment } = require('../controller/bookingController');
@@ -39,7 +39,7 @@ const { cancelBooking, cancelPackageBooking, getCancellationDetails } = require(
 const errorHandler = require('../middleware/errorHandler');
 const sendPushNotification = require('../utils/sendReminderNotification');
 
-const { Userlogin, login } = require('../controller/auth/login');
+const { customerLogin, artistLoginWithPassword, ArtistLoginWithOtp } = require('../controller/auth/login');
 const { registerUsers, register } = require('../controller/auth/register');
 const { addUserAddress, updateUserAddress, deleteUserAddress, getUserAddresses } = require('../controller/profileController/userAddress');
 
@@ -55,10 +55,12 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/adminLogin', adminLogin);
 
- 
+
 
 // for constumer and artist login
-router.post('/login', login);
+router.post('/login', customerLogin);
+router.post('/artistLoginWithPassword', artistLoginWithPassword);
+router.post('/loginArtistWithOtp', ArtistLoginWithOtp);
 
 
 router.post('/sendLoginLink', sendLoginLink);
@@ -66,7 +68,7 @@ router.post('/loginViaLink', loginViaLink);
 // router.post('/userlogin', Userlogin);
 
 //  for artist and costumer login
- 
+
 router.post('/register', upload.single('profile_img'), register);
 
 router.post('/registerSalon', upload.single('profile_img'), registerSalon);
@@ -78,11 +80,18 @@ router.post('/packages', packageController.createPackage);
 router.put('/packages/:id', packageController.updatePackage);
 router.delete('/packages/:id', packageController.deletePackage);
 
- 
+
 router.post('/getAccessToken', getAccessToken);
 
 router.post('/sendEmailOtp', sendEmailOtp);
+
+
 router.post('/sendPhoneOtp', sendPhoneOtp);
+router.post('/sendUserLoginOtp', sendUserLoginOtp);
+router.post('/sendArtistLoginOtp', sendArtistLoginOtp);
+
+
+
 
 router.post('/verifyPhoneOtp', verifyPhoneOtp);
 router.post('/verifyEmailOtp', verifyEmailOtp);
@@ -120,7 +129,7 @@ router.put('/editArtistProfile/:id', upload.single('profile_img'), verifyToken, 
 router.put('/change_password', verifyOtpAndChangePassword);
 router.put('/changeArtistPassword', verifyOtpAndChangeArtistPassword);
 
- 
+
 router.post('/booking', verifyToken, booking);
 router.post('/booking/verify-payment', verifyToken, verifyAndCompletePayment);
 router.post('/packageBooking', packageBooking);
@@ -154,10 +163,10 @@ router.delete('/artist/deleteService', deleteArtistService);
 router.post('/makeRating', makeRating);
 router.get('/getRatings', getRatings);
 router.delete('/deleteRating', deleteRating);
- 
+
 // router.post('/editReview', editRe);
 
- 
+
 
 router.post('/feedback', addFeedback);
 router.get('/feedback/:feedback_for_id', getFeedback);

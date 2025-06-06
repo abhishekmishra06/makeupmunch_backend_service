@@ -99,6 +99,10 @@ const sendEmailOtp = async (req, res) => {
   }
 };
 
+
+
+
+
 const sendPhoneOtp = async (req, res) => {
   const { phone } = req.body;
 
@@ -126,6 +130,101 @@ const sendPhoneOtp = async (req, res) => {
     await sendSMS(phone, otp);
     console.log(otp);
     sendGeneralResponse(res, true, "OTP sent to phone no", 200,);
+  } catch (error) {
+    console.error("Error sending OTP:", error.message || error);
+    sendGeneralResponse(res, false, "Internal server error", 500);
+  }
+};
+
+
+
+
+const sendUserLoginOtp = async (req, res) => {
+  const { phone } = req.body;
+
+  if (!phone) {
+    return sendGeneralResponse(res, false, "Phone number is required", 400);
+  }
+
+  if (!validatePhone(phone)) {
+    return sendGeneralResponse(res, false, "Invalid phone number", 400);
+  }
+
+  try {
+    // Check if user exists with this phone number
+    const existingUser = await User.Customer.findOne({ phone });
+    if (!existingUser) {
+      return sendGeneralResponse(res, false, "Phone number is not registered", 404);
+    }
+
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpHash = await bcrypt.hash(otp, 10);
+    const expiresAt = Date.now() + 15 * 60 * 1000;
+
+    // Remove any existing OTPs for this number
+    await Otp.deleteMany({ phone });
+
+    // Store new OTP
+    const otpEntry = await Otp.findOneAndUpdate(
+      { phone },
+      { otpHash, expiresAt, email: null },
+      { upsert: true, new: true }
+    );
+
+    // Send OTP via SMS
+    await sendSMS(phone, otp);
+    console.log("OTP:", otp);
+
+    sendGeneralResponse(res, true, "OTP sent to phone no", 200);
+  } catch (error) {
+    console.error("Error sending OTP:", error.message || error);
+    sendGeneralResponse(res, false, "Internal server error", 500);
+  }
+};
+
+
+
+
+const sendArtistLoginOtp = async (req, res) => {
+  const { phone } = req.body;
+
+  if (!phone) {
+    return sendGeneralResponse(res, false, "Phone number is required", 400);
+  }
+
+  if (!validatePhone(phone)) {
+    return sendGeneralResponse(res, false, "Invalid phone number", 400);
+  }
+
+  try {
+    // Check if user exists with this phone number
+    const existingUser = await User.Artist.findOne({ phone });
+
+    if (!existingUser) {
+      return sendGeneralResponse(res, false, "Phone number is not registered", 404);
+    }
+
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const otpHash = await bcrypt.hash(otp, 10);
+    const expiresAt = Date.now() + 15 * 60 * 1000;
+
+    // Remove any existing OTPs for this number
+    await Otp.deleteMany({ phone });
+
+    // Store new OTP
+    const otpEntry = await Otp.findOneAndUpdate(
+      { phone },
+      { otpHash, expiresAt, email: null },
+      { upsert: true, new: true }
+    );
+
+    // Send OTP via SMS
+    await sendSMS(phone, otp);
+    console.log("OTP:", otp);
+
+    sendGeneralResponse(res, true, "OTP sent to phone no", 200);
   } catch (error) {
     console.error("Error sending OTP:", error.message || error);
     sendGeneralResponse(res, false, "Internal server error", 500);
@@ -610,10 +709,12 @@ async function findUserByEmail(email) {
 module.exports = {
   sendEmailOtp,
   sendPhoneOtp,
+  sendUserLoginOtp,
+  sendArtistLoginOtp,
   verifyEmailOtp,
   verifyPhoneOtp,
   verifyOtpAndChangePassword,
   verifyOtpAndChangeArtistPassword,
-  verifyPhoneOtpHelper , 
+  verifyPhoneOtpHelper,
   verifyEmaiOtpHelper
 };
