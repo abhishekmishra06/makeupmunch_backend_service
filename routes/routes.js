@@ -1,7 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const { getAccessToken, registerSalon, Salonlogin, googleAuth, firebaseAuth, sendLoginLink, loginViaLink } = require('../controller/authController');
-const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp, verifyOtpAndChangeArtistPassword, sendUserLoginOtp, sendArtistLoginOtp } = require('../controller/otpController');
+const { verifyOtpAndChangePassword, sendPhoneOtp, verifyPhoneOtp, verifyEmailOtp, sendEmailOtp, verifyOtpAndChangeArtistPassword, sendUserLoginOtp, sendArtistLoginOtp, sendArtistSignupOtp, sendUserSignupOtp } = require('../controller/otpController');
 const { editProfile, editArtistProfile } = require('../controller/editProfileController');
 const verifyToken = require('../middleware/authMiddleware');
 const { getUserPackageBookings, packageBooking, booking, getAllBookings, getUserBookings, getArtistBookings, verifyAndCompletePayment, verifyPackagePayment } = require('../controller/bookingController');
@@ -49,6 +49,7 @@ const { createConsultation, getAllConsultations, getConsultationById, updateCons
 
 // Import artist profile routes
 const artistProfileRoutes = require('./artistProfileRoutes');
+const { logout, userLogout, artistLogout } = require('../controller/auth/logout');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -89,7 +90,11 @@ router.post('/sendEmailOtp', sendEmailOtp);
 router.post('/sendPhoneOtp', sendPhoneOtp);
 router.post('/sendUserLoginOtp', sendUserLoginOtp);
 router.post('/sendArtistLoginOtp', sendArtistLoginOtp);
+router.post('/sendArtistLoginOtp', sendArtistSignupOtp);
+router.post('/sendUserSignupOtp', sendUserSignupOtp);
 
+router.get('/userLogout', verifyToken, userLogout);
+router.get('/artistLogout', verifyToken, artistLogout);
 
 
 
