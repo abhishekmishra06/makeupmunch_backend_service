@@ -322,7 +322,7 @@ Thank you for choosing Makeup Munch!`;
         <p>You can view or manage your booking anytime by visiting your dashboard.</p>
         <a href="https://www.makeupmunch.in/userdashboard" style="display: inline-block; background-color: #FF69B4; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Go to Dashboard</a>
         <hr style="margin: 30px 0;">
-        <p style="margin: 0;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <p style="margin: 0;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <div style="margin-top: 20px; text-align: center;">
           <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
@@ -330,7 +330,7 @@ Thank you for choosing Makeup Munch!`;
           <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
           </a>
-          <a href="mailto:support@makeupmunch.in" style="margin: 0 10px;">
+          <a href="mailto:techmakeupmunch@gmail.com" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
           </a>
         </div>
@@ -405,7 +405,7 @@ Team Makeup Munch`;
         <div style="text-align: center; margin: 20px 0;">
           <a href="https://www.makeupmunch.in/artistbooking" style="background-color: #FF69B4; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px;">Go to Artist Dashboard</a>
         </div>
-        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <hr style="margin: 30px 0;">
         <div style="text-align: center;">
           <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
@@ -449,7 +449,7 @@ Team Makeup Munch`;
           <p style="margin: 5px 0;"><strong>Time:</strong> ${booking.booking_time}</p>
         </div>
         <p>Please check the admin panel for full details.</p>
-        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <hr style="margin: 30px 0;">
         <div style="text-align: center;">
           <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
