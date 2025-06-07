@@ -31,7 +31,8 @@ app.use(cors({
     'https://lab.development.makeupmunch.in',
     'lab.development.makeupmunch.in',
     'https://admin.dashboard.makeupmunch.in',
-    'https://artist.makeupmunch.in'
+    'https://artist.makeupmunch.in',
+    'https://service.app.makeupmunch.in'
   ],
  
     credentials: true,
@@ -59,4 +60,4 @@ app.use('/admin', adminRoutes);
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT}`);
-}); 
+});  
