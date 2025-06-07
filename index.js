@@ -13,6 +13,9 @@ const authRoutes = require('./routes/routes');
 
 const adminRoutes = require('./routes/admin_routes');
 
+const artistRoutes = require('./routes/artistProfileRoutes');
+
+
 // connect to database
 dotenv.config();
 connectDB();
@@ -48,6 +51,9 @@ app.use('', authRoutes);
 
 
 app.use('/admin', adminRoutes);
+
+
+ app.use('/artist', artistRoutes);
 
 
 const PORT = process.env.PORT || 3001;
