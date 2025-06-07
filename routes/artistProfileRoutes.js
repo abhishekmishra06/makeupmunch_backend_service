@@ -4,19 +4,19 @@ const {
     // About
     getAbout,
     createOrUpdateAbout,
-    
+
     // Experience
     getExperiences,
     addExperience,
     updateExperience,
     deleteExperience,
-    
+
     // Certification
     getCertifications,
     addCertification,
     updateCertification,
     deleteCertification,
-    
+
     // Products
     getProducts,
     addProduct,

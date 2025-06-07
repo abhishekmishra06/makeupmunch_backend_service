@@ -19,7 +19,7 @@ const razorpay = new Razorpay({
 
 // Create Razorpay order
 const createRazorpayOrder = async (amountInRupees, receipt) => {
-    
+
     try {
 
         const amountInPaise = Math.round(amountInRupees * 100);
@@ -425,23 +425,51 @@ Team Makeup Munch`;
                             to: artist.email.trim(),
                             subject: subject,
                             text: text,
-
-                            //                             `Dear ${artist.username || 'Artist'},
-
-                            // You have a new confirmed booking!
-
-                            // Booking Details:
-                            // - Booking ID: ${booking._id}
-                            // - Customer Name: ${booking.user_info.user_Fname} ${booking.user_info.user_Lname}
-                            // - Date: ${new Date(booking.booking_date).toLocaleDateString()}
-                            // - Time: ${booking.booking_time}
-
-                            // Please check your dashboard for more details.`,
-
-
                             html: html
                         });
                     }
+                } else if (isPackageBooking) {
+                    // Send to fixed email for package booking
+                    const subject = '🎉 New Package Booking Received on Makeup Munch!';
+
+
+                    const html = `
+  <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #e0f7f5; padding: 30px;">
+    <div style="background-color: white; max-width: 600px; margin: auto; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.1); overflow: hidden;">
+      <div style="background-color: #20c997; padding: 20px; color: white; text-align: center;">
+        <h2 style="margin: 0;">📦✨ New Package Booking!</h2>
+      </div>
+      <div style="padding: 25px 20px;">
+        <p style="font-size: 16px;">Hi <strong>Team</strong>,</p>
+        <p style="font-size: 16px;">You have received a <strong>new package booking</strong> on <strong>Makeup Munch</strong>.</p>
+        <div style="background-color: #f1fcfb; border: 1px dashed #a0ddd9; padding: 15px; margin: 20px 0; border-radius: 8px;">
+          <p style="margin: 5px 0;"><strong>Booking ID:</strong> ${booking._id}</p>
+          <p style="margin: 5px 0;"><strong>Customer:</strong> ${booking.user_info.user_Fname} ${booking.user_info.user_Lname}</p>
+          <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(booking.booking_date).toLocaleDateString()}</p>
+          <p style="margin: 5px 0;"><strong>Time:</strong> ${booking.booking_time}</p>
+        </div>
+        <p>Please check the admin panel for full details.</p>
+        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <hr style="margin: 30px 0;">
+        <div style="text-align: center;">
+          <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
+            <img src="https://img.icons8.com/ios-filled/24/20c997/facebook-new.png" alt="Facebook">
+          </a>
+          <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
+            <img src="https://img.icons8.com/ios-filled/24/20c997/instagram-new.png" alt="Instagram">
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
+                    await sendMail({
+                        to: 'techmakeupmunch@gmail.com',
+                        subject,
+                        text: '',
+                        html
+                    });
                 }
 
             } catch (emailError) {
@@ -604,6 +632,8 @@ const packageBooking = async (req, res) => {
         });
     }
 };
+
+
 
 const getUserBookings = async (req, res) => {
     const { user_id } = req.params;
