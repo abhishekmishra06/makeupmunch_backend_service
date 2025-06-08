@@ -543,6 +543,28 @@ console.log('payment:', payment);
     message: 'Missing required fields'
   });
 }
+
+
+const calculatePlatformCharge = (totalAmount) => {
+      if (totalAmount < 500) {
+        return 70;
+      } else if (totalAmount >= 500 && totalAmount <= 1000) {
+        return 40;
+      } else {
+        return 0;
+      }
+    };
+
+    const calculateVenueCharge = (totalAmount) => {
+      if (totalAmount < 500) {
+        return 30;
+      } else if (totalAmount >= 500 && totalAmount <= 1000) {
+        return 30;
+      } else {
+        return 0;
+      }
+    };
+
         // Verify user exists
         const user = await Customer.findById(user_id);
         if (!user) {
@@ -580,6 +602,10 @@ console.log('payment:', payment);
                 const subtotal = basePrice * totalPersons;
                 totalAmount += subtotal;
 
+
+
+
+
                 updatedPackageDetails.push({
                     ...pkg,
                     package_name: packageData.name,
@@ -595,8 +621,13 @@ console.log('payment:', payment);
             }
         }
 
+
+         const platformCharge = calculatePlatformCharge(totalAmount);
+    const venueCharge = calculateVenueCharge(totalAmount);
+    const grandTotalAmount = totalAmount + platformCharge + venueCharge;
+    const amountInPaise = grandTotalAmount * 100;
         
-                const amountInPaise = totalAmount * 100;
+                // const amountInPaise = totalAmount * 100;
 
 
      
