@@ -6,6 +6,7 @@ const { sendSMS } = require("../utils/sms");
 const { sendGeneralResponse } = require("../utils/responseHelper");
 const { validateEmail, validatePhone } = require("../utils/validation");
 const Otp = require("../models/otp_model");
+const { generateEmailVerificationTemplate } = require("../emailTemplate/emailVerification");
 
 const sendEmailOtp = async (req, res) => {
   console.log("call send email api")
@@ -25,7 +26,7 @@ const sendEmailOtp = async (req, res) => {
     // Generate OTP and hash it
     const otp = crypto.randomInt(100000, 999999).toString();
     const otpHash = await bcrypt.hash(otp, 10);
-    const expiresAt = Date.now() + 25 * 60 * 1000; // OTP valid for 15 minutes
+    const expiresAt = Date.now() + 5 * 60 * 1000; // OTP valid for 5 minutes
 
     // Delete any existing OTP entries for the email
     await Otp.deleteMany({ email });
@@ -37,57 +38,28 @@ const sendEmailOtp = async (req, res) => {
       { upsert: true, new: true }
     );
 
-    // Email subject and HTML content
-    const subject = "Your Makeup Munch Verification Code";
-    const html = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Makeup Munch Verification Code</title>
-</head>
-<body style="font-family: Arial, sans-serif; background-color: #FFF0F5; margin: 0; padding: 20px;">
-    <div style="background-color: white; max-width: 600px; margin: 20px auto; padding: 20px; border-radius: 10px; box-shadow: 0 0 20px rgba(255, 20, 147, 0.1);">
-        <div style="background-color: #FF1493; padding: 20px; color: white; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="margin: 0; font-size: 24px;">Your Makeup Munch Verification Code</h1>
-        </div>
-        <div style="padding: 30px; background-color: #FFFFFF;">
-            <h2 style="color: #FF1493; margin-top: 0;">Hello, Beauty Enthusiast!</h2>
-            <p style="color: #333; font-size: 16px; line-height: 1.5;">Your One-Time Password (OTP) for Makeup Munch is:</p>
-            <div style="background-color: #FFF0F5; padding: 15px; border-radius: 5px; text-align: center; margin: 20px 0;">
-                <h1 style="font-size: 36px; color: #FF1493; margin: 0;">${otp}</h1>
-            </div>
-            <p style="color: #333; font-size: 16px; line-height: 1.5;">This code is valid for the next 15 minutes. Please enter it on the verification page to continue your beauty journey with us.</p>
-            <p style="color: #333; font-size: 16px; line-height: 1.5;">If you didn't request this code, please ignore this email. Your account's security is important to us.</p>
-        </div>
-        <div style="background-color: #FFB6C1; padding: 20px; text-align: center; border-radius: 0 0 10px 10px;">
-            <p style="color: #333; font-size: 14px; margin: 0;">Follow us for daily beauty inspiration:</p>
-            <div style="margin-top: 10px;">
-                <a href="#" style="text-decoration: none; margin: 0 10px;">
-                    <img src="https://img.icons8.com/ios-filled/30/FF1493/facebook-new.png" alt="Facebook" />
-                </a>
-                <a href="#" style="text-decoration: none; margin: 0 10px;">
-                    <img src="https://img.icons8.com/ios-filled/30/FF1493/instagram-new.png" alt="Instagram" />
-                </a>
-                <a href="#" style="text-decoration: none; margin: 0 10px;">
-                    <img src="https://img.icons8.com/ios-filled/30/FF1493/twitter.png" alt="Twitter" />
-                </a>
-            </div>
-        </div>
-        <div style="text-align: center; margin-top: 20px; color: #777; font-size: 12px;">
-            <p>&copy; 2024 Makeup Munch. All Rights Reserved.</p>
-        </div>
-    </div>
-</body>
-</html>
-`;
+    // Find user name if exists
+    let userName = 'Valued Customer';
+    try {
+      const existingUser = await User.Customer.findOne({ email });
+      if (existingUser && existingUser.username) {
+        userName = existingUser.username;
+      } else if (existingUser && existingUser.email) {
+        userName = existingUser.email.split('@')[0];
+      }
+    } catch (userError) {
+      console.log("User lookup failed, using default name");
+    }
+
+    // Email subject and HTML content using new template
+    const subject = "Verify Your Email - Makeup Munch";
+    const html = generateEmailVerificationTemplate(otp, userName);
 
     // Send the email
     await sendMail({
       to: email,
       subject: subject,
-      text: "",
+      text: `Your Makeup Munch verification code is: ${otp}. This code expires in 5 minutes.`,
       html: html
     });
 
@@ -98,10 +70,6 @@ const sendEmailOtp = async (req, res) => {
     sendGeneralResponse(res, false, "Internal server error", 500);
   }
 };
-
-
-
-
 
 const sendPhoneOtp = async (req, res) => {
   const { phone } = req.body;
@@ -135,8 +103,6 @@ const sendPhoneOtp = async (req, res) => {
     sendGeneralResponse(res, false, "Internal server error", 500);
   }
 };
-
-
 
 // user both for send login otp and forget otp 
 const sendUserLoginOtp = async (req, res) => {
@@ -183,8 +149,6 @@ const sendUserLoginOtp = async (req, res) => {
   }
 };
 
-
-
 const sendUserSignupOtp = async (req, res) => {
   const { phone } = req.body;
 
@@ -229,9 +193,6 @@ const sendUserSignupOtp = async (req, res) => {
     sendGeneralResponse(res, false, "Internal server error", 500);
   }
 };
-
-
-
 
 // user both for send login otp and forget otp 
 
@@ -280,9 +241,6 @@ const sendArtistLoginOtp = async (req, res) => {
   }
 };
 
-
-
-
 const sendArtistSignupOtp = async (req, res) => {
   const { phone } = req.body;
 
@@ -327,10 +285,6 @@ const sendArtistSignupOtp = async (req, res) => {
     sendGeneralResponse(res, false, "Internal server error", 500);
   }
 };
-
-
-
-
 
 const verifyEmailOtp = async (req, res) => {
   const { email, otp } = req.body;
@@ -442,9 +396,6 @@ const verifyPhoneOtp = async (req, res) => {
   }
 };
 
-
-
-
 const verifyPhoneOtpHelper = async (phone, otp) => {
   if (!phone) {
     return { status: false, message: "phone is required", code: 400 };
@@ -491,12 +442,7 @@ const verifyPhoneOtpHelper = async (phone, otp) => {
   }
 };
 
-
-
-
-
 const verifyEmaiOtpHelper = async (email, otp) => {
-
   // Check if email is provided
   if (!email) {
     return sendGeneralResponse(res, false, "Email is required", 400);
@@ -519,7 +465,6 @@ const verifyEmaiOtpHelper = async (email, otp) => {
     // Check if OTP entry exists
     if (!otpEntry) {
       return { status: false, message: "Please request a new OTP", code: 400 };
-
     }
 
     const { otpHash, expiresAt } = otpEntry;
@@ -542,22 +487,15 @@ const verifyEmaiOtpHelper = async (email, otp) => {
       // Delete OTP entry after successful verification
       await Otp.deleteMany({ email });
 
-
       return { status: true, message: "OTP verified successfully", code: 200 };
-
-
     } else {
       return { status: false, message: "Invalid OTP", code: 400 };
-
     }
   } catch (error) {
     console.error("Error verifying OTP:", error);
     return { status: false, message: "Internal server error", code: 500 };
-
   }
 };
-
-
 
 const verifyOtpAndChangePassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
@@ -586,8 +524,6 @@ const verifyOtpAndChangePassword = async (req, res) => {
 
     const { otpHash, expiresAt } = otpEntry;
 
-
-
     // Check if OTP has expired
     if (Date.now() > expiresAt) {
       // Clean up expired OTP
@@ -603,9 +539,7 @@ const verifyOtpAndChangePassword = async (req, res) => {
     // Verify the OTP
     const isValid = await bcrypt.compare(otp, otpHash);
     if (!isValid) {
-
       return sendGeneralResponse(res, false, "Invalid OTP. Please try again.", 400);
-
     }
 
     // Find the user by email
@@ -661,21 +595,12 @@ const verifyOtpAndChangePassword = async (req, res) => {
     });
 
     // Send success response
-
-
     sendGeneralResponse(res, true, "Password changed successfully", 200);
-
-
   } catch (error) {
     console.error("Error changing password:", error);
     sendGeneralResponse(res, false, "Internal server error", 500);
-
   }
 };
-
-
-
-
 
 const verifyOtpAndChangeArtistPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
@@ -704,8 +629,6 @@ const verifyOtpAndChangeArtistPassword = async (req, res) => {
 
     const { otpHash, expiresAt } = otpEntry;
 
-
-
     // Check if OTP has expired
     if (Date.now() > expiresAt) {
       // Clean up expired OTP
@@ -721,9 +644,7 @@ const verifyOtpAndChangeArtistPassword = async (req, res) => {
     // Verify the OTP
     const isValid = await bcrypt.compare(otp, otpHash);
     if (!isValid) {
-
       return sendGeneralResponse(res, false, "Invalid OTP. Please try again.", 400);
-
     }
 
     // Find the user by email
@@ -779,19 +700,12 @@ const verifyOtpAndChangeArtistPassword = async (req, res) => {
     });
 
     // Send success response
-
-
     sendGeneralResponse(res, true, "Password changed successfully", 200);
-
-
   } catch (error) {
     console.error("Error changing password:", error);
     sendGeneralResponse(res, false, "Internal server error", 500);
-
   }
 };
-
-
 
 async function findUserByEmail(email) {
   let user = await User.Customer.findOne({ email });

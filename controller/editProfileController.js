@@ -6,6 +6,7 @@ const { validateEmail, validatePhone } = require('../utils/validation');
 const editProfile = async (req, res) => {
     try {
         const userId = req.params.id;
+        console.log('userId', userId);
 
         if (!req.body && !req.file) {
             return sendGeneralResponse(res, false, 'No data provided', 400);

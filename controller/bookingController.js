@@ -508,7 +508,6 @@ const packageBooking = async (req, res) => {
             });
         }
 
-        console.log('Received booking request:', req.body);
 
         const {
             user_id,
@@ -517,16 +516,33 @@ const packageBooking = async (req, res) => {
             booking_date,
             booking_time,
             payment
-        } = req.body;
+        } = req.body; 
 
-        // Basic validations
-        if (!user_id || !user_info || !package_details || !booking_date || !booking_time || !payment) {
-            return res.status(400).json({
-                success: false,
-                message: 'Missing required fields'
-            });
-        }
 
+        console.log('user_id:', user_id);
+console.log('user_info:', user_info);
+console.log('package_details:', package_details);
+console.log('booking_date:', booking_date);
+console.log('booking_time:', booking_time);
+console.log('payment:', payment);
+
+
+// multiple package booking
+       if (
+  !user_id ||
+  !user_info ||
+  !package_details ||
+  !Array.isArray(package_details.packages) ||
+  package_details.packages.length === 0 ||
+  !booking_date ||
+  !booking_time ||
+  !payment
+) {
+  return res.status(400).json({
+    success: false,
+    message: 'Missing required fields'
+  });
+}
         // Verify user exists
         const user = await Customer.findById(user_id);
         if (!user) {
@@ -536,26 +552,79 @@ const packageBooking = async (req, res) => {
             });
         }
 
+          let totalAmount = 0;
+          let packageBasePrice = 0;
+        let updatedPackageDetails = [];
+
+
+
         // Verify package exists and get its price
-        const packageData = await Package.findById(package_details.package_id);
-        if (!packageData) {
-            return res.status(404).json({
-                success: false,
-                message: 'Package not found'
-            });
+        // const packageData = await Package.findById(package_details.package_id);
+
+
+        // validate all package 
+         for (const pkg of package_details.packages){
+            try {
+                const packageData = await Package.findById(pkg.package_id);
+                if (!packageData) {
+                    return res.status(404).json({
+                        success: false,
+                        message: `Package not found: ${pkg.package_id}`
+                    });
+                }
+
+                const basePrice = parseInt(packageData.price.replace(/,/g, '')) || 0;
+                packageBasePrice += basePrice;
+
+                const totalPersons = parseInt(pkg.total_persons) || 1;
+                const subtotal = basePrice * totalPersons;
+                totalAmount += subtotal;
+
+                updatedPackageDetails.push({
+                    ...pkg,
+                    package_name: packageData.name,
+                    package_price: basePrice,
+                    subtotal: subtotal
+                });
+            } catch (err) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error fetching package data',
+                    error: err.message
+                });
+            }
         }
+
+        
+                const amountInPaise = totalAmount * 100;
+
+
+     
+
+        // console.log(`this is package data ${packageData}`)
+        // console.log(`this is package_details.package_id ${package_details.package_id}`)
+        // console.log(`this is package_details ${package_details}`)
+
+
+        // if (!packageData) {
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: 'Package not found'
+        //     });
+        // }
+       
 
         try {
             // Calculate total amount in paise (Razorpay expects amount in smallest currency unit)
-            const basePrice = parseInt(packageData.price.replace(/,/g, ''));
-            const totalAmount = basePrice * (parseInt(package_details.total_persons) || 1);
-            const amountInPaise = totalAmount * 100;
+            // const basePrice = parseInt(packageData.price.replace(/,/g, ''));
+            // const totalAmount = basePrice * (parseInt(package_details.total_persons) || 1);
+            // const amountInPaise = totalAmount * 100;
 
-            console.log('Calculated amounts:', {
-                basePrice,
-                totalAmount,
-                amountInPaise
-            });
+            // console.log('Calculated amounts:', {
+            //     basePrice,
+            //     totalAmount,
+            //     amountInPaise
+            // });
 
             // Create a shorter receipt format
             const timestamp = Date.now().toString().slice(-8);
@@ -578,16 +647,17 @@ const packageBooking = async (req, res) => {
             const newPackageBooking = new PackageBooking({
                 user_id,
                 user_info,
-                package_details: {
-                    ...package_details,
-                    package_name: packageData.name,
-                    package_price: basePrice
-                },
+                // package_details: {
+                //     ...package_details,
+                //     package_name: packageData.name,
+                //     package_price: basePrice
+                // },
+                package_details: updatedPackageDetails,
                 booking_date,
                 booking_time,
                 status: 'pending',
                 payment: {
-                    package_price: basePrice,
+                    package_price: packageBasePrice,
                     total_amount: totalAmount,
                     amount: amountInPaise,
                     payment_method: 'online',

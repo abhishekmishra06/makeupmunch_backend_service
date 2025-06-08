@@ -43,7 +43,6 @@ const getUserDetailsForAdmin = async (req, res) => {
       isLogin: user.isLogin ? 'Active' : 'Inactive',
       joinedDate: user.createdAt,
       lastActiveAt: user.lastActiveAt,
-      lastLoginAt:user.lastLoginAt,
       bookingCount: bookings.length,
       addresses,
       bookings: bookingDetails
