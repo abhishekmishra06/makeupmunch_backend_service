@@ -11,6 +11,7 @@ const { getAllPackagesForAdmin } = require('../controller/adminController/adminP
 const { getPackageById } = require('../controller/adminController/package/packageDetailController');
 const { updatePackageById } = require('../controller/adminController/package/packageUpdateController');
 const { deletePackageById } = require('../controller/adminController/package/packageDeleteController');
+const { getBookingDetailsById } = require('../controller/adminController/booking/bookingDetailController');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -41,6 +42,7 @@ router.delete("/packages/:id", deletePackageById);
 
 
 router.get('/getAllBookingsForAdmin', getAllBookingsForAdmin);
+router.get('/bookingDetail/:bookingId', getBookingDetailsById);
 
 router.use(errorHandler);
 

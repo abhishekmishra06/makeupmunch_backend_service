@@ -19,13 +19,13 @@ const getArtistDetailsForAdmin = async (req, res) => {
     // Map booking details
     const bookingDetails = bookings.map(booking => ({
       _id: booking._id,
-      userName: booking.userId?.username || 'N/A',
-      userEmail: booking.userId?.email || 'N/A',
-      date: booking.date,
-      timeSlot: booking.timeSlot,
+      userName: booking.user_id?.username || 'N/A',
+      userEmail: booking.user_id?.email || 'N/A',
+      bookingDate: booking.booking_date,
+      bookingTime: booking.booking_time,
       status: booking.status,
-      totalAmount: booking.totalAmount,
-      paymentMethod: booking.paymentMethod,
+      totalAmount: booking.payment.total_amount,
+      paymentMethod: booking.payment.payment_method,
     }));
 
 
