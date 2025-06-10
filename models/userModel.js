@@ -81,6 +81,8 @@ const ArtistRegisterSchema = new mongoose.Schema({
 
     approvedAt: { type: Date }, // Set when admin approves
     blockedAt: { type: Date },  // Set when admin blocks
+    blockReason: { type: String, default: '' },
+
     availability: {
         type: String,
         enum: ['day', 'night', 'both'],

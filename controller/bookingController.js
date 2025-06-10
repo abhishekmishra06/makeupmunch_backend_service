@@ -516,54 +516,54 @@ const packageBooking = async (req, res) => {
             booking_date,
             booking_time,
             payment
-        } = req.body; 
+        } = req.body;
 
 
         console.log('user_id:', user_id);
-console.log('user_info:', user_info);
-console.log('package_details:', package_details);
-console.log('booking_date:', booking_date);
-console.log('booking_time:', booking_time);
-console.log('payment:', payment);
+        console.log('user_info:', user_info);
+        console.log('package_details:', package_details);
+        console.log('booking_date:', booking_date);
+        console.log('booking_time:', booking_time);
+        console.log('payment:', payment);
 
 
-// multiple package booking
-       if (
-  !user_id ||
-  !user_info ||
-  !package_details ||
-  !Array.isArray(package_details.packages) ||
-  package_details.packages.length === 0 ||
-  !booking_date ||
-  !booking_time ||
-  !payment
-) {
-  return res.status(400).json({
-    success: false,
-    message: 'Missing required fields'
-  });
-}
+        // multiple package booking
+        if (
+            !user_id ||
+            !user_info ||
+            !package_details ||
+            !Array.isArray(package_details.packages) ||
+            package_details.packages.length === 0 ||
+            !booking_date ||
+            !booking_time ||
+            !payment
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields'
+            });
+        }
 
 
-const calculatePlatformCharge = (totalAmount) => {
-      if (totalAmount < 500) {
-        return 70;
-      } else if (totalAmount >= 500 && totalAmount <= 1000) {
-        return 40;
-      } else {
-        return 0;
-      }
-    };
+        const calculatePlatformCharge = (totalAmount) => {
+            if (totalAmount < 500) {
+                return 70;
+            } else if (totalAmount >= 500 && totalAmount <= 1000) {
+                return 40;
+            } else {
+                return 0;
+            }
+        };
 
-    const calculateVenueCharge = (totalAmount) => {
-      if (totalAmount < 500) {
-        return 30;
-      } else if (totalAmount >= 500 && totalAmount <= 1000) {
-        return 30;
-      } else {
-        return 0;
-      }
-    };
+        const calculateVenueCharge = (totalAmount) => {
+            if (totalAmount < 500) {
+                return 30;
+            } else if (totalAmount >= 500 && totalAmount <= 1000) {
+                return 30;
+            } else {
+                return 0;
+            }
+        };
 
         // Verify user exists
         const user = await Customer.findById(user_id);
@@ -574,8 +574,8 @@ const calculatePlatformCharge = (totalAmount) => {
             });
         }
 
-          let totalAmount = 0;
-          let packageBasePrice = 0;
+        let totalAmount = 0;
+        let packageBasePrice = 0;
         let updatedPackageDetails = [];
 
 
@@ -585,7 +585,7 @@ const calculatePlatformCharge = (totalAmount) => {
 
 
         // validate all package 
-         for (const pkg of package_details.packages){
+        for (const pkg of package_details.packages) {
             try {
                 const packageData = await Package.findById(pkg.package_id);
                 if (!packageData) {
@@ -622,15 +622,15 @@ const calculatePlatformCharge = (totalAmount) => {
         }
 
 
-         const platformCharge = calculatePlatformCharge(totalAmount);
-    const venueCharge = calculateVenueCharge(totalAmount);
-    const grandTotalAmount = totalAmount + platformCharge + venueCharge;
-    const amountInPaise = grandTotalAmount * 100;
-        
-                // const amountInPaise = totalAmount * 100;
+        const platformCharge = calculatePlatformCharge(totalAmount);
+        const venueCharge = calculateVenueCharge(totalAmount);
+        const grandTotalAmount = totalAmount + platformCharge + venueCharge;
+        const amountInPaise = grandTotalAmount * 100;
+
+        // const amountInPaise = totalAmount * 100;
 
 
-     
+
 
         // console.log(`this is package data ${packageData}`)
         // console.log(`this is package_details.package_id ${package_details.package_id}`)
@@ -643,7 +643,7 @@ const calculatePlatformCharge = (totalAmount) => {
         //         message: 'Package not found'
         //     });
         // }
-       
+
 
         try {
             // Calculate total amount in paise (Razorpay expects amount in smallest currency unit)
@@ -678,11 +678,6 @@ const calculatePlatformCharge = (totalAmount) => {
             const newPackageBooking = new PackageBooking({
                 user_id,
                 user_info,
-                // package_details: {
-                //     ...package_details,
-                //     package_name: packageData.name,
-                //     package_price: basePrice
-                // },
                 package_details: updatedPackageDetails,
                 booking_date,
                 booking_time,

@@ -46,6 +46,7 @@ const { addUserAddress, updateUserAddress, deleteUserAddress, getUserAddresses }
 
 // const { Userlogin } = require('../controller/auth/login');
 const { createConsultation, getAllConsultations, getConsultationById, updateConsultationStatus } = require('../controller/consultationController');
+const { getTopArtists, refreshTopArtistsCache, getCacheStatus } = require('../controller/TopArtistsController');
 
 // Import artist profile routes
 const artistProfileRoutes = require('./artistProfileRoutes');
@@ -92,7 +93,7 @@ router.post('/sendEmailOtp', sendEmailOtp);
 router.post('/sendPhoneOtp', sendPhoneOtp);
 router.post('/sendUserLoginOtp', sendUserLoginOtp);
 router.post('/sendArtistLoginOtp', sendArtistLoginOtp);
-router.post('/sendArtistLoginOtp', sendArtistSignupOtp);
+router.post('/sendArtistSignupOtp', sendArtistSignupOtp);
 router.post('/sendUserSignupOtp', sendUserSignupOtp);
 
 router.get('/userLogout', verifyToken, userLogout);
@@ -152,6 +153,9 @@ router.get('/booking/cancellation/:booking_id/:booking_type', getCancellationDet
 
 router.get('/shopsList', shopsList);
 router.get('/artistsList', artistList);
+router.get('/topArtists', getTopArtists);
+router.post('/admin/refreshTopArtistsCache', refreshTopArtistsCache);
+router.get('/admin/topArtistsCacheStatus', getCacheStatus);
 router.get('/customerList', customerList);
 router.get('/allUsersList', allUsersList);
 router.get('/userDetail/:id', userDetail);
