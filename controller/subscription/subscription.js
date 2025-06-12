@@ -28,8 +28,10 @@ const subscribe=   async (req, res) => {
 
         await newSubscription.save();
      //    const unsubscribeLink = `https://yourwebsite.com/unsubscribe?email=${encodeURIComponent(email)}`;
-        const unsubscribeLink = `https://makeup-adda.netlify.app/`;
+        const unsubscribeLink = `https://makeupmunch.in`;
 
+
+            const subject = 'Welcome to Our Beauty Newsletter!';
 
          
         const emailTemplate = `
@@ -90,7 +92,13 @@ const subscribe=   async (req, res) => {
         </html>
         `;
 
-        await sendMail(email, 'Welcome to Our Beauty Newsletter!', '', emailTemplate);
+          await sendMail({
+        to: email,
+        subject,
+        text:'', 
+        html:emailTemplate
+      });
+        // await sendMail(  to: email, 'Welcome to Our Beauty Newsletter!', '', emailTemplate);
  
 
          sendGeneralResponse(res, true, 'Subscribed successfully!', 200);
