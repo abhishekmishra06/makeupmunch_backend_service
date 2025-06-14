@@ -16,7 +16,7 @@ const addressRoutes = require('./routes/addressRoutes');
 const emailVerificationRoutes = require('./routes/emailVerificationRoutes');
 
 // connect to database
-dotenv.config();
+// dotenv.config();
 connectDB();
 
 const app = express();
