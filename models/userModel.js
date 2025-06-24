@@ -30,6 +30,17 @@ const CustomerRegisterSchema = new mongoose.Schema({
     refreshToken: { type: String },
     isLogin: { type: Boolean, default: false }, // 👈 NEW
     lastLoginAt: { type: Date },
+    addresses: [{
+        street: { type: String,  },
+        area: { type: String,  },
+        pincode: { type: Number,  },
+        city: { type: String,  },
+        landmark: { type: String },
+        isDefault: { type: Boolean, default: false },
+        addedFromBooking: { type: Boolean, default: false },
+        bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking' },
+        dateAdded: { type: Date, default: Date.now }
+    }]
 }, { timestamps: true, collection: 'users' });
 
 const Customer = mongoose.model('Customer', CustomerRegisterSchema);
@@ -70,6 +81,8 @@ const ArtistRegisterSchema = new mongoose.Schema({
 
     approvedAt: { type: Date }, // Set when admin approves
     blockedAt: { type: Date },  // Set when admin blocks
+    blockReason: { type: String, default: '' },
+
     availability: {
         type: String,
         enum: ['day', 'night', 'both'],

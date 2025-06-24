@@ -46,10 +46,13 @@ const { addUserAddress, updateUserAddress, deleteUserAddress, getUserAddresses }
 
 // const { Userlogin } = require('../controller/auth/login');
 const { createConsultation, getAllConsultations, getConsultationById, updateConsultationStatus } = require('../controller/consultationController');
+const { getTopArtists, refreshTopArtistsCache, getCacheStatus } = require('../controller/TopArtistsController');
 
 // Import artist profile routes
 const artistProfileRoutes = require('./artistProfileRoutes');
 const { logout, userLogout, artistLogout } = require('../controller/auth/logout');
+
+const { updateAddressAfterBooking, getBookingAddress, getUserSavedAddresses, setDefaultAddress } = require('../controller/addressUpdateController');
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -90,7 +93,7 @@ router.post('/sendEmailOtp', sendEmailOtp);
 router.post('/sendPhoneOtp', sendPhoneOtp);
 router.post('/sendUserLoginOtp', sendUserLoginOtp);
 router.post('/sendArtistLoginOtp', sendArtistLoginOtp);
-router.post('/sendArtistLoginOtp', sendArtistSignupOtp);
+router.post('/sendArtistSignupOtp', sendArtistSignupOtp);
 router.post('/sendUserSignupOtp', sendUserSignupOtp);
 
 router.get('/userLogout', verifyToken, userLogout);
@@ -137,7 +140,7 @@ router.put('/changeArtistPassword', verifyOtpAndChangeArtistPassword);
 
 router.post('/booking', verifyToken, booking);
 router.post('/booking/verify-payment', verifyToken, verifyAndCompletePayment);
-router.post('/packageBooking', packageBooking);
+router.post('/packageBookings', packageBooking);
 router.get('/getUserPackageBookings/:user_id', getUserPackageBookings)
 router.get('/getbooking', getAllBookings);
 router.get('/booking/user/:user_id', getUserBookings);
@@ -150,6 +153,9 @@ router.get('/booking/cancellation/:booking_id/:booking_type', getCancellationDet
 
 router.get('/shopsList', shopsList);
 router.get('/artistsList', artistList);
+router.get('/topArtists', getTopArtists);
+router.post('/admin/refreshTopArtistsCache', refreshTopArtistsCache);
+router.get('/admin/topArtistsCacheStatus', getCacheStatus);
 router.get('/customerList', customerList);
 router.get('/allUsersList', allUsersList);
 router.get('/userDetail/:id', userDetail);
@@ -220,6 +226,11 @@ router.post('/auth/firebase', firebaseAuth);
 router.post('/verify-package-payment', verifyToken, verifyPackagePayment);
 
 router.use('/artist', artistProfileRoutes);
+
+router.post('/saveBookingAddress', updateAddressAfterBooking);
+router.get('/getBookingAddress/:bookingId', getBookingAddress);
+router.get('/getUserSavedAddresses/:userId', getUserSavedAddresses);
+router.post('/setDefaultAddress', setDefaultAddress);
 
 router.use(errorHandler);
 

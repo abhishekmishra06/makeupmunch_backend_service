@@ -4,7 +4,7 @@ const bookingSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     user_info: {
         user_Fname: { type: String, required: true },  
-        user_Lname: { type: String, required: true },
+        user_Lname: { type: String,  },
         phoneNumber: { type: Number, required: true }, 
         address: {
             street: { type: String, required: true},  
@@ -62,7 +62,7 @@ const packageBookingSchema = new mongoose.Schema({
     },
     user_info: {
         user_Fname: { type: String, required: true },
-        user_Lname: { type: String, required: true },
+        user_Lname: { type: String,  },
         phoneNumber: { type: Number, required: true },
         address: {
             street: { type: String, required: true },
@@ -72,17 +72,28 @@ const packageBookingSchema = new mongoose.Schema({
             landmark: String
         }
     },
-    package_details: {
-        package_id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Package',
-            required: true
-        },
-        package_name: { type: String, required: true },
-        total_persons: { type: Number, default: 1 },
-        special_notes: String,
-        package_price: { type: Number, required: true }
-    },
+    // package_details: {
+    //     package_id: {
+    //         type: mongoose.Schema.Types.ObjectId,
+    //         ref: 'Package',
+    //         required: true
+    //     },
+    //     package_name: { type: String, required: true },
+    //     total_persons: { type: Number, default: 1 },
+    //     special_notes: String,
+    //     package_price: { type: Number, required: true }
+    // },
+
+    package_details: [
+  {
+    package_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Package', required: true },
+    package_name: { type: String, required: true },
+    total_persons: { type: Number, default: 1 },
+    special_notes: String,
+    package_price: { type: Number, required: true },
+    subtotal: { type: Number }
+  }
+],
     booking_date: { type: Date, required: true },
     booking_time: { type: String, required: true },
     status: {

@@ -392,7 +392,7 @@ const registerUser = async (req, res) => {
                             <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
                                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
                             </a>
-                            <a href="mailto:support@makeupmunch.in">
+                            <a href="mailto:techmakeupmunch@gmail.com">
                                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
                             </a>
                         </div>

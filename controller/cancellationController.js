@@ -236,7 +236,7 @@ const cancelBooking = async (req, res) => {
         <p>The refund will reflect in your bank account within <strong>4–5 working days</strong>.</p>
 
         <hr style="margin: 30px 0;">
-        <p style="margin: 0;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <p style="margin: 0;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <div style="margin-top: 20px; text-align: center;">
           <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/facebook-new.png" alt="Facebook" />
@@ -244,7 +244,7 @@ const cancelBooking = async (req, res) => {
           <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/instagram-new.png" alt="Instagram" />
           </a>
-          <a href="mailto:support@makeupmunch.in" style="margin: 0 10px;">
+          <a href="mailto:techmakeupmunch@gmail.com" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/support.png" alt="Support" />
           </a>
         </div>
@@ -285,7 +285,7 @@ const cancelBooking = async (req, res) => {
         <p>If you’ve made a payment, it will be refunded to your account within 4-5 working days.</p>
         <a href="https://www.makeupmunch.in/userdashboard" style="display: inline-block; background-color: #FF6F61; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Go to Dashboard</a>
         <hr style="margin: 30px 0;">
-        <p style="margin: 0;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <p style="margin: 0;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
       </div>
     </div>
   </div>
@@ -326,7 +326,7 @@ const cancelBooking = async (req, res) => {
              </ul>
             <p>If this was a mistake, kindly reach out to the Makeup Munch team immediately.</p>
             <hr style="margin: 30px 0;">
-            <p style="margin: 0;">Support: <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+            <p style="margin: 0;">Support: <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
           </div>
         </div>
       </div>
@@ -361,7 +361,7 @@ const cancelBooking = async (req, res) => {
              </ul>
             <p>Please log in to your <a href="https://www.makeupmunch.in/artistdashboard">artist dashboard</a> for full booking details.</p>
             <hr style="margin: 30px 0;">
-            <p style="margin: 0;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+            <p style="margin: 0;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
             <div style="margin-top: 20px; text-align: center;">
               <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
                 <img src="https://img.icons8.com/ios-filled/24/FFA07A/facebook-new.png" alt="Facebook" />
@@ -369,7 +369,7 @@ const cancelBooking = async (req, res) => {
               <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
                 <img src="https://img.icons8.com/ios-filled/24/FFA07A/instagram-new.png" alt="Instagram" />
               </a>
-              <a href="mailto:support@makeupmunch.in" style="margin: 0 10px;">
+              <a href="mailto:techmakeupmunch@gmail.com" style="margin: 0 10px;">
                 <img src="https://img.icons8.com/ios-filled/24/FFA07A/support.png" alt="Support" />
               </a>
             </div>
@@ -543,7 +543,7 @@ const cancelPackageBooking = async (req, res) => {
         <p>Your refund will be processed within <strong>5-7 business days</strong> to your original payment method.</p>
 
         <hr style="margin: 30px 0;">
-        <p style="margin: 0;">If you need any help, please contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <p style="margin: 0;">If you need any help, please contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <div style="margin-top: 20px; text-align: center;">
           <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/facebook-new.png" alt="Facebook" />
@@ -551,7 +551,7 @@ const cancelPackageBooking = async (req, res) => {
           <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/instagram-new.png" alt="Instagram" />
           </a>
-          <a href="mailto:support@makeupmunch.in" style="margin: 0 10px;">
+          <a href="mailto:techmakeupmunch@gmail.com" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/support.png" alt="Support" />
           </a>
         </div>

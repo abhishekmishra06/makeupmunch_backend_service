@@ -322,7 +322,7 @@ Thank you for choosing Makeup Munch!`;
         <p>You can view or manage your booking anytime by visiting your dashboard.</p>
         <a href="https://www.makeupmunch.in/userdashboard" style="display: inline-block; background-color: #FF69B4; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 15px;">Go to Dashboard</a>
         <hr style="margin: 30px 0;">
-        <p style="margin: 0;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <p style="margin: 0;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <div style="margin-top: 20px; text-align: center;">
           <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
@@ -330,7 +330,7 @@ Thank you for choosing Makeup Munch!`;
           <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
           </a>
-          <a href="mailto:support@makeupmunch.in" style="margin: 0 10px;">
+          <a href="mailto:techmakeupmunch@gmail.com" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/support.png" alt="Support" />
           </a>
         </div>
@@ -405,7 +405,7 @@ Team Makeup Munch`;
         <div style="text-align: center; margin: 20px 0;">
           <a href="https://www.makeupmunch.in/artistbooking" style="background-color: #FF69B4; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px;">Go to Artist Dashboard</a>
         </div>
-        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <hr style="margin: 30px 0;">
         <div style="text-align: center;">
           <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
@@ -449,7 +449,7 @@ Team Makeup Munch`;
           <p style="margin: 5px 0;"><strong>Time:</strong> ${booking.booking_time}</p>
         </div>
         <p>Please check the admin panel for full details.</p>
-        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:support@makeupmunch.in">support@makeupmunch.in</a></p>
+        <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <hr style="margin: 30px 0;">
         <div style="text-align: center;">
           <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
@@ -508,7 +508,6 @@ const packageBooking = async (req, res) => {
             });
         }
 
-        console.log('Received booking request:', req.body);
 
         const {
             user_id,
@@ -519,13 +518,52 @@ const packageBooking = async (req, res) => {
             payment
         } = req.body;
 
-        // Basic validations
-        if (!user_id || !user_info || !package_details || !booking_date || !booking_time || !payment) {
+
+        console.log('user_id:', user_id);
+        console.log('user_info:', user_info);
+        console.log('package_details:', package_details);
+        console.log('booking_date:', booking_date);
+        console.log('booking_time:', booking_time);
+        console.log('payment:', payment);
+
+
+        // multiple package booking
+        if (
+            !user_id ||
+            !user_info ||
+            !package_details ||
+            !Array.isArray(package_details.packages) ||
+            package_details.packages.length === 0 ||
+            !booking_date ||
+            !booking_time ||
+            !payment
+        ) {
             return res.status(400).json({
                 success: false,
                 message: 'Missing required fields'
             });
         }
+
+
+        const calculatePlatformCharge = (totalAmount) => {
+            if (totalAmount < 500) {
+                return 70;
+            } else if (totalAmount >= 500 && totalAmount <= 1000) {
+                return 40;
+            } else {
+                return 0;
+            }
+        };
+
+        const calculateVenueCharge = (totalAmount) => {
+            if (totalAmount < 500) {
+                return 30;
+            } else if (totalAmount >= 500 && totalAmount <= 1000) {
+                return 30;
+            } else {
+                return 0;
+            }
+        };
 
         // Verify user exists
         const user = await Customer.findById(user_id);
@@ -536,26 +574,88 @@ const packageBooking = async (req, res) => {
             });
         }
 
+        let totalAmount = 0;
+        let packageBasePrice = 0;
+        let updatedPackageDetails = [];
+
+
+
         // Verify package exists and get its price
-        const packageData = await Package.findById(package_details.package_id);
-        if (!packageData) {
-            return res.status(404).json({
-                success: false,
-                message: 'Package not found'
-            });
+        // const packageData = await Package.findById(package_details.package_id);
+
+
+        // validate all package 
+        for (const pkg of package_details.packages) {
+            try {
+                const packageData = await Package.findById(pkg.package_id);
+                if (!packageData) {
+                    return res.status(404).json({
+                        success: false,
+                        message: `Package not found: ${pkg.package_id}`
+                    });
+                }
+
+                const basePrice = parseInt(packageData.price.replace(/,/g, '')) || 0;
+                packageBasePrice += basePrice;
+
+                const totalPersons = parseInt(pkg.total_persons) || 1;
+                const subtotal = basePrice * totalPersons;
+                totalAmount += subtotal;
+
+
+
+
+
+                updatedPackageDetails.push({
+                    ...pkg,
+                    package_name: packageData.name,
+                    package_price: basePrice,
+                    subtotal: subtotal
+                });
+            } catch (err) {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Error fetching package data',
+                    error: err.message
+                });
+            }
         }
+
+
+        const platformCharge = calculatePlatformCharge(totalAmount);
+        const venueCharge = calculateVenueCharge(totalAmount);
+        const grandTotalAmount = totalAmount + platformCharge + venueCharge;
+        const amountInPaise = grandTotalAmount * 100;
+
+        // const amountInPaise = totalAmount * 100;
+
+
+
+
+        // console.log(`this is package data ${packageData}`)
+        // console.log(`this is package_details.package_id ${package_details.package_id}`)
+        // console.log(`this is package_details ${package_details}`)
+
+
+        // if (!packageData) {
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: 'Package not found'
+        //     });
+        // }
+
 
         try {
             // Calculate total amount in paise (Razorpay expects amount in smallest currency unit)
-            const basePrice = parseInt(packageData.price.replace(/,/g, ''));
-            const totalAmount = basePrice * (parseInt(package_details.total_persons) || 1);
-            const amountInPaise = totalAmount * 100;
+            // const basePrice = parseInt(packageData.price.replace(/,/g, ''));
+            // const totalAmount = basePrice * (parseInt(package_details.total_persons) || 1);
+            // const amountInPaise = totalAmount * 100;
 
-            console.log('Calculated amounts:', {
-                basePrice,
-                totalAmount,
-                amountInPaise
-            });
+            // console.log('Calculated amounts:', {
+            //     basePrice,
+            //     totalAmount,
+            //     amountInPaise
+            // });
 
             // Create a shorter receipt format
             const timestamp = Date.now().toString().slice(-8);
@@ -578,16 +678,12 @@ const packageBooking = async (req, res) => {
             const newPackageBooking = new PackageBooking({
                 user_id,
                 user_info,
-                package_details: {
-                    ...package_details,
-                    package_name: packageData.name,
-                    package_price: basePrice
-                },
+                package_details: updatedPackageDetails,
                 booking_date,
                 booking_time,
                 status: 'pending',
                 payment: {
-                    package_price: basePrice,
+                    package_price: packageBasePrice,
                     total_amount: totalAmount,
                     amount: amountInPaise,
                     payment_method: 'online',

@@ -1,3 +1,4 @@
+const { About, Experience, Certification, Product } = require("../../models/artistProfileModel");
 const { Booking } = require("../../models/bookingModel");
 const { User, Artist } = require("../../models/userModel");
 const { sendGeneralResponse } = require("../../utils/responseHelper");
@@ -27,6 +28,14 @@ const getArtistDetailsForAdmin = async (req, res) => {
       paymentMethod: booking.paymentMethod,
     }));
 
+
+    const about = await About.findOne({ artistId });
+    const experience = await Experience.find({ artistId }).sort({ year: -1 });
+    const certifications = await Certification.find({ artistId }).sort({ issueDate: -1 });
+    const products = await Product.find({ artistId });
+
+
+
     const responseData = {
       _id: artist._id,
       businessName: artist.businessName,
@@ -46,9 +55,13 @@ const getArtistDetailsForAdmin = async (req, res) => {
       lastActiveAt: artist.lastActiveAt,
       bookingCount: bookings.length,
       bookings: bookingDetails,
+      about: about?.description || '',
+      experience,
+      certifications,
+      products,
     };
 
-    return sendGeneralResponse(res, true, "Artist detail fetched successfully", 200, responseData);
+    return sendGeneralResponse(res, true, "Artist detail fetchedwewe successfully", 200, responseData);
 
   } catch (error) {
     console.error("Error fetching artist details for admin:", error);

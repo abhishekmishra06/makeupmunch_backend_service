@@ -302,3 +302,52 @@ const  ArtistLoginWithOtp = async (req, res) => {
 
 
 module.exports = { ArtistLoginWithOtp, artistLoginWithPassword, customerLogin }
+
+/// these line give response if user is registered as customer or artist
+// If user is not found in the specified role, check if they exist in the other role
+// Uncomment this block if you want to allow users to switch roles
+
+//  if (!user) {
+//             const userInOtherRole = isArtist
+//                 ? await User.User.findOne({ email })
+//                 : await Artist.findOne({ email });
+
+//             if (userInOtherRole) {
+//                 return sendGeneralResponse(
+//                     res,
+//                     false,
+//                     `This email is registered as a ${isArtist ? 'customer' : 'artist'}. Please select the correct role.`,
+//                     400
+//                 );
+//             }
+
+//             return sendGeneralResponse(res, false, "User not registered", 400);
+//         }
+
+
+
+
+
+// if (isMatch) {
+//     const accessToken = generateAccessToken(user._id);
+//     const refreshToken = generateRefreshToken(user._id);
+
+//     // user.refreshToken = refreshToken;
+
+//     const updateData = {
+//         refreshToken,
+//         isLogin: true,
+//         lastLoginAt: new Date(),
+//     };
+
+//     if (fcmToken) {
+//         updateData.fcmToken = fcmToken;
+
+//     }
+
+//     await User.User.updateOne({ _id: user._id }, { $set: updateData });
+
+//     return sendGeneralResponse(res, true, 'Login successful', 200, { ...user._doc, accessToken, refreshToken });
+// } else {
+//     return sendGeneralResponse(res, false, 'Invalid password', 400);
+// }
