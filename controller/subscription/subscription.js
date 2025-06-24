@@ -28,10 +28,8 @@ const subscribe=   async (req, res) => {
 
         await newSubscription.save();
      //    const unsubscribeLink = `https://yourwebsite.com/unsubscribe?email=${encodeURIComponent(email)}`;
-        const unsubscribeLink = `https://makeupmunch.in`;
+     
 
-
-            const subject = 'Welcome to Our Beauty Newsletter!';
 
          
         const emailTemplate = `
@@ -92,13 +90,12 @@ const subscribe=   async (req, res) => {
         </html>
         `;
 
-          await sendMail({
-        to: email,
-        subject,
-        text:'', 
-        html:emailTemplate
-      });
-        // await sendMail(  to: email, 'Welcome to Our Beauty Newsletter!', '', emailTemplate);
+        await sendMail({
+            to: email,
+            subject: 'Welcome to Our Beauty Newsletter!',
+            text: '',
+            html: emailTemplate
+        });
  
 
          sendGeneralResponse(res, true, 'Subscribed successfully!', 200);
@@ -138,7 +135,7 @@ const unsubscribe = async (req, res) => {
     <a href="https://makeup-adda.netlify.app/" style="font-size: 12px; color: #e74c3c; text-decoration: none;">Subscribe</a>
 </div>
          <h1 style="text-align: center; color: #2c3e50;">We're Sorry to See You Go!</h1>
-         <p style="font-size: 16px; color: #34495e; text-align: center;">You have successfully unsubscribed from our newsletter. We’re sad to see you go, but we understand.</p>
+         <p style="font-size: 16px; color: #34495e; text-align: center;">You have successfully unsubscribed from our newsletter. We're sad to see you go, but we understand.</p>
 
          <p style="font-size: 16px; color: #34495e; text-align: center;">If you ever change your mind, feel free to <a href="https://makeup-adda.netlify.app/" style="color: #2980b9; text-decoration: none;">subscribe again</a> anytime.</p>
 
@@ -169,7 +166,12 @@ const unsubscribe = async (req, res) => {
  
       `;
 
-     await sendMail(email, 'You Have Unsubscribed', '', emailTemplate);
+     await sendMail({
+         to: email,
+         subject: 'You Have Unsubscribed',
+         text: '',
+         html: emailTemplate
+     });
  
          sendGeneralResponse(res, true, 'Unsubscribed successfully!', 200);
  

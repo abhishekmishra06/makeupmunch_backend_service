@@ -16,8 +16,8 @@ const addressRoutes = require('./routes/addressRoutes');
 const emailVerificationRoutes = require('./routes/emailVerificationRoutes');
 
 // connect to database
-// dotenv.config();
-// connectDB();
+dotenv.config();
+connectDB();
 
 const app = express();
 app.use(express.json({ limit: '50mb' }));
@@ -60,21 +60,6 @@ app.use('', addressRoutes);
 app.use('/email-verification', emailVerificationRoutes);
 
 const PORT = process.env.PORT || 3001;
-
-
-// app.listen(PORT, () => {
-//     console.log(`Server listening on http://localhost:${PORT}`);
-// });  
-
-
-(async () => {
-  try {
-    await connectDB();
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-    });
-  } catch (err) {
-    console.error('❌ Server startup failed:', err.message);
-    process.exit(1);
-  }
-})();
+app.listen(PORT, () => {
+    console.log(`Server listening on http://localhost:${PORT}`);
+});  

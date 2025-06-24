@@ -1,4 +1,5 @@
-const { Booking } = require("../../../models/bookingModel");
+// bookingController.js
+const Booking = require("../models/Booking");
 
 const getBookingDetailsById = async (req, res) => {
   const { bookingId } = req.params;
@@ -9,8 +10,8 @@ const getBookingDetailsById = async (req, res) => {
 
   try {
     const booking = await Booking.findById(bookingId)
-      .populate("user_id", "-password -refreshToken -addresses")
-      .populate("artist_id", "username businessName email phone")
+      .populate("user_id", "name email")
+      .populate("artist_id", "name email phone")
       .populate("service_details.service_id", "name category")
       .lean();
 

@@ -314,7 +314,7 @@ const registerArtist = async (req, res) => {
                         <p><strong>Business Name:</strong> ${businessName}</p>
                         <p><strong>Specialties:</strong> ${specialties.join(', ')}</p>
                         <p>You can now start offering your services and connecting with customers. Access your dashboard to manage your profile and bookings.</p>
-                        <a href="https://artist.makeupmunch.in" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Access Artist Dashboard</a>
+                        <a href="https://makeup-adda.netlify.app/artistdashboard" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Access Artist Dashboard</a>
                     </div>
                 </div>
             </div>

@@ -4,7 +4,7 @@ const bookingSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     user_info: {
         user_Fname: { type: String, required: true },  
-        user_Lname: { type: String },
+        user_Lname: { type: String,  },
         phoneNumber: { type: Number, required: true }, 
         address: {
             street: { type: String, required: true},  
@@ -62,7 +62,7 @@ const packageBookingSchema = new mongoose.Schema({
     },
     user_info: {
         user_Fname: { type: String, required: true },
-        user_Lname: { type: String },
+        user_Lname: { type: String,  },
         phoneNumber: { type: Number, required: true },
         address: {
             street: { type: String, required: true },
