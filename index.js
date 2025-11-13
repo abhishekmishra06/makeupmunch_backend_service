@@ -12,6 +12,7 @@ console.log("Loading environment variables from:", envFile);
 const authRoutes = require('./routes/routes');
 const adminRoutes = require('./routes/admin_routes');
 const artistRoutes = require('./routes/artistProfileRoutes');
+const aiPreLaunch = require('./routes/campaignRoutes');
 const addressRoutes = require('./routes/addressRoutes');
 const emailVerificationRoutes = require('./routes/emailVerificationRoutes');
 
@@ -54,6 +55,9 @@ app.use('/admin', adminRoutes);
 
 
  app.use('/artist', artistRoutes);
+
+ app.use('/anupurna/ai', aiPreLaunch);
+
 
 app.use('', addressRoutes);
 
