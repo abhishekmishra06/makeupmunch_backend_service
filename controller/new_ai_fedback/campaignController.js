@@ -9,7 +9,7 @@ const submitFeedback = async (req, res) => {
 
         if (!feedback) {
             return sendGeneralResponse(res, false, 'Feedback message is required', 400);
-        }
+        } 
 
         const newFeedback = new Feedback({
             name,
