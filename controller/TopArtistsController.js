@@ -67,7 +67,7 @@ const calculateTopArtists = (artists) => {
 // Function to fetch and cache top artists
 const fetchAndCacheTopArtists = async (city = null) => {
     try {
-        console.log(`Fetching top artists for city: ${city || 'all cities'}`);
+        console.log(`Fetching top artists for city: ${city || 'all cities from cache'}`);
         
         let query = { role: 'artist' };
         if (city && city !== "Select City") {
