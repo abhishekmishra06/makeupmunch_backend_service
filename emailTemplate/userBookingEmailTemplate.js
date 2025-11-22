@@ -52,7 +52,7 @@
             </tr>
             <tr>
                 <td style="padding: 20px; text-align: center;">
-                    <a href="https://makeup-adda.netlify.app/" style="display: inline-block; background-color: #FF1493; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">View Your Booking</a>
+                    <a href="https://www.makeupmunch.in" style="display: inline-block; background-color: #FF1493; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">View Your Booking</a>
                 </td>
             </tr>
             <tr>

@@ -123,7 +123,7 @@ const registerUser = async (req, res) => {
                             <p>We are thrilled to have you on board. Thank you for registering with us!</p>
                             <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
                             <p>We hope you have a great experience with us!</p>
-                            <a href="https://makeup-adda.netlify.app/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
+                            <a href="https://www.makeupmunch.in" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
                             <p style="margin-top: 20px;">Follow us on social media:</p>
                             <div style="text-align: center; margin-top: 10px;"> 
                                 <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
@@ -314,7 +314,7 @@ const registerArtist = async (req, res) => {
                         <p><strong>Business Name:</strong> ${businessName}</p>
                         <p><strong>Specialties:</strong> ${specialties.join(', ')}</p>
                         <p>You can now start offering your services and connecting with customers. Access your dashboard to manage your profile and bookings.</p>
-                        <a href="https://makeup-adda.netlify.app/artistdashboard" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Access Artist Dashboard</a>
+                        <a href="https://www.makeupmunch.inartistdashboard" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Access Artist Dashboard</a>
                     </div>
                 </div>
             </div>

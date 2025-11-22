@@ -60,7 +60,7 @@ const subscribe=   async (req, res) => {
                         </ul>
                         
                         <div style="text-align: center; margin-top: 30px;">
-                            <a href="https://makeupmunch.com/shop" style="background-color: #FF1493; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Explore Our Beauty Collection</a>
+                            <a href="https://makeupmunch.in" style="background-color: #FF1493; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Explore Our Beauty Collection</a>
                         </div>
                     </td>
                 </tr>
@@ -70,10 +70,10 @@ const subscribe=   async (req, res) => {
                         <a href="https://www.facebook.com/makeupmunch" style="text-decoration: none; margin: 0 10px;">
                             <img src="https://img.icons8.com/ios-filled/30/FF1493/facebook-new.png" alt="Facebook" />
                         </a>
-                        <a href="https://www.instagram.com/makeupmunch" style="text-decoration: none; margin: 0 10px;">
+                        <a href="https://www.instagram.com/makeupmunch_official" style="text-decoration: none; margin: 0 10px;">
                             <img src="https://img.icons8.com/ios-filled/30/FF1493/instagram-new.png" alt="Instagram" />
                         </a>
-                        <a href="mailto:support@makeupmunch.com" style="text-decoration: none; margin: 0 10px;">
+                        <a href="mailto:support@makeupmunch.in" style="text-decoration: none; margin: 0 10px;">
                             <img src="https://img.icons8.com/ios-filled/30/FF1493/support.png" alt="Support" />
                         </a>
                     </td>
@@ -81,8 +81,8 @@ const subscribe=   async (req, res) => {
                 <tr>
                     <td style="padding: 30px; text-align: center; font-size: 14px; color: #777;">
                         <p>&copy; 2024 Makeup Munch. All Rights Reserved.</p>
-                        <p>You're receiving this email because you signed up for our beauty newsletter. If you believe this is an error, please <a href="mailto:support@makeupmunch.com" style="color: #FF1493; text-decoration: none;">contact us</a>.</p>
-                        <p><a href="https://makeupmunch.com/unsubscribe" style="color: #FF1493; text-decoration: none;">Unsubscribe</a></p>
+                        <p>You're receiving this email because you signed up for our beauty newsletter. If you believe this is an error, please <a href="mailto:support@makeupmunch.in" style="color: #FF1493; text-decoration: none;">contact us</a>.</p>
+                        <p><a href="https://makeupmunch.in/unsubscribe" style="color: #FF1493; text-decoration: none;">Unsubscribe</a></p>
                     </td>
                 </tr>
             </table>
@@ -132,17 +132,17 @@ const unsubscribe = async (req, res) => {
          // Send confirmation email to the user
          const emailTemplate = `
              <div style="text-align: right; padding: 10px;">
-    <a href="https://makeup-adda.netlify.app/" style="font-size: 12px; color: #e74c3c; text-decoration: none;">Subscribe</a>
+    <a href="https://www.makeupmunch.in" style="font-size: 12px; color: #e74c3c; text-decoration: none;">Subscribe</a>
 </div>
          <h1 style="text-align: center; color: #2c3e50;">We're Sorry to See You Go!</h1>
          <p style="font-size: 16px; color: #34495e; text-align: center;">You have successfully unsubscribed from our newsletter. We're sad to see you go, but we understand.</p>
 
-         <p style="font-size: 16px; color: #34495e; text-align: center;">If you ever change your mind, feel free to <a href="https://makeup-adda.netlify.app/" style="color: #2980b9; text-decoration: none;">subscribe again</a> anytime.</p>
+         <p style="font-size: 16px; color: #34495e; text-align: center;">If you ever change your mind, feel free to <a href="https://www.makeupmunch.in" style="color: #2980b9; text-decoration: none;">subscribe again</a> anytime.</p>
 
                    <p style="font-size: 16px; color: #34495e; text-align: center;">We hope you have a great experience with us!</p>
 
          <div style="text-align: center; margin-top: 30px;">
-             <a href="https://makeup-adda.netlify.app/" style="background-color: #3498db; color: white; padding: 15px 30px; font-size: 18px; text-decoration: none; border-radius: 5px;">
+             <a href="https://www.makeupmunch.in" style="background-color: #3498db; color: white; padding: 15px 30px; font-size: 18px; text-decoration: none; border-radius: 5px;">
                  Subscribe Again
              </a>
          </div>
