@@ -499,6 +499,28 @@ Team Makeup Munch`;
     }
 };
 
+// Helper function to calculate platform charge
+const calculatePlatformCharge = (totalAmount) => {
+    if (totalAmount < 500) {
+        return 70;
+    } else if (totalAmount >= 500 && totalAmount <= 1000) {
+        return 40;
+    } else {
+        return 0;
+    }
+};
+
+// Helper function to calculate venue/service charge
+const calculateVenueCharge = (totalAmount) => {
+    if (totalAmount < 500) {
+        return 30;
+    } else if (totalAmount >= 500 && totalAmount <= 1000) {
+        return 30;
+    } else {
+        return 0;
+    }
+};
+
 const packageBooking = async (req, res) => {
     try {
         if (!req.body) {
@@ -514,56 +536,24 @@ const packageBooking = async (req, res) => {
             user_info,
             package_details,
             booking_date,
-            booking_time,
-            payment
+            booking_time
         } = req.body;
 
+        console.log('Received booking request:', req.body);
 
-        console.log('user_id:', user_id);
-        console.log('user_info:', user_info);
-        console.log('package_details:', package_details);
-        console.log('booking_date:', booking_date);
-        console.log('booking_time:', booking_time);
-        console.log('payment:', payment);
-
-
-        // multiple package booking
+        // Basic validations - payment is no longer required (backend calculates it)
         if (
             !user_id ||
             !user_info ||
             !package_details ||
-            !Array.isArray(package_details.packages) ||
-            package_details.packages.length === 0 ||
             !booking_date ||
-            !booking_time ||
-            !payment
+            !booking_time
         ) {
             return res.status(400).json({
                 success: false,
                 message: 'Missing required fields'
             });
         }
-
-
-        const calculatePlatformCharge = (totalAmount) => {
-            if (totalAmount < 500) {
-                return 70;
-            } else if (totalAmount >= 500 && totalAmount <= 1000) {
-                return 40;
-            } else {
-                return 0;
-            }
-        };
-
-        const calculateVenueCharge = (totalAmount) => {
-            if (totalAmount < 500) {
-                return 30;
-            } else if (totalAmount >= 500 && totalAmount <= 1000) {
-                return 30;
-            } else {
-                return 0;
-            }
-        };
 
         // Verify user exists
         const user = await Customer.findById(user_id);
@@ -574,88 +564,73 @@ const packageBooking = async (req, res) => {
             });
         }
 
-        let totalAmount = 0;
-        let packageBasePrice = 0;
-        let updatedPackageDetails = [];
+        try {
+            let baseAmount = 0;
+            const validatedPackages = [];
+            let totalPersons = parseInt(package_details.total_persons) || 1;
 
-
-
-        // Verify package exists and get its price
-        // const packageData = await Package.findById(package_details.package_id);
-
-
-        // validate all package 
-        for (const pkg of package_details.packages) {
-            try {
-                const packageData = await Package.findById(pkg.package_id);
+            // Handle both single package and multiple packages
+            if (package_details.packages && Array.isArray(package_details.packages) && package_details.packages.length > 0) {
+                // Multiple packages scenario
+                for (const pkg of package_details.packages) {
+                    const packageData = await Package.findById(pkg.package_id);
+                    if (!packageData) {
+                        return res.status(404).json({
+                            success: false,
+                            message: `Package not found: ${pkg.package_id}`
+                        });
+                    }
+                    
+                    const packagePrice = parseInt(packageData.price.replace(/,/g, '')) || 0;
+                    const personsForThisPackage = parseInt(pkg.total_persons) || totalPersons;
+                    const packageTotal = packagePrice * personsForThisPackage;
+                    baseAmount += packageTotal;
+                    
+                    validatedPackages.push({
+                        package_id: pkg.package_id,
+                        package_name: packageData.name,
+                        package_price: packagePrice,
+                        total_persons: personsForThisPackage
+                    });
+                }
+            } else if (package_details.package_id) {
+                // Single package scenario (backward compatibility)
+                const packageData = await Package.findById(package_details.package_id);
                 if (!packageData) {
                     return res.status(404).json({
                         success: false,
-                        message: `Package not found: ${pkg.package_id}`
+                        message: 'Package not found'
                     });
                 }
-
-                const basePrice = parseInt(packageData.price.replace(/,/g, '')) || 0;
-                packageBasePrice += basePrice;
-
-                const totalPersons = parseInt(pkg.total_persons) || 1;
-                const subtotal = basePrice * totalPersons;
-                totalAmount += subtotal;
-
-
-
-
-
-                updatedPackageDetails.push({
-                    ...pkg,
+                
+                const packagePrice = parseInt(packageData.price.replace(/,/g, '')) || 0;
+                baseAmount = packagePrice * totalPersons;
+                
+                validatedPackages.push({
+                    package_id: package_details.package_id,
                     package_name: packageData.name,
-                    package_price: basePrice,
-                    subtotal: subtotal
+                    package_price: packagePrice
                 });
-            } catch (err) {
-                return res.status(500).json({
+            } else {
+                return res.status(400).json({
                     success: false,
-                    message: 'Error fetching package data',
-                    error: err.message
+                    message: 'Invalid package details. Either package_id or packages array is required'
                 });
             }
-        }
 
+            // Calculate charges
+            const platformCharge = calculatePlatformCharge(baseAmount);
+            const venueCharge = calculateVenueCharge(baseAmount);
+            const finalAmount = baseAmount + platformCharge + venueCharge;
+            const amountInPaise = finalAmount * 100;
 
-        const platformCharge = calculatePlatformCharge(totalAmount);
-        const venueCharge = calculateVenueCharge(totalAmount);
-        const grandTotalAmount = totalAmount + platformCharge + venueCharge;
-        const amountInPaise = grandTotalAmount * 100;
-
-        // const amountInPaise = totalAmount * 100;
-
-
-
-
-        // console.log(`this is package data ${packageData}`)
-        // console.log(`this is package_details.package_id ${package_details.package_id}`)
-        // console.log(`this is package_details ${package_details}`)
-
-
-        // if (!packageData) {
-        //     return res.status(404).json({
-        //         success: false,
-        //         message: 'Package not found'
-        //     });
-        // }
-
-
-        try {
-            // Calculate total amount in paise (Razorpay expects amount in smallest currency unit)
-            // const basePrice = parseInt(packageData.price.replace(/,/g, ''));
-            // const totalAmount = basePrice * (parseInt(package_details.total_persons) || 1);
-            // const amountInPaise = totalAmount * 100;
-
-            // console.log('Calculated amounts:', {
-            //     basePrice,
-            //     totalAmount,
-            //     amountInPaise
-            // });
+            console.log('Calculated amounts:', {
+                baseAmount,
+                platformCharge,
+                venueCharge,
+                finalAmount,
+                amountInPaise
+            });
 
             // Create a shorter receipt format
             const timestamp = Date.now().toString().slice(-8);
@@ -663,7 +638,7 @@ const packageBooking = async (req, res) => {
             const receipt = `pkg_${timestamp}_${shortUserId}`;
             const bookingId = `BK${timestamp}${shortUserId}`;
 
-            // Create Razorpay order
+            // Create Razorpay order with final amount including charges
             console.log('Creating Razorpay order with amount:', amountInPaise);
             const razorpayOrder = await razorpay.orders.create({
                 amount: amountInPaise,
@@ -674,17 +649,29 @@ const packageBooking = async (req, res) => {
 
             console.log('Razorpay order created:', razorpayOrder);
 
-            // Create booking object
+            // Prepare package_details for saving
+            const packageDetailsToSave = {
+                ...package_details,
+                packages: validatedPackages.length > 0 ? validatedPackages : undefined,
+                package_id: validatedPackages.length === 1 ? validatedPackages[0].package_id : undefined,
+                package_name: validatedPackages.length === 1 ? validatedPackages[0].package_name : undefined,
+                package_price: validatedPackages.length === 1 ? validatedPackages[0].package_price : undefined,
+                total_persons: totalPersons
+            };
+
+            // Create booking object with all charge details
             const newPackageBooking = new PackageBooking({
                 user_id,
                 user_info,
-                package_details: updatedPackageDetails,
+                package_details: packageDetailsToSave,
                 booking_date,
                 booking_time,
                 status: 'pending',
                 payment: {
-                    package_price: packageBasePrice,
-                    total_amount: totalAmount,
+                    base_amount: baseAmount,
+                    platform_charge: platformCharge,
+                    venue_charge: venueCharge,
+                    total_amount: finalAmount,
                     amount: amountInPaise,
                     payment_method: 'online',
                     payment_status: 'pending',
@@ -706,6 +693,12 @@ const packageBooking = async (req, res) => {
                         id: razorpayOrder.id,
                         amount: amountInPaise,
                         currency: 'INR'
+                    },
+                    charges: {
+                        base_amount: baseAmount,
+                        platform_charge: platformCharge,
+                        venue_charge: venueCharge,
+                        total_amount: finalAmount
                     }
                 }
             });
