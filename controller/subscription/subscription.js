@@ -67,7 +67,7 @@ const subscribe=   async (req, res) => {
                 <tr>
                     <td style="padding: 30px; background-color: #FFF0F5; text-align: center;">
                         <p style="font-size: 16px; color: #333; margin-bottom: 20px;">Connect with us for daily beauty inspiration:</p>
-                        <a href="https://www.facebook.com/makeupmunch" style="text-decoration: none; margin: 0 10px;">
+                        <a href="https://www.facebook.com/profile.php?id=61576604952593" style="text-decoration: none; margin: 0 10px;">
                             <img src="https://img.icons8.com/ios-filled/30/FF1493/facebook-new.png" alt="Facebook" />
                         </a>
                         <a href="https://www.instagram.com/makeupmunch_official" style="text-decoration: none; margin: 0 10px;">
@@ -149,10 +149,10 @@ const unsubscribe = async (req, res) => {
 
          <p style="font-size: 14px; color: #7f8c8d; text-align: center; margin-top: 40px;">If you didn't request this, or if you believe there's been an error, please <a href="mailto:support@yourwebsite.com" style="color: #2980b9; text-decoration: none;">contact us</a>.</p>
                      <div style="text-align: center; margin-top: 10px;"> 
-                        <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+                        <a href="https://www.facebook.com/profile.php?id=61576604952593" style="margin-right: 10px;">
                             <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
                         </a>
-                        <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+                        <a href="https://www.instagram.com/makeupmunch_official" style="margin-right: 10px;">
                             <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
                         </a>
                         <a href="mailto:support@yourservice.com">

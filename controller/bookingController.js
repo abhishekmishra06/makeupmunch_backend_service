@@ -324,10 +324,10 @@ Thank you for choosing Makeup Munch!`;
         <hr style="margin: 30px 0;">
         <p style="margin: 0;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <div style="margin-top: 20px; text-align: center;">
-          <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.facebook.com/profile.php?id=61576604952593e" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
           </a>
-          <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.instagram.com/makeupmunch_official" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
           </a>
           <a href="mailto:techmakeupmunch@gmail.com" style="margin: 0 10px;">
@@ -408,10 +408,10 @@ Team Makeup Munch`;
         <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <hr style="margin: 30px 0;">
         <div style="text-align: center;">
-          <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.facebook.com/profile.php?id=61576604952593" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook">
           </a>
-          <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.instagram.com/makeupmunch_official" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram">
           </a>
         </div>
@@ -452,10 +452,10 @@ Team Makeup Munch`;
         <p style="font-size: 14px; color: #555;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <hr style="margin: 30px 0;">
         <div style="text-align: center;">
-          <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.facebook.com/profile.php?id=61576604952593" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/20c997/facebook-new.png" alt="Facebook">
           </a>
-          <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.instagram.com/makeupmunch_official" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/20c997/instagram-new.png" alt="Instagram">
           </a>
         </div>

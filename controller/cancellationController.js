@@ -238,10 +238,10 @@ const cancelBooking = async (req, res) => {
         <hr style="margin: 30px 0;">
         <p style="margin: 0;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <div style="margin-top: 20px; text-align: center;">
-          <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.facebook.com/profile.php?id=61576604952593" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/facebook-new.png" alt="Facebook" />
           </a>
-          <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.instagram.com/makeupmunch_official" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/instagram-new.png" alt="Instagram" />
           </a>
           <a href="mailto:techmakeupmunch@gmail.com" style="margin: 0 10px;">
@@ -363,10 +363,10 @@ const cancelBooking = async (req, res) => {
             <hr style="margin: 30px 0;">
             <p style="margin: 0;">Need help? Contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
             <div style="margin-top: 20px; text-align: center;">
-              <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
+              <a href="https://www.facebook.com/profile.php?id=61576604952593" style="margin: 0 10px;">
                 <img src="https://img.icons8.com/ios-filled/24/FFA07A/facebook-new.png" alt="Facebook" />
               </a>
-              <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
+              <a href="https://www.instagram.com/makeupmunch_official" style="margin: 0 10px;">
                 <img src="https://img.icons8.com/ios-filled/24/FFA07A/instagram-new.png" alt="Instagram" />
               </a>
               <a href="mailto:techmakeupmunch@gmail.com" style="margin: 0 10px;">
@@ -545,10 +545,10 @@ const cancelPackageBooking = async (req, res) => {
         <hr style="margin: 30px 0;">
         <p style="margin: 0;">If you need any help, please contact us at <a href="mailto:techmakeupmunch@gmail.com">techmakeupmunch@gmail.com</a></p>
         <div style="margin-top: 20px; text-align: center;">
-          <a href="https://www.facebook.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.facebook.com/profile.php?id=61576604952593" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/facebook-new.png" alt="Facebook" />
           </a>
-          <a href="https://www.instagram.com/yourpage" style="margin: 0 10px;">
+          <a href="https://www.instagram.com/makeupmunch_official" style="margin: 0 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF6B6B/instagram-new.png" alt="Instagram" />
           </a>
           <a href="mailto:techmakeupmunch@gmail.com" style="margin: 0 10px;">

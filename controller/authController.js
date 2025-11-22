@@ -126,10 +126,10 @@ const sendLoginLink = async (req, res) => {
 
         <p style="margin-top: 30px;">Follow us on social media:</p>
         <div style="text-align: center; margin-top: 10px;">
-          <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+          <a href="https://www.facebook.com/profile.php?id=61576604952593" style="margin-right: 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
           </a>
-          <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+          <a href="https://www.instagram.com/makeupmunch_official" style="margin-right: 10px;">
             <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
           </a>
           <a href="mailto:support@yourservice.com">
@@ -383,13 +383,13 @@ const registerUser = async (req, res) => {
                         <p>We are thrilled to have you on board. Thank you for registering with us!</p>
                         <p>You can now start using all the services we offer. If you have any questions, feel free to reach out to our support team.</p>
                         <p>We hope you have a great experience with us!</p>
-                        <a href="https://www.makeupmunch.in/" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
+                        <a href="https://www.makeupmunch.in" style="display: inline-block; background-color: #FFB6C1; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-top: 20px;">Visit Our Website</a>
                         <p style="margin-top: 20px;">Follow us on social media:</p>
                         <div style="text-align: center; margin-top: 10px;"> 
-                            <a href="https://www.facebook.com/yourpage" style="margin-right: 10px;">
+                            <a href="https://www.facebook.com/profile.php?id=61576604952593" style="margin-right: 10px;">
                                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/facebook-new.png" alt="Facebook" />
                             </a>
-                            <a href="https://www.instagram.com/yourpage" style="margin-right: 10px;">
+                            <a href="https://www.instagram.com/makeupmunch_official" style="margin-right: 10px;">
                                 <img src="https://img.icons8.com/ios-filled/24/FF69B4/instagram-new.png" alt="Instagram" />
                             </a>
                             <a href="mailto:techmakeupmunch@gmail.com">
