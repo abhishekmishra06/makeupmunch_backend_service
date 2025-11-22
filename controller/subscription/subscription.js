@@ -80,7 +80,7 @@ const subscribe=   async (req, res) => {
                 </tr>
                 <tr>
                     <td style="padding: 30px; text-align: center; font-size: 14px; color: #777;">
-                        <p>&copy; 2024 Makeup Munch. All Rights Reserved.</p>
+                        <p>&copy; 2025 Makeup Munch. All Rights Reserved.</p>
                         <p>You're receiving this email because you signed up for our beauty newsletter. If you believe this is an error, please <a href="mailto:support@makeupmunch.in" style="color: #FF1493; text-decoration: none;">contact us</a>.</p>
                         <p><a href="https://makeupmunch.in/unsubscribe" style="color: #FF1493; text-decoration: none;">Unsubscribe</a></p>
                     </td>
@@ -160,7 +160,7 @@ const unsubscribe = async (req, res) => {
                         </a>
 
                              <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
-                    <p>&copy; 2024 Our Service. All Rights Reserved.</p>
+                    <p>&copy; 2025 Our Service. All Rights Reserved.</p>
                 </div>
 
  

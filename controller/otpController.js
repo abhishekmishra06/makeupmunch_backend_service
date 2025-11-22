@@ -580,7 +580,7 @@ const verifyOtpAndChangePassword = async (req, res) => {
                         </div>
                     </div>
                     <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
-                        <p>&copy; 2024 Our Service. All Rights Reserved.</p>
+                        <p>&copy; 2025 Our Service. All Rights Reserved.</p>
                     </div>
                 </div>
             </div>
@@ -685,7 +685,7 @@ const verifyOtpAndChangeArtistPassword = async (req, res) => {
                         </div>
                     </div>
                     <div style="margin-top: 20px; text-align: center; color: #777; font-size: 12px;">
-                        <p>&copy; 2024 Our Service. All Rights Reserved.</p>
+                        <p>&copy; 2025 Our Service. All Rights Reserved.</p>
                     </div>
                 </div>
             </div>

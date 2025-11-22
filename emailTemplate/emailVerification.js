@@ -131,7 +131,7 @@ const generateEmailVerificationTemplate = (otp, userName = 'Valued Customer') =>
             
             <div style="border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 20px; margin-top: 20px;">
                 <p style="color: rgba(255, 255, 255, 0.6); font-size: 12px; margin: 0;">
-                    © 2024 Makeup Munch. All Rights Reserved.<br>
+                    © 2025 Makeup Munch. All Rights Reserved.<br>
                     This email was sent to verify your account registration.
                 </p>
             </div>

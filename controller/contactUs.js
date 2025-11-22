@@ -58,7 +58,7 @@ const contactUs = async (req, res) => {
             </tr>
             <tr>
                 <td style="padding: 20px; text-align: center;">
-                    <p style="color: #888888; font-size: 12px; margin: 0;">&copy; 2024 Makeup Munch. All Rights Reserved.</p>
+                    <p style="color: #888888; font-size: 12px; margin: 0;">&copy; 2025 Makeup Munch. All Rights Reserved.</p>
                 </td>
             </tr>
         </table>
